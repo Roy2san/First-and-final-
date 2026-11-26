@@ -1,0 +1,778 @@
+<title>Кощеева игла</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Golos+Text:wght@400;500;600;700&family=PT+Mono&display=swap">
+<style>
+/* Layout: night masthead with an embroidered border, a sticky tab rail, one view at a time.
+   The world view is a geological cross-section; cards read like dossiers from a folklore archive. */
+:root {
+  --bg: #ECEBE6;
+  --surface: #F8F7F3;
+  --surface-2: #E2E0D8;
+  --ink: #1C1E1B;
+  --muted: #5B6058;
+  --line: #CDCAC0;
+  --accent: #2C4C9C;
+  --accent-ink: #FFFFFF;
+  --ally: #8C5D00;
+  --neutral: #3B6A42;
+  --foe: #AE311D;
+  --mast: #131916;
+  --mast-ink: #ECEAE2;
+  --mast-muted: #A3AA9F;
+  --mast-line: #2C352F;
+  --thread: #C8402A;
+  --f-title: "Ruslan Display", "Old Standard TT", Georgia, serif;
+  --f-head: "Old Standard TT", Georgia, "Times New Roman", serif;
+  --f-body: "Golos Text", "PT Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "PT Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111412; --surface: #181C19; --surface-2: #222822; --ink: #E7E5DC; --muted: #A3A89D; --line: #313831;
+    --accent: #94AAEE; --accent-ink: #0E1430; --ally: #E2B455; --neutral: #86C08A; --foe: #F07A5C;
+    --mast: #0B0E0C; --mast-line: #232A25; --thread: #D9553C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111412; --surface: #181C19; --surface-2: #222822; --ink: #E7E5DC; --muted: #A3A89D; --line: #313831;
+  --accent: #94AAEE; --accent-ink: #0E1430; --ally: #E2B455; --neutral: #86C08A; --foe: #F07A5C;
+  --mast: #0B0E0C; --mast-line: #232A25; --thread: #D9553C;
+  color-scheme: dark;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--f-body); font-size: 16px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+a { color: var(--accent); }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, h4 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.eyebrow, .lbl { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- masthead ---------- */
+.mast { background: var(--mast); color: var(--mast-ink); margin-top: calc(-1 * env(safe-area-inset-top, 0px)); padding-top: calc(env(safe-area-inset-top, 0px) + 36px); }
+.mast .wrap { display: flex; flex-direction: column; gap: 14px; padding-bottom: 26px; }
+.mast .eyebrow { color: var(--mast-muted); }
+.mast h1 { font-family: var(--f-title); font-weight: 400; font-size: clamp(44px, 9vw, 96px); line-height: .95; letter-spacing: .02em; }
+.mast .lede { font-family: var(--f-head); font-size: clamp(18px, 2.2vw, 22px); line-height: 1.45; max-width: 58ch; color: var(--mast-ink); }
+.mast .lede em { font-style: italic; color: #F0B9A8; }
+.counts { display: flex; flex-wrap: wrap; gap: 8px 22px; padding-top: 6px; border-top: 1px solid var(--mast-line); }
+.count { display: flex; align-items: baseline; gap: 7px; font-size: 14px; color: var(--mast-muted); }
+.count b { font-family: var(--f-mono); font-size: 20px; font-weight: 400; color: var(--mast-ink); font-variant-numeric: tabular-nums; }
+.count.wip b { color: var(--mast-muted); }
+.status { font-size: 13.5px; color: var(--mast-muted); }
+.orn { height: 14px; background: var(--thread);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M14 1.5 L26 7 L14 12.5 L2 7 Z' fill='none' stroke='black' stroke-width='1.8'/%3E%3Cpath d='M14 4.6 L19.2 7 L14 9.4 L8.8 7 Z'/%3E%3Ccircle cx='0' cy='7' r='1.4'/%3E%3Ccircle cx='28' cy='7' r='1.4'/%3E%3C/svg%3E") repeat-x left center / 28px 14px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M14 1.5 L26 7 L14 12.5 L2 7 Z' fill='none' stroke='black' stroke-width='1.8'/%3E%3Cpath d='M14 4.6 L19.2 7 L14 9.4 L8.8 7 Z'/%3E%3Ccircle cx='0' cy='7' r='1.4'/%3E%3Ccircle cx='28' cy='7' r='1.4'/%3E%3C/svg%3E") repeat-x left center / 28px 14px; }
+.mast-orn { background-color: var(--mast); padding-block: 0 0; }
+
+/* ---------- tabs ---------- */
+.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.tabs-in { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs-in::-webkit-scrollbar { display: none; }
+.tabs a { flex: none; padding: 13px 12px 11px; font-size: 14.5px; font-weight: 600; color: var(--muted); text-decoration: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tabs a:hover { color: var(--ink); }
+.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabs a .n { font-family: var(--f-mono); font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 5px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+/* ---------- views ---------- */
+main { padding-block: 28px 60px; }
+.view { display: flex; flex-direction: column; gap: 34px; }
+.view-head { display: flex; flex-direction: column; gap: 8px; max-width: 74ch; }
+.view-head h2 { font-family: var(--f-head); font-weight: 700; font-size: clamp(30px, 4.4vw, 44px); line-height: 1.08; }
+.view-head .lede { font-size: 17px; color: var(--muted); }
+.block { display: flex; flex-direction: column; gap: 14px; }
+.block > h3 { font-family: var(--f-head); font-weight: 700; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.15; }
+.prose { display: flex; flex-direction: column; gap: 12px; max-width: 70ch; }
+.wip { border: 1px dashed var(--line); border-radius: 6px; padding: 26px 20px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.wip b { color: var(--ink); font-family: var(--f-head); font-size: 20px; }
+
+.quote { border-left: 0; padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; display: flex; flex-direction: column; gap: 6px; max-width: 70ch; }
+.quote q { font-family: var(--f-head); font-style: italic; font-size: 21px; line-height: 1.4; quotes: "«" "»"; }
+.quote cite { font-style: normal; font-size: 13.5px; color: var(--muted); }
+
+.two { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px 32px; align-items: start; }
+@media (max-width: 860px) { .two { grid-template-columns: minmax(0, 1fr); } }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--f-mono); font-weight: 400; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td.row-h { font-weight: 600; white-space: nowrap; }
+
+/* tags */
+.src { display: inline-flex; align-items: center; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; padding: 1px 6px 0; border-radius: 3px; border: 1px solid var(--ink); color: var(--ink); line-height: 16px; white-space: nowrap; }
+.src.folk { background: var(--ink); color: var(--bg); }
+.src.lit { background: transparent; }
+.src.recon { border-style: dashed; color: var(--muted); border-color: var(--muted); }
+.src.game { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.orig { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.st { --c: var(--muted); display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--c); white-space: nowrap; }
+.st::before { content: ""; width: 8px; height: 8px; transform: rotate(45deg); background: var(--c); flex: none; }
+.st.ally { --c: var(--ally); } .st.neutral { --c: var(--neutral); } .st.foe { --c: var(--foe); }
+
+/* ladder */
+.ladder { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 1060px) { .ladder { grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); } }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.step-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pips { display: flex; gap: 3px; }
+.pips i { width: 7px; height: 7px; transform: rotate(45deg); border: 1px solid var(--foe); }
+.pips i.on { background: var(--foe); }
+.step h4 { font-family: var(--f-head); font-size: 21px; }
+.step .look { font-size: 13.5px; color: var(--muted); font-style: italic; }
+.kv { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.kv .lbl { font-size: 10.5px; }
+.kv.gift .lbl { color: var(--neutral); } .kv.cost .lbl { color: var(--foe); }
+
+/* generic cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 14px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.card-h h4 { font-family: var(--f-head); font-size: 22px; line-height: 1.12; }
+.card .alt { font-size: 13px; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.card p { font-size: 14.5px; }
+.card .folk { color: var(--ink); }
+.card .game { color: var(--ink); }
+.sec { display: flex; flex-direction: column; gap: 3px; }
+.sec .lbl { font-size: 10.5px; }
+.sec ul { margin: 0; padding-left: 18px; font-size: 14px; display: flex; flex-direction: column; gap: 2px; }
+.sec p { font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.pill { font-size: 12.5px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); text-decoration: none; white-space: nowrap; cursor: pointer; font-family: inherit; line-height: 20px; }
+a.pill:hover, button.pill:hover { border-color: var(--muted); }
+.pill.form { border-color: var(--accent); color: var(--accent); background: transparent; }
+
+/* filters */
+.filters { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.frow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.frow .lbl { min-width: 78px; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 4px 11px; font: inherit; font-size: 13.5px; cursor: pointer; }
+.chip:hover { border-color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.search { width: 100%; max-width: 420px; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 15px; }
+.shown { font-size: 13.5px; color: var(--muted); }
+
+/* world map */
+.map { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) minmax(0, 1fr); gap: 0 12px; }
+.map .side { display: flex; flex-direction: column; justify-content: center; gap: 6px; padding-block: 6px; min-width: 0; }
+.map .side.left { align-items: flex-end; text-align: right; }
+.map .side.right { align-items: flex-start; }
+.band { --c: #777; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 14px; align-items: center; padding: 12px 14px; border-radius: 4px; text-decoration: none; color: var(--ink);
+  background: color-mix(in srgb, var(--c) 24%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c) 45%, var(--line)); min-width: 0; }
+.band:hover { background: color-mix(in srgb, var(--c) 34%, var(--surface)); }
+.band .land { grid-row: span 2; font-family: var(--f-mono); font-size: 12px; color: var(--muted); text-align: center; line-height: 1.2; min-width: 44px; }
+.band .land b { display: block; font-size: 20px; font-weight: 400; color: var(--ink); }
+.band .nm { font-family: var(--f-head); font-weight: 700; font-size: 19px; line-height: 1.15; }
+.band .bs { font-size: 13px; color: var(--muted); }
+.branch { --c: #777; display: inline-flex; flex-direction: column; gap: 0; padding: 6px 10px; border: 1px dashed color-mix(in srgb, var(--c) 70%, var(--muted)); border-radius: 4px; text-decoration: none; color: var(--ink); font-size: 14px; background: var(--surface); max-width: 100%; }
+.branch small { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.gap { grid-column: 2; display: flex; align-items: center; justify-content: center; gap: 8px; height: 26px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.gap::before, .gap::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+.gap a { color: var(--muted); text-decoration: none; }
+.map .full { grid-column: 1 / -1; display: flex; justify-content: center; padding-bottom: 8px; }
+@media (max-width: 720px) {
+  .map { grid-template-columns: minmax(0, 1fr); }
+  .map .side { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; align-items: center; padding-block: 4px; }
+  .map .side.left { justify-content: flex-start; text-align: left; }
+  .map .side:empty { display: none; }
+  .gap { grid-column: 1; }
+}
+
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; scroll-margin-top: 70px; }
+.dossier-h { --c: #777; padding: 16px 18px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; background: color-mix(in srgb, var(--c) 18%, var(--surface)); border-bottom: 1px solid var(--line); }
+.dossier-h h4 { font-family: var(--f-head); font-size: 26px; line-height: 1.1; }
+.dossier-h .tone { flex-basis: 100%; font-family: var(--f-head); font-style: italic; font-size: 17px; color: var(--muted); }
+.dossier-b { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px 28px; padding: 18px; }
+@media (max-width: 860px) { .dossier-b { grid-template-columns: minmax(0, 1fr); } }
+.dossier-b .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.mat { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr); gap: 3px 12px; font-size: 14px; }
+.mat dt { font-weight: 600; }
+.mat dd { margin: 0; color: var(--muted); }
+.dw { display: flex; flex-direction: column; gap: 6px; }
+.dw-row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.dw-row .st { min-width: 98px; }
+.namebtn { font: inherit; font-size: 13px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; line-height: 20px; }
+.namebtn:hover { border-color: var(--muted); }
+
+/* chain */
+.chain { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0; align-items: stretch; }
+.link { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 14px 12px; background: var(--surface); border: 1px solid var(--line); margin-right: -1px; min-width: 0; }
+.link:first-child { border-radius: 6px 0 0 6px; }
+.link:last-child { border-radius: 0 6px 6px 0; margin-right: 0; background: color-mix(in srgb, var(--foe) 10%, var(--surface)); }
+.link .k { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.link h4 { font-family: var(--f-head); font-size: 20px; line-height: 1.1; }
+.link p { font-size: 13.5px; }
+.link .chips { margin-top: auto; }
+@media (max-width: 980px) {
+  .chain { grid-template-columns: minmax(0, 1fr); }
+  .link { margin-right: 0; margin-bottom: -1px; border-radius: 0 !important; }
+  .link:first-child { border-radius: 6px 6px 0 0 !important; }
+  .link:last-child { border-radius: 0 0 6px 6px !important; margin-bottom: 0; }
+}
+
+/* endings, loop */
+.endings { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+.ending { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.ending h4 { font-family: var(--f-head); font-size: 21px; }
+.ending .how { font-size: 13.5px; color: var(--muted); }
+.ending.true { border-color: var(--ally); }
+.loop { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 10px; counter-reset: s; }
+.loop li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 5px; font-size: 14.5px; }
+.loop li::before { content: counter(s); font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.loop li b { font-family: var(--f-head); font-size: 19px; font-weight: 700; }
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 10px 22px; font-size: 14.5px; }
+.legend div { display: flex; gap: 10px; align-items: baseline; }
+.facts { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.facts li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 15px; }
+
+/* decisions */
+.dec { display: flex; flex-direction: column; gap: 10px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; }
+.q .qid { font-family: var(--f-mono); font-size: 13px; color: var(--muted); padding-top: 3px; }
+.q h4 { font-family: var(--f-head); font-size: 20px; line-height: 1.2; }
+.q .body { grid-column: 2; display: flex; flex-direction: column; gap: 8px; font-size: 14.5px; }
+.q ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 3px; }
+.q .rec { border-top: 1px solid var(--line); padding-top: 8px; }
+.q .rec b { color: var(--accent); }
+.depth { display: inline-flex; gap: 3px; }
+.depth i { width: 8px; height: 8px; transform: rotate(45deg); border: 1px solid var(--accent); }
+.depth i.on { background: var(--accent); }
+
+footer { border-top: 1px solid var(--line); padding-block: 26px 40px; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; flex-direction: column; gap: 10px; }
+footer h3 { font-family: var(--f-head); color: var(--ink); font-size: 20px; }
+footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .view:not([hidden]) { animation: rise .28s ease-out; }
+  @keyframes rise { from { transform: translateY(6px); } to { transform: none; } }
+}
+</style>
+
+<header class="mast">
+  <div class="wrap">
+    <span class="eyebrow">Лор-библия · рогалик в духе Noita · славянский фольклор</span>
+    <h1>Кощеева игла</h1>
+    <p class="lede">Ты напоил прикованного Кощея водой, и он в благодарность <em>простил тебе смерть</em>: вынул её, вложил в иглу и спрятал. Теперь каждая гибель «не своя», и ты возвращаешься всё большей нечистью.</p>
+    <div class="counts" id="counts"></div>
+    <p class="status" id="status"></p>
+  </div>
+</header>
+<div class="mast-orn"><div class="orn" aria-hidden="true"></div></div>
+
+<nav class="tabs" aria-label="Разделы">
+  <div class="wrap tabs-in" id="tabs">
+    <a href="#core" data-v="core">Ядро</a>
+    <a href="#world" data-v="world">Мир</a>
+    <a href="#bestiary" data-v="bestiary">Бестиарий</a>
+    <a href="#feuds" data-v="feuds">Кто кого</a>
+    <a href="#forms" data-v="forms">Облики</a>
+    <a href="#bosses" data-v="bosses">Боссы</a>
+    <a href="#items" data-v="items">Артефакты</a>
+    <a href="#secrets" data-v="secrets">Секреты</a>
+    <a href="#decisions" data-v="decisions">Решения</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ================= CORE ================= -->
+<section class="view" data-view="core">
+  <div class="view-head">
+    <span class="eyebrow">Ядро лора</span>
+    <h2>Прощёная смерть</h2>
+    <p class="lede">Всё в игре держится на одном народном представлении: смерть бывает своя и не своя. Отсюда цикл перерождений, лестница нечисти, враги, союзники и концовки.</p>
+  </div>
+
+  <div class="block">
+    <h3>Завязка</h3>
+    <div class="two">
+      <div class="prose">
+        <p>В чулане у царицы Марьи Моревны висит на двенадцати цепях тощий старик и просит пить. Герой подаёт ведро, второе, третье, и Кощей рвёт цепи. Так начинается сказка «Марья Моревна» из сборника Афанасьева. Потом Кощей догоняет героя и отпускает его, потому что тот был добр.</p>
+        <p>В игре это «прощаю» понято буквально. Кощей прощает герою смерть: вынимает её, кладёт в иглу и прячет в собственной цепи, в одном яйце со своей. Он считает это щедрым подарком. Он сам когда-то был пленником (древнерусское «кощей» значит «пленник, раб»), и бессмертие кажется ему свободой.</p>
+        <p>Без своей смерти любая гибель становится «не своей». Герой встаёт снова, но каждый раз немного другим: сначала у него пропадает тень, потом его перестают пускать в избы, потом его начинает жечь соль. Цель игры — найти иглу, пока ты ещё помнишь, зачем она тебе.</p>
+      </div>
+      <div class="quote">
+        <q>Ну, Иван-царевич, первый раз тебя прощаю, за твою доброту, что водой меня напоил.</q>
+        <cite>«Марья Моревна», Народные русские сказки А. Н. Афанасьева. В игре героя зовут Прощёный.</cite>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Своя смерть и не своя</h3>
+    <div class="two">
+      <div class="prose">
+        <p>Этнограф Д. К. Зеленин (1916) показал, что в народных верованиях покойники делятся на два резко отличных разряда. Умершие своей смертью уходят к предкам: их зовут «деды» и «родители», поминают на Радуницу и осенние Деды, и они помогают роду.</p>
+        <p>Умершие не своей смертью (утопленники, убитые, опойцы, некрещёные дети, колдуны) становятся «заложными». Земля их не принимает, и они ходят среди живых, пока не выйдет отпущенный им век. Из них получаются русалки, упыри, игоши, кикиморы.</p>
+        <p>Это и есть игровой цикл. Каждая смерть героя «не своя», поэтому он возвращается заложным и поднимается на ступень нечисти. Каждый, кого ты упокоил в забеге (вернул его смерть, дал имя, похоронил по обычаю), уходит в деды и помогает тебе дальше.</p>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th></th><th>Деды · своя смерть</th><th>Заложные · не своя</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Кто</td><td>умершие в свой срок, по обычаю</td><td>утопленники, убитые, опойцы, некрещёные дети, колдуны</td></tr>
+            <tr><td class="row-h">Где лежат</td><td>на кладбище, в родной земле</td><td>за оградой, у дорог, в болоте; земля их «не принимает»</td></tr>
+            <tr><td class="row-h">Что делают</td><td>приходят на поминальные дни, берегут род</td><td>бродят, пока не истечёт их век; вредят живым</td></tr>
+            <tr><td class="row-h">В игре</td><td>союзники между забегами</td><td>враги и твоё возможное будущее</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Лестница нечисти</h3>
+    <p class="prose">Семь ступеней. Каждая смерть поднимает на одну. Каждая ступень даёт силу и отнимает что-то человеческое, а мир меняет к тебе отношение: светлые отворачиваются, нечисть начинает принимать за своего, обереги из твоих рук начинают бить тебя самого. Спуститься вниз можно, но редко и дорого: молодильное яблоко, сброшенная змеиная кожа, купальский костёр до третьей ступени.</p>
+    <div class="ladder" id="ladder"></div>
+  </div>
+
+  <div class="block">
+    <h3>Кто такой Кощей</h3>
+    <div class="two">
+      <ul class="facts">
+        <li><span class="src folk">Фольк</span><span>Слово «кощей» в древнерусском значит «пленник, раб». В «Слове о полку Игореве»: «была бы чага по ногате, а кощей по резане», то есть пленник стоил бы гроши.</span></li>
+        <li><span class="src folk">Фольк</span><span>В «Марье Моревне» он сам пленник: висит на двенадцати цепях, пока герой не напоит его тремя вёдрами воды.</span></li>
+        <li><span class="src folk">Фольк</span><span>Смерть его вынесена из тела: на море-окияне, на острове Буяне, дуб, под ним сундук, в сундуке заяц, в зайце утка, в утке яйцо, в яйце игла. Пока игла цела, его не берёт ни меч, ни огонь.</span></li>
+        <li><span class="src folk">Фольк</span><span>Он похищает невест и цариц, ездит на вещем коне от кобылиц Бабы-яги. Догнать его может только брат этого коня. Когда герой перекидывает яйцо с руки на руку, Кощея бросает из угла в угол.</span></li>
+        <li><span class="src recon">Рекон</span><span>В. В. Иванов и В. Н. Топоров видят за Кощеем и Змеем древнего противника Громовержца: того, кто крадёт жену или скот и прячется в дереве, камне, воде.</span></li>
+        <li><span class="src game">Игра</span><span>Кощей — собиратель смертей. Его Тридевятое царство населено людьми, которым он «простил». Он не злодей в бытовом смысле: он искренне считает бессмертие милостью и не понимает, почему от неё бегут.</span></li>
+      </ul>
+      <div class="prose">
+        <p>Отсюда тон игры. Кощей разговаривает с героем как старший с младшим: он уже прошёл этот путь и ждёт, что ты тоже поймёшь. Его войско — такие же прощёные, как ты, только дошедшие до конца лестницы. Убивая их, ты видишь, кем станешь. Упокаивая их, ты отнимаешь у Кощея подданных.</p>
+        <p>Второй слой: Марья Моревна, единственная, кто однажды уже держал Кощея в цепях. В игре она пленница в Тридевятом царстве и знает, как с ним обращаться: она выведывает у него, где смерть, как царевны в сказках.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Цепь смерти</h3>
+    <p class="prose">Дорога к игле повторяет сказочную матрёшку. На каждом звене нужен свой облик героя, и все облики добываются в разных биомах. Подробно во вкладке <a href="#forms">Облики</a>.</p>
+    <div class="chain" id="chain-core"></div>
+  </div>
+
+  <div class="block">
+    <h3>Цикл забега</h3>
+    <ol class="loop">
+      <li><b>Погост</b>Встаёшь из свежей могилы. Земля тебя не приняла. Изба, Домовой, Деды, тайник.</li>
+      <li><b>Распутье</b>Камень с тремя надписями: прямо, направо, налево. Три дара, у каждого цена.</li>
+      <li><b>Царство</b>Три земли биома, хозяин места, босс, секреты. Тридевять земель — 27 уровней.</li>
+      <li><b>Смерть</b>Шёпот Кощея: «Прощаю». Ступень нечисти растёт, календарь сдвигается на следующий праздник.</li>
+      <li><b>Деды</b>Упокоенные за забег становятся предками и ждут на погосте с дарами.</li>
+    </ol>
+    <div class="prose">
+      <p>Сказочная формула «в тридевятом царстве, в тридесятом государстве» даёт структуру мира: девять царств по три земли, всего 27, и Тридевятое царство Кощея — последнее. Тридесятое — это море-окиян и остров Буян, куда попадают только с выведанной тайной. Календарь народных праздников (Святки, Купала, Русальная неделя, Ильин день, Деды, Карачун) меняет правила каждого забега.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Концовки</h3>
+    <div class="endings" id="endings"></div>
+  </div>
+
+  <div class="block">
+    <h3>Как читать эту библию</h3>
+    <div class="legend">
+      <div><span class="src folk">Фольк</span><span>Записано в фольклоре: сказки, былины, поверья, заговоры.</span></div>
+      <div><span class="src lit">Лит</span><span>Литературная обработка: Пушкин, Ершов, Гоголь, Бажов.</span></div>
+      <div><span class="src recon">Рекон</span><span>Научная реконструкция или спорное свидетельство.</span></div>
+      <div><span class="src game">Игра</span><span>Наш вымысел, построенный на фольклоре.</span></div>
+      <div><span class="st ally">Помощник</span><span>Помогает, учит, торгует, даёт облик.</span></div>
+      <div><span class="st neutral">Двоякий</span><span>Хозяин места: награждает за уважение, карает за нарушение.</span></div>
+      <div><span class="st foe">Враг</span><span>Нападает. Почти у каждого есть народная слабость.</span></div>
+      <div><span class="orig">укр. · бел. · южн.-слав.</span><span>Происхождение: вост.-слав., рус. Север, Урал, зап.-слав., книжн. (апокрифы, лубок).</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OTHER VIEWS (rendered) ================= -->
+<section class="view" data-view="world" hidden></section>
+<section class="view" data-view="bestiary" hidden></section>
+<section class="view" data-view="feuds" hidden></section>
+<section class="view" data-view="forms" hidden></section>
+<section class="view" data-view="bosses" hidden></section>
+<section class="view" data-view="items" hidden></section>
+<section class="view" data-view="secrets" hidden></section>
+<section class="view" data-view="decisions" hidden></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h3>Источники</h3>
+    <ul>
+      <li>А. Н. Афанасьев. Народные русские сказки (1855–1863); Поэтические воззрения славян на природу.</li>
+      <li>Д. К. Зеленин. Очерки русской мифологии: Умершие неестественною смертью и русалки (1916).</li>
+      <li>В. Я. Пропп. Исторические корни волшебной сказки (1946).</li>
+      <li>С. В. Максимов. Нечистая, неведомая и крестная сила (1903).</li>
+      <li>Э. В. Померанцева. Мифологические персонажи в русском фольклоре (1975).</li>
+      <li>Славянские древности: этнолингвистический словарь, под ред. Н. И. Толстого (1995–2012).</li>
+      <li>В. В. Иванов, В. Н. Топоров. Исследования в области славянских древностей (1974).</li>
+      <li>Былины (собрания Рыбникова и Гильфердинга); Голубиная книга; русские заговоры.</li>
+      <li>О. Воропай. Звичаї нашого народу (1958); П. П. Бажов. Малахитовая шкатулка (литературная обработка уральских сказов).</li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+(() => {
+  "use strict";
+  const FILES = ["world", "forms", "bosses", "bestiary", "feuds", "items", "secrets", "decisions"];
+  const VIEWS = ["core", "world", "bestiary", "feuds", "forms", "bosses", "items", "secrets", "decisions"];
+  const D = {};
+  const rendered = {};
+  const SRC = { folk: "Фольк", lit: "Лит", recon: "Рекон", game: "Игра" };
+  const ST = { ally: "Помощник", neutral: "Двоякий", foe: "Враг" };
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const src = s => s ? `<span class="src ${esc(s)}">${SRC[s] || esc(s)}</span>` : "";
+  const st = s => s ? `<span class="st ${esc(s)}">${ST[s] || esc(s)}</span>` : "";
+  const list = (arr) => Array.isArray(arr) && arr.length ? `<ul>${arr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
+  const sec = (label, inner) => inner ? `<div class="sec"><span class="lbl">${label}</span>${inner}</div>` : "";
+  const para = (t) => t ? `<p>${esc(t)}</p>` : "";
+  const biomeName = id => { const b = (D.world || []).find(x => x.id === id); return b ? b.name : id; };
+  const formName = id => { const f = (D.forms || []).find(x => x.id === id); return f ? f.name : id; };
+  const biomePills = ids => (ids || []).map(id => `<a class="pill" href="#world" data-biome="${esc(id)}">${esc(biomeName(id))}</a>`).join("");
+  const formPills = ids => (ids || []).map(id => `<a class="pill form" href="#forms" data-form="${esc(id)}">${esc(formName(id))}</a>`).join("");
+  const wip = (what) => `<div class="wip"><b>${what} в работе</b><span>Раздел наполняется и появится в одной из следующих версий этой страницы.</span></div>`;
+
+  // ---------- static data for the core view ----------
+  const LADDER = [
+    { n: 0, name: "Живой", look: "Есть тень, собаки виляют хвостом.", gift: "Светлые помогают, обереги работают на тебя, Китеж виден.", cost: "Обычная смертность; нечисть видит в тебе добычу." },
+    { n: 1, name: "Заложный", look: "Пропала тень, собаки воют вслед.", gift: "Видишь заложных и болотные огни, понимаешь речь мертвецов.", cost: "Китеж закрыт; на погосте не отдохнуть: земля не принимает." },
+    { n: 2, name: "Навий", look: "Кожа серая, на золе не остаётся следов.", gift: "Проходишь навий туман; русалки и мавки не нападают первыми.", cost: "Домовой молчит; святая и крещенская вода жжёт; серебро ранит." },
+    { n: 3, name: "Упырь", look: "Чужой румянец, клыки.", gift: "Лечишься кровью; возвращаешься из любой могилы, не только с погоста.", cost: "Мак заставляет считать зёрна; осина и петушиный крик валят с ног; из избы гонят." },
+    { n: 4, name: "Волкодлак", look: "Шерсть, глаза светятся в темноте.", gift: "Облики дешевле; можно «съесть луну» и погрузить землю во тьму.", cost: "Человеческий облик возвращается только через пень с ножами; на Егорья волки служат не тебе." },
+    { n: 5, name: "Ведьмак", look: "Тени тянутся из-под ногтей.", gift: "Порча и заговоры на чужое; путь на Лысую гору; нечисть торгует как со своим.", cost: "Умереть можно, только передав силу или разобрав конёк крыши; гроза Перуна бьёт прицельно." },
+    { n: 6, name: "Бессмертный", look: "Кости, кожа как пергамент.", gift: "Неуязвим ко всему, кроме иглы.", cost: "Светлые вещи рассыпаются в руках, Деды уходят. Дойти до конца так — концовка «Бессмертный»." }
+  ];
+  const CHAIN = [
+    { k: "звено 1", name: "Море-Окиян", text: "Добраться до острова через бурю Стратим-птицы.", forms: ["lebed", "sokol"] },
+    { k: "звено 2", name: "Остров Буян", text: "Бел-горюч камень Алатырь, птица Гагана, змея Скоропея.", forms: [] },
+    { k: "звено 3", name: "Дуб", text: "Вывернуть с корнем, чтобы сундук упал и разбился.", forms: ["medved", "tur"] },
+    { k: "звено 4", name: "Сундук", text: "Кованый. Падает и бьётся, или открывается разрыв-травой.", forms: ["medved"] },
+    { k: "звено 5", name: "Заяц", text: "Выскакивает и бежит. Догнать и разорвать.", forms: ["volk"] },
+    { k: "звено 6", name: "Утка", text: "Вылетает из зайца. Сбить в воздухе.", forms: ["sokol"] },
+    { k: "звено 7", name: "Яйцо", text: "Падает в море. Достать со дна. Силой не разбить: только мышкин хвостик или лоб Кощея.", forms: ["shchuka", "mysh"] },
+    { k: "звено 8", name: "Две иглы", text: "Кощеева и твоя. Что сломать, решаешь ты.", forms: [] }
+  ];
+  const ENDINGS = [
+    { name: "Своя смерть", how: "Сломать свою иглу.", text: "Ты умираешь в свой срок и уходишь к дедам в Ирий. Кощей остаётся жить и ждать следующего, кого можно простить.", cls: "" },
+    { name: "Пепел по ветру", how: "Сломать иглу Кощея.", text: "Кощей умирает, как в сказке: его сжигают и развеивают пепел. Ты остаёшься без смерти и бродишь заложным, пока не истечёт век.", cls: "" },
+    { name: "Возвращённая смерть", how: "Сломать обе иглы и отдать украденные смерти их владельцам.", text: "Истинная концовка. Нужны упокоенные Деды, писанки, затянувшие цепи, и знание, куда несут смерти. Мир снова умеет умирать.", cls: "true" },
+    { name: "Бессмертный", how: "Оставить иглы себе или дойти до шестой ступени.", text: "Ты садишься на костяной престол. Начинается следующий забег, и теперь прощаешь ты.", cls: "" },
+    { name: "Китеж", how: "Секрет. Дойти до Буяна живым, без единой ступени нечисти.", text: "Град на Светлояре открывает ворота тому, кто не стал нечистью. Ты уходишь туда, где нет ни смерти, ни бессмертия.", cls: "" }
+  ];
+
+  function renderCore() {
+    document.getElementById("ladder").innerHTML = LADDER.map(s => `
+      <article class="step">
+        <div class="step-top"><span class="lbl">Ступень ${s.n}</span><span class="pips" aria-hidden="true">${Array.from({ length: 6 }, (_, i) => `<i class="${i < s.n ? "on" : ""}"></i>`).join("")}</span></div>
+        <h4>${esc(s.name)}</h4>
+        <p class="look">${esc(s.look)}</p>
+        <div class="kv gift"><span class="lbl">Даёт</span><span>${esc(s.gift)}</span></div>
+        <div class="kv cost"><span class="lbl">Отнимает</span><span>${esc(s.cost)}</span></div>
+      </article>`).join("");
+    document.getElementById("chain-core").innerHTML = chainHTML();
+    document.getElementById("endings").innerHTML = ENDINGS.map(e => `
+      <article class="ending ${e.cls}"><h4>${esc(e.name)}</h4><span class="how">${esc(e.how)}</span><p>${esc(e.text)}</p></article>`).join("");
+  }
+  function chainHTML() {
+    return CHAIN.map(c => `<div class="link"><span class="k">${esc(c.k)}</span><h4>${esc(c.name)}</h4><p>${esc(c.text)}</p><div class="chips">${formPills(c.forms)}</div></div>`).join("");
+  }
+
+  // ---------- world ----------
+  function renderWorld(el) {
+    if (!D.world) { el.innerHTML = head("Мир", "Тридевять земель", "Разрез мира сверху вниз.") + wip("Мир"); return; }
+    const W = D.world;
+    const main = W.filter(b => b.kind === "main").sort((a, b) => a.order - b.order);
+    const sides = W.filter(b => b.kind !== "main" && b.attach);
+    const branch = b => `<a class="branch" href="#b-${esc(b.id)}" style="--c:${esc(b.color)}"><small>${b.kind === "secret" ? "секрет" : (b.kind === "station" ? "станция" : "ветвь")}</small>${esc(b.name)}</a>`;
+    let map = "";
+    const top = sides.filter(b => b.attach === "top");
+    if (top.length) map += `<div class="full">${top.map(branch).join("")}</div>`;
+    main.forEach((b, i) => {
+      const L = sides.filter(s => s.attach === b.id && s.side === "left");
+      const R = sides.filter(s => s.attach === b.id && s.side !== "left");
+      map += `<div class="side left">${L.map(branch).join("")}</div>
+        <a class="band" href="#b-${esc(b.id)}" style="--c:${esc(b.color)}">
+          <span class="land">земли<b>${esc(b.lands)}</b></span>
+          <span class="nm">${esc(b.name)}</span>
+          <span class="bs">${esc(b.bossShort || "")}</span>
+        </a>
+        <div class="side right">${R.map(branch).join("")}</div>`;
+      if (i < main.length - 1) map += `<div class="gap"><a href="#b-raspute">Распутье</a></div>`;
+    });
+    const order = [...main, ...W.filter(b => b.kind !== "main")];
+    el.innerHTML = head("Мир", "Тридевять земель", "Разрез мира сверху вниз: девять царств по три земли и Тридесятое государство на дне. Пунктиром отмечены ветви и секретные места; между царствами стоит камень Распутья. Нажми на пласт, чтобы открыть досье.") +
+      `<div class="block"><div class="map">${map}</div></div>
+       <div class="block">${order.map(dossier).join("")}</div>`;
+  }
+  function dossier(b) {
+    const dw = b.dwellers || {};
+    const dwRow = (k) => (dw[k] && dw[k].length) ? `<div class="dw-row">${st(k)}${dw[k].map(n => `<button type="button" class="namebtn" data-find="${esc(n)}">${esc(n)}</button>`).join("")}</div>` : "";
+    const mats = (b.materials || []).map(m => `<dt>${esc(m[0])}</dt><dd>${esc(m[1])}</dd>`).join("");
+    const kindLbl = b.kind === "main" ? `Земли ${esc(b.lands)}` : (b.kind === "secret" ? "Секретное место" : (b.kind === "station" ? "Станция между царствами" : "Боковая ветвь"));
+    return `<article class="dossier" id="b-${esc(b.id)}">
+      <div class="dossier-h" style="--c:${esc(b.color)}">
+        <h4>${esc(b.name)}</h4><span class="meta"><span class="lbl">${kindLbl}</span>${src(b.src)}</span>
+        ${b.tone ? `<p class="tone">${esc(b.tone)}</p>` : ""}
+      </div>
+      <div class="dossier-b">
+        <div class="col">
+          ${sec("Фольклор", para(b.folk))}
+          ${sec("В игре", para(b.game))}
+          ${sec("Как выглядит", para(b.look))}
+          ${b.access ? sec("Как попасть", para(b.access)) : ""}
+          ${sec("Календарь", para(b.calendar))}
+        </div>
+        <div class="col">
+          ${mats ? sec("Вещества", `<dl class="mat">${mats}</dl>`) : ""}
+          ${(dw.ally || dw.neutral || dw.foe) ? sec("Кто живёт", `<div class="dw">${dwRow("ally")}${dwRow("neutral")}${dwRow("foe")}</div>`) : ""}
+          ${sec("Босс", para(b.boss))}
+          ${(b.forms && b.forms.length) ? sec("Облики здесь", `<div class="chips">${formPills(b.forms)}</div>`) : ""}
+          ${sec("Кто кого обидит", list(b.conflicts))}
+          ${sec("Опасности", list(b.hazards))}
+        </div>
+      </div>
+    </article>`;
+  }
+
+  // ---------- bestiary ----------
+  const BF = { stance: "all", kind: "all", biome: "all", src: "all", q: "" };
+  function renderBestiary(el) {
+    if (!D.bestiary) { el.innerHTML = head("Бестиарий", "Все, кого встретишь", "Существа и персонажи славянского фольклора.") + wip("Бестиарий"); return; }
+    const kinds = [...new Set(D.bestiary.map(b => b.kind))];
+    const biomes = (D.world || []).map(b => b.id).filter(id => D.bestiary.some(x => (x.biomes || []).includes(id)));
+    const chipRow = (label, key, opts) => `<div class="frow"><span class="lbl">${label}</span>${opts.map(([v, t]) => `<button type="button" class="chip" data-f="${key}" data-v="${esc(v)}" aria-pressed="${BF[key] === v}">${esc(t)}</button>`).join("")}</div>`;
+    el.innerHTML = head("Бестиарий", "Все, кого встретишь", `${D.bestiary.length} существ и персонажей. Фильтруй по отношению к герою, типу, месту и источнику. Имена в досье биомов ведут сюда.`) +
+      `<div class="filters">
+        <input id="bq" class="search" type="search" placeholder="Поиск: имя, свойство, слабость" value="${esc(BF.q)}" aria-label="Поиск по бестиарию">
+        ${chipRow("Отношение", "stance", [["all", "Все"], ["ally", "Помощники"], ["neutral", "Двоякие"], ["foe", "Враги"]])}
+        ${chipRow("Тип", "kind", [["all", "Все"], ...kinds.map(k => [k, k])])}
+        ${chipRow("Где", "biome", [["all", "Везде"], ...biomes.map(id => [id, biomeName(id)])])}
+        ${chipRow("Источник", "src", [["all", "Все"], ["folk", "Фольклор"], ["lit", "Литература"], ["recon", "Реконструкция"], ["game", "Вымысел игры"]])}
+        <span class="shown" id="bshown"></span>
+      </div>
+      <div class="grid" id="bgrid"></div>`;
+    el.querySelectorAll(".chip[data-f]").forEach(b => b.addEventListener("click", () => { BF[b.dataset.f] = b.dataset.v; renderBestiary(el); }));
+    const inp = el.querySelector("#bq");
+    inp.addEventListener("input", () => { BF.q = inp.value; fillBestiary(); });
+    fillBestiary();
+  }
+  function fillBestiary() {
+    const q = BF.q.trim().toLowerCase();
+    const res = D.bestiary.filter(b =>
+      (BF.stance === "all" || b.stance === BF.stance) &&
+      (BF.kind === "all" || b.kind === BF.kind) &&
+      (BF.biome === "all" || (b.biomes || []).includes(BF.biome)) &&
+      (BF.src === "all" || b.src === BF.src) &&
+      (!q || [b.name, b.alt, b.folk, b.game, b.weak, (b.abilities || []).join(" "), (b.help || []).join(" ")].join(" ").toLowerCase().includes(q)));
+    document.getElementById("bshown").textContent = `Показано ${res.length} из ${D.bestiary.length}`;
+    document.getElementById("bgrid").innerHTML = res.map(b => `
+      <article class="card" id="c-${esc(b.id)}">
+        <div class="card-h"><div><h4>${esc(b.name)}</h4>${b.alt ? `<span class="alt">${esc(b.alt)}</span>` : ""}</div>${st(b.stance)}</div>
+        <div class="meta"><span class="lbl">${esc(b.kind)}</span><span class="orig">${esc(b.origin)}</span>${src(b.src)}</div>
+        ${sec("Фольклор", para(b.folk))}
+        ${sec("В игре", para(b.game))}
+        ${sec(b.stance === "ally" ? "Умеет" : "Способности", list(b.abilities))}
+        ${sec("Чем поможет", list(b.help))}
+        ${sec("Слабость и обереги", para(b.weak))}
+        ${sec("С ростом нечисти", para(b.shift))}
+        <div class="chips">${biomePills(b.biomes)}</div>
+      </article>`).join("") || `<p class="shown">Никого не нашлось. Сбрось фильтры.</p>`;
+  }
+
+  // ---------- feuds ----------
+  function renderFeuds(el) {
+    if (!D.feuds) { el.innerHTML = head("Кто кого", "Вражда и союзы", "Связи между существами.") + wip("Карта вражды"); return; }
+    const types = [...new Set(D.feuds.map(f => f.type))];
+    el.innerHTML = head("Кто кого", "Вражда и союзы", "Существа фольклора враждуют, служат и боятся друг друга. В игре это инфайтинг: стравливай, приманивай, прячься за чужой страх.") +
+      types.map(t => `<div class="block"><h3>${esc(t[0].toUpperCase() + t.slice(1))}</h3>
+        <div class="tbl-wrap"><table><thead><tr><th>Кто</th><th>Кого</th><th>Фольклор</th><th>В игре</th><th>Источник</th></tr></thead><tbody>
+        ${D.feuds.filter(f => f.type === t).map(f => `<tr><td class="row-h">${esc(f.a)}</td><td class="row-h">${esc(f.b)}</td><td>${esc(f.how)}</td><td>${esc(f.game)}</td><td>${src(f.src)}</td></tr>`).join("")}
+        </tbody></table></div></div>`).join("");
+  }
+
+  // ---------- forms ----------
+  function renderForms(el) {
+    const intro = head("Облики", "Чем стать, чтобы дойти до иглы", "В сказке иглу добывают звери, которых герой пощадил. Здесь эти звери — облики героя. У каждого облика светлый путь (милосердие, помощь, испытание) и тёмный (ритуал, сорванная шкура), который поднимает на ступень нечисти.");
+    if (!D.forms) { el.innerHTML = intro + `<div class="block"><h3>Цепь смерти</h3><div class="chain">${chainHTML()}</div></div>` + wip("Облики"); return; }
+    el.innerHTML = intro + `<div class="block"><h3>Цепь смерти</h3><div class="chain">${chainHTML()}</div></div>
+      <div class="block"><h3>Все облики</h3><div class="grid">${D.forms.map(f => `
+        <article class="card" id="f-${esc(f.id)}">
+          <div class="card-h"><div><h4>${esc(f.name)}</h4><span class="alt">${esc(f.source)}</span></div>${src(f.src)}</div>
+          ${f.chain ? `<div class="sec"><span class="lbl">Звено цепи</span><p><b>${esc(f.chain)}</b></p></div>` : ""}
+          ${sec("Что умеет", para(f.ability))}
+          ${sec("Физика", para(f.physics))}
+          ${sec("Светлый путь", para(f.light))}
+          ${sec("Тёмный путь · +1 ступень", para(f.dark))}
+          ${sec("У кого", para(f.boss))}
+          ${sec("Риск", para(f.risk))}
+          <div class="chips">${biomePills(f.where)}</div>
+        </article>`).join("")}</div></div>`;
+  }
+
+  // ---------- bosses ----------
+  function renderBosses(el) {
+    if (!D.bosses) { el.innerHTML = head("Боссы", "Хозяева царств", "Главные и секретные противники.") + wip("Боссы"); return; }
+    const card = b => `<article class="card" id="x-${esc(b.id)}">
+      <div class="card-h"><div><h4>${esc(b.name)}</h4><span class="alt">${esc(biomeName(b.biome))}</span></div><div class="meta">${src(b.src)}</div></div>
+      ${sec("Фольклор", para(b.folk))}
+      ${sec("Бой", list(b.phases))}
+      ${sec("Слабость", para(b.weakness))}
+      ${sec("Награда", list(b.drops))}
+      ${(b.forms && b.forms.length) ? sec("Облики", `<div class="chips">${formPills(b.forms)}</div>`) : ""}
+      ${sec("Заметка", para(b.note))}
+    </article>`;
+    const main = D.bosses.filter(b => !b.secret), secret = D.bosses.filter(b => b.secret);
+    el.innerHTML = head("Боссы", "Хозяева царств", "У каждого царства свой хозяин. Многих можно не убивать: обмануть, задобрить, пройти испытание. Сказочные решения всегда работают лучше грубой силы.") +
+      `<div class="block"><h3>По царствам</h3><div class="grid">${main.map(card).join("")}</div></div>
+       <div class="block"><h3>Секретные</h3><div class="grid">${secret.map(card).join("")}</div></div>`;
+  }
+
+  // ---------- items ----------
+  const IF = { type: "all", q: "" };
+  function renderItems(el) {
+    if (!D.items) { el.innerHTML = head("Артефакты", "Волшебные предметы", "Что даёт сказка и чем это станет в игре.") + wip("Артефакты"); return; }
+    const types = [...new Set(D.items.map(i => i.type))];
+    el.innerHTML = head("Артефакты", "Волшебные предметы", `${D.items.length} предметов из сказок, былин, поверий и заговоров, переведённых в механику с ценой и связями.`) +
+      `<div class="filters">
+        <input id="iq" class="search" type="search" placeholder="Поиск: предмет, свойство" value="${esc(IF.q)}" aria-label="Поиск по артефактам">
+        <div class="frow"><span class="lbl">Тип</span>${[["all", "Все"], ...types.map(t => [t, t])].map(([v, t]) => `<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${IF.type === v}">${esc(t)}</button>`).join("")}</div>
+        <span class="shown" id="ishown"></span>
+      </div><div class="grid" id="igrid"></div>`;
+    el.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { IF.type = b.dataset.v; renderItems(el); }));
+    const inp = el.querySelector("#iq");
+    inp.addEventListener("input", () => { IF.q = inp.value; fillItems(); });
+    fillItems();
+  }
+  function fillItems() {
+    const q = IF.q.trim().toLowerCase();
+    const res = D.items.filter(i => (IF.type === "all" || i.type === IF.type) && (!q || [i.name, i.folk, i.game, i.links].join(" ").toLowerCase().includes(q)));
+    document.getElementById("ishown").textContent = `Показано ${res.length} из ${D.items.length}`;
+    document.getElementById("igrid").innerHTML = res.map(i => `
+      <article class="card" id="i-${esc(i.id)}">
+        <div class="card-h"><div><h4>${esc(i.name)}</h4></div>${src(i.src)}</div>
+        <div class="meta"><span class="lbl">${esc(i.type)}</span><span class="orig">${esc(i.origin)}</span></div>
+        ${sec("Фольклор", para(i.folk))}
+        ${sec("В игре", para(i.game))}
+        ${sec("Цена", para(i.cost))}
+        ${sec("Связи", para(i.links))}
+        <div class="chips">${formPills(i.forms)}${biomePills(i.biomes)}</div>
+      </article>`).join("");
+  }
+
+  // ---------- secrets ----------
+  const SF = { depth: "all", type: "all" };
+  function renderSecrets(el) {
+    if (!D.secrets) { el.innerHTML = head("Секреты", "Что спрятано", "Тайные места, ритуалы и механики.") + wip("Секреты"); return; }
+    const types = [...new Set(D.secrets.map(s => s.type))];
+    const DEP = { 1: "Заметные", 2: "Скрытые", 3: "Глубокие" };
+    el.innerHTML = head("Секреты", "Что спрятано", `${D.secrets.length} секретов. Глубина показывает, насколько трудно найти: заметные игрок встретит сам, скрытые требуют знать сказку, глубокие рассчитаны на форумы и вики, как в Noita.`) +
+      `<div class="filters">
+        <div class="frow"><span class="lbl">Глубина</span>${[["all", "Все"], ["1", DEP[1]], ["2", DEP[2]], ["3", DEP[3]]].map(([v, t]) => `<button type="button" class="chip" data-f="depth" data-v="${v}" aria-pressed="${SF.depth === v}">${t}</button>`).join("")}</div>
+        <div class="frow"><span class="lbl">Тип</span>${[["all", "Все"], ...types.map(t => [t, t])].map(([v, t]) => `<button type="button" class="chip" data-f="type" data-v="${esc(v)}" aria-pressed="${SF.type === v}">${esc(t)}</button>`).join("")}</div>
+      </div><div class="grid">${D.secrets.filter(s => (SF.depth === "all" || String(s.depth) === SF.depth) && (SF.type === "all" || s.type === SF.type)).map(s => `
+        <article class="card" id="s-${esc(s.id)}">
+          <div class="card-h"><div><h4>${esc(s.name)}</h4></div><span class="depth" title="${esc(DEP[s.depth] || "")}" aria-label="Глубина ${s.depth} из 3">${[1, 2, 3].map(i => `<i class="${i <= s.depth ? "on" : ""}"></i>`).join("")}</span></div>
+          <div class="meta"><span class="lbl">${esc(s.type)}</span>${src(s.src)}</div>
+          ${sec("Как найти", para(s.trigger))}
+          ${sec("Что даёт", para(s.reward))}
+          ${sec("Основа", para(s.folk))}
+          ${sec("Связи", para(s.links))}
+          <div class="chips">${biomePills(s.where)}</div>
+        </article>`).join("")}</div>`;
+    el.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { SF[b.dataset.f] = b.dataset.v; renderSecrets(el); }));
+  }
+
+  // ---------- decisions ----------
+  function renderDecisions(el) {
+    if (!D.decisions) { el.innerHTML = head("Решения", "Вопросы и развилки", "Что нужно решить, прежде чем строить дальше.") + wip("Решения"); return; }
+    const groups = [...new Set(D.decisions.map(d => d.group))];
+    el.innerHTML = head("Решения", "Вопросы и развилки", "Что нужно решить тебе, что я принял по умолчанию и что нужно прислать, чтобы связать лор с готовой механикой.") +
+      groups.map(g => `<div class="block"><h3>${esc(g)}</h3><div class="dec">${D.decisions.filter(d => d.group === g).map(d => `
+        <article class="q" id="q-${esc(d.id)}">
+          <span class="qid">${esc(d.id)}</span><h4>${esc(d.title)}</h4>
+          <div class="body">
+            ${para(d.why)}
+            ${(d.options && d.options.length) ? `<ol>${d.options.map(o => `<li>${esc(o)}</li>`).join("")}</ol>` : ""}
+            ${d.rec ? `<p class="rec"><b>Моя рекомендация.</b> ${esc(d.rec)}</p>` : ""}
+          </div>
+        </article>`).join("")}</div></div>`).join("");
+  }
+
+  function head(eyebrow, title, lede) {
+    return `<div class="view-head"><span class="eyebrow">${esc(eyebrow)}</span><h2>${esc(title)}</h2><p class="lede">${esc(lede)}</p></div>`;
+  }
+
+  const RENDER = { world: renderWorld, bestiary: renderBestiary, feuds: renderFeuds, forms: renderForms, bosses: renderBosses, items: renderItems, secrets: renderSecrets, decisions: renderDecisions };
+
+  // ---------- routing ----------
+  let current = "core";
+  function show(v, scroll) {
+    if (!VIEWS.includes(v)) v = "core";
+    current = v;
+    document.querySelectorAll("[data-view]").forEach(s => { s.hidden = s.dataset.view !== v; });
+    document.querySelectorAll("#tabs a").forEach(a => { if (a.dataset.v === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    const el = document.querySelector(`[data-view="${v}"]`);
+    if (RENDER[v] && !rendered[v]) { RENDER[v](el); rendered[v] = true; }
+    const tab = document.querySelector(`#tabs a[data-v="${v}"]`);
+    if (tab) tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (scroll) {
+      const nav = document.querySelector(".tabs");
+      const y = nav.offsetTop;
+      if (window.scrollY > y) window.scrollTo({ top: y });
+    }
+  }
+  function route() {
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (VIEWS.includes(h)) { show(h, true); return; }
+    // anchors inside rendered views: b-*, f-*, c-*, x-*, i-*, s-*, q-*
+    const pref = { b: "world", f: "forms", c: "bestiary", x: "bosses", i: "items", s: "secrets", q: "decisions" }[h.split("-")[0]];
+    if (pref) { show(pref, false); const t = document.getElementById(h); if (t) t.scrollIntoView({ block: "start" }); return; }
+    show("core", false);
+  }
+  addEventListener("hashchange", route);
+
+  // cross-links: dweller names → bestiary search; biome pills → biome dossier; form pills → form card
+  document.addEventListener("click", e => {
+    const n = e.target.closest("[data-find]");
+    if (n) { BF.q = n.dataset.find; BF.stance = BF.kind = BF.biome = BF.src = "all"; rendered.bestiary = false; location.hash = "bestiary"; return; }
+    const b = e.target.closest("a[data-biome]");
+    if (b) { e.preventDefault(); location.hash = "b-" + b.dataset.biome; return; }
+    const f = e.target.closest("a[data-form]");
+    if (f) { e.preventDefault(); location.hash = "f-" + f.dataset.form; }
+  });
+
+  // ---------- counters ----------
+  function counts() {
+    const C = [["bestiary", "существ"], ["world", "мест"], ["forms", "обликов"], ["bosses", "боссов"], ["items", "артефактов"], ["secrets", "секретов"], ["decisions", "решений"]];
+    document.getElementById("counts").innerHTML = C.map(([k, t]) => D[k] ? `<span class="count"><b>${D[k].length}</b>${t}</span>` : `<span class="count wip"><b>·</b>${t} в работе</span>`).join("");
+    const missing = { bestiary: "бестиарий", feuds: "кто кого", items: "артефакты", secrets: "секреты", bosses: "боссы", decisions: "решения", world: "мир", forms: "облики" };
+    const m = Object.keys(missing).filter(k => !D[k]).map(k => missing[k]);
+    document.getElementById("status").textContent = m.length ? `Наполняется: ${m.join(", ")}.` : "Все разделы на месте. Дальше — правки по твоим решениям.";
+    const tabN = { bestiary: "bestiary", items: "items", secrets: "secrets", decisions: "decisions" };
+    Object.keys(tabN).forEach(k => {
+      const a = document.querySelector(`#tabs a[data-v="${k}"]`);
+      if (a && D[k] && !a.querySelector(".n")) a.insertAdjacentHTML("beforeend", `<span class="n">${D[k].length}</span>`);
+    });
+  }
+
+  renderCore();
+  counts();
+  route();
+  Promise.all(FILES.map(f => fetch(`data/${f}.json`).then(r => r.ok ? r.json() : null).catch(() => null))).then(res => {
+    FILES.forEach((f, i) => { if (Array.isArray(res[i])) D[f] = res[i]; });
+    Object.keys(rendered).forEach(k => { rendered[k] = false; });
+    renderCore();
+    counts();
+    route();
+  });
+})();
+</script>
