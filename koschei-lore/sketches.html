@@ -1,0 +1,1281 @@
+<title>Наброски Кощеевой иглы</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Golos+Text:wght@400;500;600&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: one dark world, like the game itself. Pixel canvases are the content;
+   the page chrome borrows game UI materials: carved wood, birch bark, embroidered linen, cinnabar ink. */
+:root {
+  color-scheme: dark;
+  --bg: #0b0c0b;
+  --panel: #131512;
+  --panel-2: #1a1c18;
+  --line: #2b2f29;
+  --ink: #e8e3d4;
+  --muted: #a29e90;
+  --cinnabar: #d0472d;
+  --gold: #d6a640;
+  --linen: #e6dfcd;
+  --wood: #2a1d14;
+  --wood-2: #3b2a1c;
+  --bark: #1c1a15;
+  --f-title: "Ruslan Display", "Old Standard TT", Georgia, serif;
+  --f-head: "Old Standard TT", Georgia, serif;
+  --f-body: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-px: "Pixelify Sans", "Golos Text", ui-monospace, monospace;
+}
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--f-body); font-size: 16px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: #e88a6e; }
+canvas.px, .pxi canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.eyebrow { font-family: var(--f-px); font-size: 13px; letter-spacing: .06em; color: var(--muted); text-transform: uppercase; }
+
+header.top { padding-block: calc(env(safe-area-inset-top, 0px) + 28px) 18px; margin-top: calc(-1 * env(safe-area-inset-top, 0px)); }
+header.top .wrap { display: flex; flex-direction: column; gap: 10px; }
+header.top h1 { font-family: var(--f-title); font-weight: 400; font-size: clamp(36px, 7vw, 72px); line-height: 1; }
+header.top .lede { max-width: 66ch; color: var(--muted); font-size: 17px; }
+.jump { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 6px; }
+.jump a { font-family: var(--f-px); font-size: 14px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--cinnabar); }
+.orn { height: 14px; background: var(--cinnabar);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M14 1.5 L26 7 L14 12.5 L2 7 Z' fill='none' stroke='black' stroke-width='1.8'/%3E%3Cpath d='M14 4.6 L19.2 7 L14 9.4 L8.8 7 Z'/%3E%3Ccircle cx='0' cy='7' r='1.4'/%3E%3Ccircle cx='28' cy='7' r='1.4'/%3E%3C/svg%3E") repeat-x left center / 28px 14px;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M14 1.5 L26 7 L14 12.5 L2 7 Z' fill='none' stroke='black' stroke-width='1.8'/%3E%3Cpath d='M14 4.6 L19.2 7 L14 9.4 L8.8 7 Z'/%3E%3Ccircle cx='0' cy='7' r='1.4'/%3E%3Ccircle cx='28' cy='7' r='1.4'/%3E%3C/svg%3E") repeat-x left center / 28px 14px; }
+
+main { display: flex; flex-direction: column; gap: 64px; padding-block: 28px 70px; }
+section { display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 16px; }
+.sh { display: flex; flex-direction: column; gap: 6px; max-width: 72ch; }
+.sh h2 { font-family: var(--f-head); font-weight: 700; font-size: clamp(28px, 3.6vw, 38px); line-height: 1.1; }
+.sh p { color: var(--muted); }
+.note { font-size: 14px; color: var(--muted); max-width: 72ch; }
+
+/* ---------- game screen ---------- */
+.screen { position: relative; container-type: inline-size; width: 100%; aspect-ratio: 16 / 9; background: #000; border: 1px solid var(--line); overflow: hidden; }
+.screen > canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+[data-ico], [data-jug] { display: block; }
+[data-ico] canvas, [data-jug] canvas { width: 100%; height: auto; }
+.slot [data-ico] { width: 72%; }
+.form-ring [data-ico] { width: 56%; }
+.jug [data-jug] { width: 100%; }
+.hud { position: absolute; inset: 0; pointer-events: none; font-family: var(--f-px); color: #efe8d6; text-shadow: 0 0 .3cqw #000, 0 .15cqw 0 #000; }
+.hud .tl { position: absolute; left: 1.6cqw; top: 1.6cqw; display: flex; flex-direction: column; gap: .7cqw; }
+.hud .tr { position: absolute; right: 1.6cqw; top: 1.6cqw; display: flex; flex-direction: column; align-items: flex-end; gap: .5cqw; font-size: 1.55cqw; }
+.hud .bl { position: absolute; left: 1.6cqw; bottom: 1.6cqw; display: flex; flex-direction: column; gap: .5cqw; }
+.hud .br { position: absolute; right: 1.6cqw; bottom: 1.6cqw; display: flex; align-items: flex-end; gap: 1.2cqw; }
+.hud .row { display: flex; align-items: center; gap: .8cqw; font-size: 1.45cqw; }
+.hud .pxi { width: 2.6cqw; display: grid; place-items: center; }
+.hud .pxi canvas { width: 100%; height: auto; }
+.thread { width: 19cqw; height: .9cqw; background: rgba(40, 10, 8, .8); border: .15cqw solid #120806; position: relative; }
+.thread i { position: absolute; inset: 0; width: 68%; background: repeating-linear-gradient(115deg, #d03a2a 0 .5cqw, #8f1f17 .5cqw .8cqw); }
+.wax { width: 19cqw; height: .7cqw; background: rgba(30, 26, 18, .8); border: .15cqw solid #0d0b08; position: relative; }
+.wax i { position: absolute; inset: 0; width: 45%; background: linear-gradient(#efe6c8, #b9ac86); }
+.pips { display: flex; gap: .55cqw; padding-left: .2cqw; }
+.pips b { width: 1.05cqw; height: 1.05cqw; transform: rotate(45deg); border: .15cqw solid #d0472d; background: rgba(0, 0, 0, .4); }
+.pips b.on { background: #d0472d; box-shadow: 0 0 .8cqw #d0472d; }
+.hud .lbl { color: #b9b19c; font-size: 1.3cqw; }
+.title-card { position: absolute; left: 50%; top: 2.2cqw; transform: translateX(-50%); text-align: center; display: flex; flex-direction: column; gap: .2cqw; opacity: .9; }
+.title-card small { font-size: 1.3cqw; letter-spacing: .2em; text-transform: uppercase; color: #c9bfa6; }
+.title-card b { font-family: var(--f-title); font-weight: 400; font-size: 3.2cqw; color: #efe6cf; text-shadow: 0 0 1.2cqw rgba(0, 0, 0, .9); }
+.charm { display: flex; gap: .5cqw; padding: .6cqw; background: rgba(28, 19, 12, .82); border: .2cqw solid #4a3424; box-shadow: inset 0 0 0 .2cqw #1a110a; }
+.slot { width: 4.2cqw; aspect-ratio: 1; display: grid; place-items: center; background: #d8ceb3; border: .15cqw solid #6a5236; position: relative; }
+.slot.active { outline: .2cqw solid #d0472d; outline-offset: .15cqw; }
+.charm-cap { font-size: 1.35cqw; color: #e2d6b8; }
+.jugs { display: flex; gap: .7cqw; align-items: flex-end; }
+.jug { width: 3cqw; display: flex; flex-direction: column; align-items: center; gap: .2cqw; font-size: 1.05cqw; color: #b9b19c; }
+.jug canvas { width: 100%; height: auto; }
+.form-ring { width: 6cqw; aspect-ratio: 1; border-radius: 50%; border: .3cqw solid #6a5236; background: radial-gradient(circle, #2a1d14 55%, #1a110a 56%); display: grid; place-items: center; position: relative; }
+.form-ring .cap { position: absolute; bottom: -1.8cqw; font-size: 1.15cqw; white-space: nowrap; color: #d9cfb5; }
+.tip { position: absolute; padding: .5cqw .8cqw; background: rgba(12, 10, 8, .88); border: .15cqw solid #5a4430; font-size: 1.3cqw; line-height: 1.35; white-space: nowrap; }
+.tip b { color: #e4ffe6; font-weight: 600; }
+.caption { font-size: 14.5px; color: var(--muted); max-width: 80ch; }
+.ctrl { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+button.btn { font: inherit; font-family: var(--f-px); font-size: 15px; color: var(--ink); background: var(--wood); border: 1px solid #5a4430; padding: 7px 14px; cursor: pointer; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .35); }
+button.btn:hover { background: var(--wood-2); }
+button.btn:focus-visible { outline: 2px solid var(--cinnabar); outline-offset: 2px; }
+
+/* ---------- ivan ---------- */
+.ivan-card { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px 26px; align-items: center; padding: 18px; background: var(--panel); border: 1px solid var(--line); }
+@media (max-width: 640px) { .ivan-card { grid-template-columns: minmax(0, 1fr); } }
+.ivan-card .who { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ivan-card h3 { font-family: var(--f-title); font-weight: 400; font-size: clamp(26px, 4vw, 40px); line-height: 1.05; }
+.ivan-card .trait { font-size: 16px; }
+.ivan-card .tale { font-size: 14px; color: var(--muted); }
+.ladder { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 900px) { .ladder { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.rung { background: var(--panel); border: 1px solid var(--line); padding: 12px 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
+.rung canvas { width: 100%; max-width: 120px; height: auto; }
+.rung b { font-family: var(--f-head); font-size: 18px; }
+.rung span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.rung .n { font-family: var(--f-px); font-size: 12px; color: var(--cinnabar); }
+
+/* ---------- land anatomy ---------- */
+.anat { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 24px 34px; align-items: start; }
+@media (max-width: 900px) { .anat { grid-template-columns: minmax(0, 1fr); } }
+.landwrap { position: relative; width: 100%; border: 1px solid var(--line); background: #000; }
+.landwrap canvas { width: 100%; height: auto; }
+.vp { position: absolute; left: 0; right: 0; border: 2px dashed rgba(232, 227, 212, .55); pointer-events: none; }
+.vp span { position: absolute; right: 4px; top: 2px; font-family: var(--f-px); font-size: 12px; color: #e8e3d4; background: rgba(0, 0, 0, .6); padding: 0 5px; }
+.tag { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 5px; pointer-events: none; }
+.tag i { width: 18px; height: 18px; border-radius: 50%; background: var(--cinnabar); color: #fff; font: 600 11px/18px var(--f-px); text-align: center; font-style: normal; box-shadow: 0 0 0 2px #000; }
+.legend-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.legend-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 15px; }
+.legend-list li i { width: 20px; height: 20px; border-radius: 50%; background: var(--cinnabar); color: #fff; font: 600 11px/20px var(--f-px); text-align: center; font-style: normal; }
+.rules { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 10px; }
+.rule { background: var(--panel); border: 1px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 5px; font-size: 14.5px; }
+.rule b { font-family: var(--f-head); font-size: 18px; }
+
+/* ---------- realms gallery ---------- */
+.realms { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 18px; }
+.realm { background: var(--panel); border: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; }
+.realm .cv { position: relative; background: #000; }
+.realm .cv canvas { width: 100%; height: auto; }
+.realm .cv .lands { position: absolute; left: 8px; top: 8px; font-family: var(--f-px); font-size: 12.5px; background: rgba(0, 0, 0, .65); padding: 1px 6px; color: #e8e3d4; }
+.realm .info { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+.realm h3 { font-family: var(--f-head); font-size: 22px; line-height: 1.15; }
+.realm p { font-size: 14px; color: #cfc9b8; }
+.sw { display: flex; gap: 4px; }
+.sw i { width: 22px; height: 14px; border: 1px solid rgba(255, 255, 255, .08); }
+
+/* ---------- world map (chertezh) ---------- */
+.chart { background:
+    repeating-linear-gradient(0deg, transparent 0 22px, rgba(0, 0, 0, .22) 22px 23px, transparent 23px 41px),
+    repeating-linear-gradient(90deg, transparent 0 90px, rgba(255, 255, 255, .015) 90px 140px),
+    #1b1913;
+  border: 1px solid #3a3326; padding: 22px 18px; display: flex; flex-direction: column; gap: 6px; position: relative; overflow-x: auto; }
+.chart-h { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-bottom: 10px; text-align: center; }
+.chart-h b { font-family: var(--f-title); font-weight: 400; font-size: clamp(22px, 3.4vw, 34px); color: #e0d3b0; }
+.chart-h span { font-family: var(--f-head); font-style: italic; color: #a8987a; font-size: 15px; }
+.crow { display: grid; grid-template-columns: 170px repeat(3, 96px) minmax(80px, 1fr); align-items: center; gap: 8px 14px; min-width: 620px; }
+.crow .nm { font-family: var(--f-head); font-size: 15px; color: #d9c9a4; line-height: 1.2; text-align: right; }
+.crow .nm small { display: block; font-family: var(--f-px); font-size: 11.5px; color: #8d806a; }
+.node { position: relative; width: 96px; aspect-ratio: 16 / 10; border: 1px solid #5a4c36; background: #0b0a08; }
+.node canvas { width: 100%; height: 100%; }
+.node.unk canvas { filter: grayscale(1) brightness(.25) blur(1.2px); }
+.node.unk::after { content: "незнаемо"; position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-head); font-style: italic; font-size: 12.5px; color: #8d806a; }
+.node.cur { outline: 2px solid var(--cinnabar); outline-offset: 2px; }
+.node.cur::before { content: "ты здесь"; position: absolute; left: 50%; top: -18px; transform: translateX(-50%); font-family: var(--f-px); font-size: 11px; color: #f09a7f; white-space: nowrap; }
+.node .no { position: absolute; left: 3px; bottom: 1px; font-family: var(--f-px); font-size: 10.5px; color: #e8e3d4; text-shadow: 0 0 3px #000; }
+.crow .side { font-family: var(--f-head); font-style: italic; font-size: 13.5px; color: #9c8b6c; border-left: 1px dashed #6a5a40; padding-left: 10px; }
+.stone-row { display: grid; grid-template-columns: 170px 1fr; gap: 14px; min-width: 620px; align-items: center; }
+.stone-row span { grid-column: 2; font-family: var(--f-px); font-size: 11.5px; color: #c46a52; letter-spacing: .08em; text-transform: uppercase; padding-left: 4px; }
+
+/* ---------- UI kit ---------- */
+.kit { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 14px; }
+.kit-item { background: var(--panel); border: 1px solid var(--line); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.kit-item h4 { font-family: var(--f-head); font-size: 19px; }
+.kit-item p { font-size: 14px; color: var(--muted); }
+.kit-demo { background: #070807; border: 1px solid #22251f; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 96px; flex-wrap: wrap; font-family: var(--f-px); }
+.kit-demo .big-thread { width: 220px; height: 12px; border: 2px solid #120806; background: rgba(40, 10, 8, .9); position: relative; }
+.kit-demo .big-thread i { position: absolute; inset: 0; width: 64%; background: repeating-linear-gradient(115deg, #d03a2a 0 6px, #8f1f17 6px 10px); }
+.kit-demo .pxbig canvas { width: 44px; height: auto; }
+.kit-demo .pips b { width: 14px; height: 14px; border-width: 2px; }
+.kit-demo .pips { gap: 9px; }
+.kit-demo .charm { padding: 8px; gap: 7px; }
+.kit-demo .slot { width: 50px; }
+.kit-demo .slot small { position: absolute; bottom: -18px; font-size: 11px; color: #b9b19c; white-space: nowrap; }
+.kit-demo .jug { width: 40px; font-size: 11px; }
+.kit-demo .form-ring { width: 78px; }
+.kit-demo .form-ring.sm { width: 42px; border-width: 2px; }
+.kit-demo .ringset { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+
+.screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); gap: 16px; }
+.shot { container-type: inline-size; aspect-ratio: 16 / 9; position: relative; overflow: hidden; border: 1px solid var(--line); }
+.shot-cap { font-size: 14px; color: var(--muted); padding-top: 8px; }
+
+.raspute { background: radial-gradient(ellipse at 30% 60%, #20251f 0%, #0a0c0a 70%); display: grid; grid-template-columns: 38% 1fr; gap: 2cqw; padding: 4cqw; align-items: center; }
+.raspute .stone canvas { width: 100%; height: auto; }
+.raspute .ins { font-family: var(--f-head); font-style: italic; font-size: 2.35cqw; color: #d8ccb0; line-height: 1.35; }
+.roads { display: flex; flex-direction: column; gap: 1.1cqw; margin-top: 1.6cqw; }
+.road { display: grid; grid-template-columns: 9cqw 1fr; gap: 1cqw; font-family: var(--f-px); font-size: 1.85cqw; color: #e8e0c8; padding: .8cqw 1cqw; border: .2cqw solid #3a3124; background: rgba(20, 16, 11, .75); }
+.road b { color: #f09a7f; font-weight: 600; }
+.road em { font-style: normal; color: #a99f88; display: block; }
+.road.sel { border-color: #d0472d; }
+
+.death { background: #050404; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6cqw; text-align: center; padding: 4cqw; }
+.death .big { font-family: var(--f-title); font-size: 9cqw; color: #d0472d; line-height: 1; text-shadow: 0 0 3cqw rgba(208, 71, 45, .45); }
+.death q { font-family: var(--f-head); font-style: italic; font-size: 2.4cqw; color: #cfc4a8; quotes: "«" "»"; max-width: 70cqw; }
+.death .pips b { width: 2cqw; height: 2cqw; border-width: .3cqw; }
+.death .pips { gap: 1.5cqw; }
+.death .pips b.new { background: #d0472d; animation: pulse 1.4s ease-in-out infinite; }
+.death small { font-family: var(--f-px); font-size: 1.8cqw; color: #a99f88; }
+@keyframes pulse { 50% { box-shadow: 0 0 2.4cqw #ff6a4a; background: #ff6a4a; } }
+@media (prefers-reduced-motion: reduce) { .death .pips b.new { animation: none; box-shadow: 0 0 1.6cqw #ff6a4a; } }
+
+.book { background: #17130d; display: grid; grid-template-columns: 1fr 1fr; padding: 2.4cqw; gap: 0; }
+.page { padding: 2.2cqw 2.6cqw; background: linear-gradient(90deg, #2a2216, #241d13); border: .2cqw solid #4a3b26; display: flex; flex-direction: column; gap: 1.2cqw; }
+.page.l { border-right: none; align-items: center; justify-content: center; background: linear-gradient(90deg, #211a11, #2a2216); }
+.page.l canvas { width: 42%; height: auto; }
+.page.l small { font-family: var(--f-head); font-style: italic; font-size: 1.9cqw; color: #a8987a; }
+.page h5 { margin: 0; font-family: var(--f-title); font-weight: 400; font-size: 3.6cqw; color: #e6d7b0; }
+.page p { font-family: var(--f-head); font-size: 1.95cqw; color: #d6c9a8; line-height: 1.4; }
+.page p .cap { float: left; font-family: var(--f-title); font-size: 5.2cqw; line-height: .85; color: #d0472d; padding-right: .6cqw; }
+.page .src { font-family: var(--f-px); font-size: 1.5cqw; color: #9c8b6c; }
+.page .game { border-top: .15cqw solid #4a3b26; padding-top: 1cqw; font-family: var(--f-body); font-size: 1.7cqw; color: #cfc4a8; }
+
+.tc { background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5cqw; }
+.tc small { font-family: var(--f-px); font-size: 2cqw; letter-spacing: .3em; text-transform: uppercase; color: #a99f88; }
+.tc b { font-family: var(--f-title); font-weight: 400; font-size: 7cqw; color: #e8dfc8; }
+.tc .orn { width: 40cqw; height: 1.6cqw; -webkit-mask-size: 3.2cqw 1.6cqw; mask-size: 3.2cqw 1.6cqw; }
+.tc em { font-family: var(--f-head); font-size: 2.2cqw; color: #b5a888; }
+
+.art { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.art div { background: var(--panel); border: 1px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; }
+.art b { font-family: var(--f-head); font-size: 18px; }
+footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var(--muted); font-size: 14px; }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <span class="eyebrow">Наброски визуала · всё ниже нарисовано кодом в браузере</span>
+    <h1>Кощеева игла</h1>
+    <p class="lede">Мрачный пиксельный мир со светом, как в Noita, и интерфейс из вещей, которые видел бы сказочный Иван: веретено, свеча, вышивка, береста, резная доска, лубочный чертёж. Каждая земля — отдельная вертикальная карта в три экрана высотой.</p>
+    <nav class="jump" aria-label="Разделы">
+      <a href="#screen">Игровой экран</a><a href="#ivan">Иван</a><a href="#land">Устройство земли</a><a href="#realms">Царства</a><a href="#map">Карта мира</a><a href="#ui">Интерфейс</a><a href="#art">Правила визуала</a>
+    </nav>
+  </div>
+</header>
+<div class="orn" aria-hidden="true"></div>
+
+<main class="wrap">
+
+<section id="screen">
+  <div class="sh">
+    <span class="eyebrow">Набросок 1</span>
+    <h2>Игровой экран</h2>
+    <p>Земля пятая, Дремучий лес, купальская ночь. Сверху лесная подстилка и стволы, ниже пещера. Иван с факелом, в мавку летит заговор «огненная стрела».</p>
+  </div>
+  <div class="screen" id="game">
+    <canvas class="px" id="gameCv" width="320" height="180" aria-label="Пиксельный набросок игрового экрана: пещера под лесом, Иван с факелом, мавка, светящиеся гнилушки"></canvas>
+    <div class="hud" aria-hidden="true">
+      <div class="tl">
+        <div class="row"><span class="pxi" data-ico="spindle"></span><span class="thread"><i></i></span><span>68</span></div>
+        <div class="row"><span class="pxi" data-ico="candle"></span><span class="wax"><i></i></span><span class="lbl">свеча</span></div>
+        <div class="row"><span class="pips"><b class="on"></b><b></b><b></b><b></b><b></b><b></b></span><span class="lbl">Заложный</span></div>
+      </div>
+      <div class="title-card"><small>Земля пятая</small><b>Дремучий лес</b></div>
+      <div class="tr">
+        <div class="row"><span class="pxi" data-ico="grivna"></span><span>37 гривен</span></div>
+        <span class="lbl">Купала · ночь</span>
+      </div>
+      <div class="bl">
+        <div class="charm">
+          <span class="slot"><span data-ico="zachin"></span></span>
+          <span class="slot"><span data-ico="alatyr"></span></span>
+          <span class="slot active"><span data-ico="flame"></span></span>
+          <span class="slot"><span data-ico="key"></span></span>
+        </div>
+        <span class="charm-cap">Встану · на Алатыре · огнём · ключ-замок</span>
+      </div>
+      <div class="br">
+        <div class="jugs">
+          <span class="jug"><span data-jug="live" data-lvl="7"></span>живая</span>
+          <span class="jug"><span data-jug="dead" data-lvl="3"></span>мёртвая</span>
+          <span class="jug"><span data-jug="poppy" data-lvl="5"></span>мак</span>
+        </div>
+        <div class="form-ring"><span data-ico="man"></span><span class="cap">облик: Иван</span></div>
+      </div>
+      <div class="tip" style="left: 6%; top: 52%;"><b>Мавка</b><br>спины нет · боится полыни</div>
+    </div>
+  </div>
+  <div class="ctrl"><button class="btn" id="pauseBtn" type="button">Пауза</button><span class="caption">Слева сверху: нить жизни на веретене, свеча (запас сил на полёт и заговоры), ступени нечисти вышитыми ромбами. Внизу слева: доска заговора из четырёх звеньев, как жезл в Noita. Справа: крынки с водами и облик.</span></div>
+</section>
+
+<section id="ivan">
+  <div class="sh">
+    <span class="eyebrow">Набросок 2</span>
+    <h2>Иван, каждый раз другой</h2>
+    <p>Герой — просто Иван. Каждый забег выпадает новый Иван из сказок, и у каждого одна черта из его сказки. Ниже тот же Иван на семи ступенях нечисти: по силуэту видно, сколько раз он уже был «прощён».</p>
+  </div>
+  <div class="ivan-card">
+    <canvas class="px" id="ivanPortrait" width="132" height="168" aria-label="Портрет Ивана в пикселях"></canvas>
+    <div class="who">
+      <span class="eyebrow">Забег №14 · выпал</span>
+      <h3 id="ivName">Иван Попялов</h3>
+      <p class="trait" id="ivTrait"></p>
+      <p class="tale" id="ivTale"></p>
+      <div class="ctrl"><button class="btn" id="reroll" type="button">Другой Иван</button></div>
+    </div>
+  </div>
+  <div class="ladder" id="ladder"></div>
+</section>
+
+<section id="land">
+  <div class="sh">
+    <span class="eyebrow">Набросок 3</span>
+    <h2>Земля — это отдельная карта</h2>
+    <p>Одна земля — вертикальный срез шириной в экран и глубиной в три экрана. Сверху вход, снизу выход, по бокам тайники. Три земли — одно царство, между царствами камень Распутья. Это в разы меньше биома Noita: землю можно пройти за несколько минут, а вылизать за полчаса.</p>
+  </div>
+  <div class="anat">
+    <div class="landwrap" id="anatomy">
+      <canvas class="px" id="anatCv" width="320" height="540" aria-label="Разрез первой земли: погост и деревня сверху, гробы и подпол, колодец, пещеры, выход внизу"></canvas>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <ol class="legend-list" id="anatLegend"></ol>
+      <div class="rules">
+        <div class="rule"><b>Размер</b>320 × 540 пикселей вещества: экран в ширину и три в высоту. Камера идёт за Иваном вверх и вниз.</div>
+        <div class="rule"><b>Сборка</b>Каждая земля собирается из рукотворных кусков и шума: могилы, избы, логово всегда на своих местах, пещеры между ними случайные.</div>
+        <div class="rule"><b>Переход</b>Упал в выход — чёрный экран с лубочной надписью «Земля вторая», и новая карта начинается сверху.</div>
+        <div class="rule"><b>Возврат</b>Вернуться в пройденную землю нельзя, как в Noita. Зато секреты на краях земли ведут в боковые ветви.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="realms">
+  <div class="sh">
+    <span class="eyebrow">Набросок 4</span>
+    <h2>Девять царств и Тридесятое</h2>
+    <p>По одной земле из каждого царства в полный рост. У каждого царства своя палитра и свой главный свет: окна изб, гнилушки, болотные огни, фонари в штреках, огненная река, одно тёплое окно у Кощея.</p>
+  </div>
+  <div class="realms" id="realmGrid"></div>
+  <p class="note">Наброски рисуются по очереди после загрузки страницы. Свет считается как в Noita: тьма по умолчанию, каждый светящийся пиксель освещает округу.</p>
+</section>
+
+<section id="map">
+  <div class="sh">
+    <span class="eyebrow">Набросок 5</span>
+    <h2>Карта мира как старинный чертёж</h2>
+    <p>В Noita карты нет. Здесь её роль играет «чертёж» в духе «Книги Большому чертежу» XVII века: пройденные земли вклеены миниатюрами, впереди «незнаемо», между царствами отмечен камень Распутья, боковые ветви подписаны по слухам.</p>
+  </div>
+  <div class="chart" id="chart">
+    <div class="chart-h"><b>Чертёж тридевяти земель</b><span>писан Иваном Попяловым со слов дедов, забег четырнадцатый</span></div>
+  </div>
+</section>
+
+<section id="ui">
+  <div class="sh">
+    <span class="eyebrow">Набросок 6</span>
+    <h2>Интерфейс из сказочных вещей</h2>
+    <p>Каждая полоска и значок взяты из вещей, которые были у Ивана под рукой. Так интерфейс сам рассказывает фольклор, и его не спутать с западным фэнтези.</p>
+  </div>
+  <div class="kit">
+    <div class="kit-item"><h4>Нить жизни</h4><div class="kit-demo"><span class="pxbig pxi" data-ico="spindle"></span><span class="big-thread"><i></i></span></div><p>Здоровье — нить на веретене. Доля прядёт, Недоля обрывает. Получил удар — нить разматывается и рвётся.</p></div>
+    <div class="kit-item"><h4>Ступени нечисти</h4><div class="kit-demo"><span class="pips"><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b><b></b></span></div><p>Шесть вышитых ромбов: орнамент «засеянное поле». Каждая смерть вышивает следующий красной нитью. Шесть — Бессмертный.</p></div>
+    <div class="kit-item"><h4>Свеча</h4><div class="kit-demo"><span class="pxbig pxi" data-ico="candle"></span><span class="wax" style="width:200px;height:10px"><i></i></span></div><p>Запас сил на полёт, облики и заговоры. Тает, пока тратишь, и снова отливается, когда стоишь на земле. Заодно освещает.</p></div>
+    <div class="kit-item"><h4>Заговор</h4><div class="kit-demo" style="padding-bottom:26px"><div class="charm"><span class="slot"><span data-ico="zachin"></span><small>зачин</small></span><span class="slot"><span data-ico="alatyr"></span><small>место</small></span><span class="slot active"><span data-ico="flame"></span><small>обращение</small></span><span class="slot"><span data-ico="key"></span><small>закрепка</small></span></div></div><p>Резная доска с четырьмя гнёздами — замена жезла Noita. Звенья — берестяные таблички с формулами настоящих заговоров.</p></div>
+    <div class="kit-item"><h4>Сосуды</h4><div class="kit-demo"><span class="jug"><span data-jug="live" data-lvl="8"></span>живая</span><span class="jug"><span data-jug="dead" data-lvl="5"></span>мёртвая</span><span class="jug"><span data-jug="fire" data-lvl="6"></span>огненная</span><span class="jug"><span data-jug="milk" data-lvl="3"></span>молоко</span></div><p>Крынки вместо фляг Noita. Жидкость в них ведёт себя как в мире: льётся, смешивается, горит.</p></div>
+    <div class="kit-item"><h4>Облики</h4><div class="kit-demo"><div class="ringset"><span class="form-ring sm"><span data-ico="man"></span></span><span class="form-ring sm"><span data-ico="bear"></span></span><span class="form-ring sm"><span data-ico="wolf"></span></span><span class="form-ring sm"><span data-ico="falcon"></span></span><span class="form-ring sm"><span data-ico="pike"></span></span><span class="form-ring sm"><span data-ico="mouse"></span></span></div></div><p>Кольцо обликов. Открытые светятся, тёмный путь помечен красной каймой.</p></div>
+  </div>
+
+  <div class="screens">
+    <div>
+      <div class="shot raspute">
+        <div class="stone"><canvas class="px" id="stoneCv" width="96" height="84" aria-label="Камень на распутье"></canvas></div>
+        <div>
+          <p class="ins">«Кто поедет от столба сего прямо, тот будет голоден и холоден…»</p>
+          <div class="roads">
+            <div class="road"><b>Прямо</b><span>Заговор «Ветры буйные»<em>цена: все крынки пустеют</em></span></div>
+            <div class="road sel"><b>Направо</b><span>Облик медведя на весь забег<em>цена: Серый волк съест коня</em></span></div>
+            <div class="road"><b>Налево</b><span>Меч-кладенец<em>цена: смерть и ступень нечисти</em></span></div>
+          </div>
+        </div>
+      </div>
+      <p class="shot-cap">Распутье между царствами. Замена Святой горы Noita: три дара, у каждого цена.</p>
+    </div>
+    <div>
+      <div class="shot death">
+        <span class="big">Прощаю.</span>
+        <q>Ну, Иван, первый раз тебя прощаю, за твою доброту, что водой меня напоил.</q>
+        <span class="pips"><b class="on"></b><b class="new"></b><b></b><b></b><b></b><b></b></span>
+        <small>Иван Попялов встаёт навьим. На золе больше не остаётся следов.</small>
+      </div>
+      <p class="shot-cap">Экран смерти. Голос Кощея и новый вышитый ромб.</p>
+    </div>
+    <div>
+      <div class="shot book">
+        <div class="page l"><canvas class="px" id="bookCv" width="7" height="13" aria-label="Мавка в пикселях"></canvas><small>Мавка. Зарисовка с натуры</small></div>
+        <div class="page">
+          <h5>Мавка</h5>
+          <p><span class="cap">Л</span>есная дева. Спереди красавица, а спины нет, и видно всё, что внутри. Заманивает хороводом и защекочивает до смерти.</p>
+          <p class="src">Украинские поверья · Голубиная книга, лист 41</p>
+          <p class="game">Боится полыни и Чугайстера. Со 2-й ступени зовёт тебя в хоровод как свою.</p>
+        </div>
+      </div>
+      <p class="shot-cap">Голубиная книга: внутриигровая энциклопедия. Заполняется по мере встреч, у каждой записи настоящий источник.</p>
+    </div>
+    <div>
+      <div class="shot tc">
+        <small>Земля шестая</small>
+        <b>Дремучий лес</b>
+        <div class="orn" aria-hidden="true"></div>
+        <em>«Лес не твой, а Лешего. Не свисти».</em>
+      </div>
+      <p class="shot-cap">Переход между землями: лубочная надпись и присказка о месте.</p>
+    </div>
+  </div>
+</section>
+
+<section id="art">
+  <div class="sh">
+    <span class="eyebrow">Правила</span>
+    <h2>Как держать визуал</h2>
+  </div>
+  <div class="art">
+    <div><b>Тьма по умолчанию</b>Как в Noita, мир чёрный, пока его не осветят. Свет дают огонь, гнилушки, окна, огоньки, сам Иван. Каждое царство имеет свой главный источник света.</div>
+    <div><b>Тёплое против холодного</b>Тёплый свет — человеческое: печь, окно, факел, свеча. Холодный — нечисть: болотные огни, навий туман, глаза в темноте. С ростом нечисти у Ивана свет вокруг холодеет.</div>
+    <div><b>Вещества читаются цветом</b>Вода синяя, болотная вода бурая, мёртвая вода серо-фиолетовая, живая зеленоватая, огненная оранжевая. Игрок должен узнавать вещество за долю секунды.</div>
+    <div><b>Интерфейс из материалов</b>Береста, лён с вышивкой, резное дерево, киноварь, медь. Никаких фэнтезийных свитков и металлических рамок.</div>
+    <div><b>Шрифты</b>Вязь и лубочная кириллица для названий земель и надписей, пиксельный шрифт для цифр, книжный для Голубиной книги.</div>
+    <div><b>Иван всегда читается</b>Белая рубаха с красной вышивкой видна на любом фоне. С каждой ступенью она темнеет, и это видно без интерфейса.</div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Наброски к лор-библии «Кощеева игла». Пиксели и свет сгенерированы процедурно: это ориентир по композиции, палитре и интерфейсу, а не финальная графика.</div></footer>
+
+<script>
+(() => {
+"use strict";
+// =================================================================== utilities
+const C = h => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
+const lerp = (a, b, t) => a + (b - a) * t;
+const mixc = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+function rngOf(seed) { let s = seed >>> 0 || 1; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function noiseOf(rnd) {
+  const G = 256, g = new Float32Array(G * G);
+  for (let i = 0; i < g.length; i++) g[i] = rnd();
+  return (x, y) => {
+    const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+    const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+    const x0 = xi & 255, x1 = (xi + 1) & 255, y0 = (yi & 255) * G, y1 = ((yi + 1) & 255) * G;
+    const a = g[y0 + x0], b = g[y0 + x1], c = g[y1 + x0], d = g[y1 + x1];
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  };
+}
+const EMPTY = 0, SOLID = 1, LIQ = 2, DECOR = 3;
+function m(hex, o) { return Object.assign({ c: C(hex), k: SOLID, v: .12 }, o || {}); }
+
+class Scene {
+  constructor(W, H, seed) {
+    this.W = W; this.H = H; const N = this.N = W * H;
+    this.k = new Uint8Array(N); this.sk = new Uint8Array(N);
+    this.r = new Float32Array(N); this.g = new Float32Array(N); this.b = new Float32Array(N); this.a = new Float32Array(N);
+    this.er = new Float32Array(N); this.eg = new Float32Array(N); this.eb = new Float32Array(N);
+    this.br = new Float32Array(N); this.bg = new Float32Array(N); this.bb = new Float32Array(N);
+    this.fa = new Float32Array(N); this.fr = new Float32Array(N); this.fg = new Float32Array(N); this.fb = new Float32Array(N);
+    this.rnd = rngOf(seed); this.nz = noiseOf(this.rnd);
+  }
+  fbm(x, y, o = 4) { let s = 0, a = .5, f = 1, n = 0; for (let i = 0; i < o; i++) { s += a * this.nz(x * f + i * 17.3, y * f - i * 9.1); n += a; a *= .5; f *= 2; } return s / n; }
+  ok(x, y) { return x >= 0 && y >= 0 && x < this.W && y < this.H; }
+  at(x, y) { return this.ok(x, y) ? this.k[(y | 0) * this.W + (x | 0)] : SOLID; }
+  put(x, y, mt, f) {
+    x |= 0; y |= 0; if (!this.ok(x, y)) return;
+    const i = y * this.W + x;
+    let s = 1 + (this.rnd() - .5) * (mt.v || 0);
+    if (mt.n) s *= 1 + (this.nz(x * mt.n, y * mt.n) - .5) * (mt.nv || .45);
+    if (f) s *= f;
+    this.k[i] = mt.k; this.r[i] = mt.c[0] * s; this.g[i] = mt.c[1] * s; this.b[i] = mt.c[2] * s; this.a[i] = mt.a || 1;
+    if (mt.e) { const e = mt.ev ? 1 + (this.rnd() - .5) * mt.ev : 1; this.er[i] = mt.e[0] * e; this.eg[i] = mt.e[1] * e; this.eb[i] = mt.e[2] * e; }
+    else { this.er[i] = this.eg[i] = this.eb[i] = 0; }
+  }
+  clear(x, y) { x |= 0; y |= 0; if (!this.ok(x, y)) return; const i = y * this.W + x; this.k[i] = EMPTY; this.er[i] = this.eg[i] = this.eb[i] = 0; }
+  emit(x, y, c, s) { x |= 0; y |= 0; if (!this.ok(x, y)) return; const i = y * this.W + x; this.er[i] += c[0] * s; this.eg[i] += c[1] * s; this.eb[i] += c[2] * s; }
+  fog(x, y, c, a) { x |= 0; y |= 0; if (!this.ok(x, y)) return; const i = y * this.W + x; this.fa[i] = Math.min(.9, a); this.fr[i] = c[0]; this.fg[i] = c[1]; this.fb[i] = c[2]; }
+  bgAll(fn) { for (let y = 0; y < this.H; y++) for (let x = 0; x < this.W; x++) { const i = y * this.W + x, c = fn(x, y); this.br[i] = c[0]; this.bg[i] = c[1]; this.bb[i] = c[2]; } }
+  skyMark(fn) { for (let y = 0; y < this.H; y++) for (let x = 0; x < this.W; x++) this.sk[y * this.W + x] = fn(x, y) ? 1 : 0; }
+  disc(cx, cy, r, fn) { const r2 = r * r; for (let y = Math.floor(cy - r); y <= cy + r; y++) for (let x = Math.floor(cx - r); x <= cx + r; x++) { const dx = x - cx, dy = y - cy; if (dx * dx + dy * dy <= r2) fn(x, y); } }
+  rect(x0, y0, w, h, fn) { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) fn(x, y); }
+  line(x0, y0, x1, y1, fn, w = 1) {
+    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+    for (let s = 0; s <= n; s++) { const x = Math.round(lerp(x0, x1, s / n)), y = Math.round(lerp(y0, y1, s / n)); if (w <= 1) fn(x, y); else this.disc(x, y, w / 2, fn); }
+  }
+  sprite(x, y, rows, pal, flip) {
+    rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const ch = row[flip ? row.length - 1 - i : i]; const mt = pal[ch]; if (mt) this.put(x + i, y + j, mt); } });
+  }
+  worm(x, y, tx, ty, rMin, rMax, fn) {
+    let a = Math.atan2(ty - y, tx - x);
+    for (let s = 0; s < 2000; s++) {
+      const want = Math.atan2(ty - y, tx - x);
+      a += (want - a) * .12 + (this.rnd() - .5) * .9;
+      x += Math.cos(a) * 1.5; y += Math.sin(a) * 1.5;
+      this.disc(x, y, lerp(rMin, rMax, this.nz(s * .05, 3.3)), fn);
+      if (Math.hypot(tx - x, ty - y) < 3) break;
+    }
+  }
+}
+
+function blur1(src, W, H, r, passes) {
+  const a = Float32Array.from(src), t = new Float32Array(src.length), n = 2 * r + 1;
+  for (let p = 0; p < passes; p++) {
+    for (let y = 0; y < H; y++) {
+      const o = y * W; let acc = 0;
+      for (let x = -r; x <= r; x++) acc += a[o + Math.min(W - 1, Math.max(0, x))];
+      for (let x = 0; x < W; x++) { t[o + x] = acc / n; acc += a[o + Math.min(W - 1, x + r + 1)] - a[o + Math.max(0, x - r)]; }
+    }
+    for (let x = 0; x < W; x++) {
+      let acc = 0;
+      for (let y = -r; y <= r; y++) acc += t[Math.min(H - 1, Math.max(0, y)) * W + x];
+      for (let y = 0; y < H; y++) { a[y * W + x] = acc / n; acc += t[Math.min(H - 1, y + r + 1) * W + x] - t[Math.max(0, y - r) * W + x]; }
+    }
+  }
+  return a;
+}
+
+function lightScene(S, P) {
+  const { W, H, N } = S;
+  let sb = null;
+  if (P.sky) {
+    const sky = new Float32Array(N);
+    for (let x = 0; x < W; x++) {
+      let s = 1;
+      for (let y = 0; y < H; y++) {
+        const i = y * W + x, k = S.k[i];
+        sky[i] = s;
+        s *= k === SOLID ? 0 : k === DECOR ? .9 : k === LIQ ? (P.liqAtt || .985) : 1;
+        if (S.fa[i] > 0) s *= 1 - S.fa[i] * .03;
+      }
+    }
+    sb = blur1(sky, W, H, P.skyR || 5, 2);
+  }
+  const e1 = [S.er, S.eg, S.eb].map(ch => blur1(ch, W, H, P.e1r || 3, 2));
+  const e2 = [S.er, S.eg, S.eb].map(ch => blur1(ch, W, H, P.e2r || 18, 2));
+  const L = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
+  const G = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
+  const amb = P.amb || [.04, .04, .045];
+  for (let i = 0; i < N; i++) {
+    const y = (i / W) | 0;
+    const ad = P.ambDepth ? Math.max(.25, 1 - y / H * P.ambDepth) : 1;
+    for (let c = 0; c < 3; c++) {
+      L[c][i] = amb[c] * ad + (sb ? sb[i] * P.sky[c] : 0) + e2[c][i] * (P.e2g || 10) + e1[c][i] * (P.e1g || 1.5);
+      G[c][i] = e1[c][i] * (P.glow || .7) + e2[c][i] * (P.glow2 || 2);
+    }
+  }
+  return { L, G, P };
+}
+
+function compose(S, LG, data, o) {
+  const { W, N } = S, { L, G, P } = LG;
+  const fl = (o && o.flick) || 1, dyn = (o && o.dyn) || [];
+  const bd = P.bgDim || .5, ex = P.exp || 1;
+  for (let i = 0; i < N; i++) {
+    const k = S.k[i];
+    let lr = L[0][i], lg = L[1][i], lb = L[2][i];
+    if (dyn.length) {
+      const x = i % W, y = (i / W) | 0;
+      for (const d of dyn) {
+        const dx = x - d.x, dy = y - d.y, q = dx * dx + dy * dy;
+        if (q < d.r * d.r) { const f = 1 - Math.sqrt(q) / d.r, ff = f * f * d.i; lr += d.c[0] * ff; lg += d.c[1] * ff; lb += d.c[2] * ff; }
+      }
+    }
+    let r, g, b;
+    if (k === EMPTY) {
+      if (S.sk[i]) { r = S.br[i]; g = S.bg[i]; b = S.bb[i]; }
+      else { r = S.br[i] * lr * bd; g = S.bg[i] * lg * bd; b = S.bb[i] * lb * bd; }
+    } else if (k === LIQ) {
+      const a = S.a[i];
+      const back = S.sk[i] ? [S.br[i], S.bg[i], S.bb[i]] : [S.br[i] * lr * bd, S.bg[i] * lg * bd, S.bb[i] * lb * bd];
+      r = back[0] * (1 - a) + S.r[i] * lr * a; g = back[1] * (1 - a) + S.g[i] * lg * a; b = back[2] * (1 - a) + S.b[i] * lb * a;
+    } else {
+      let sh = 1;
+      if (k === SOLID) { if (i >= W && S.k[i - W] !== SOLID) sh = 1.2; else if (i + W < N && S.k[i + W] !== SOLID) sh = .78; }
+      r = S.r[i] * lr * sh; g = S.g[i] * lg * sh; b = S.b[i] * lb * sh;
+    }
+    r += (S.er[i] + G[0][i]) * fl; g += (S.eg[i] + G[1][i]) * fl; b += (S.eb[i] + G[2][i]) * fl;
+    const fa = S.fa[i];
+    if (fa > 0) { const fl2 = .35 + .65 * Math.min(1, (lr + lg + lb) / 1.2); r = r * (1 - fa) + S.fr[i] * fl2 * fa; g = g * (1 - fa) + S.fg[i] * fl2 * fa; b = b * (1 - fa) + S.fb[i] * fl2 * fa; }
+    const j = i * 4;
+    data[j] = Math.min(255, r * ex * 255); data[j + 1] = Math.min(255, g * ex * 255); data[j + 2] = Math.min(255, b * ex * 255); data[j + 3] = 255;
+  }
+}
+
+function renderTo(cv, S, P) {
+  const LG = lightScene(S, P);
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(S.W, S.H);
+  compose(S, LG, img.data);
+  ctx.putImageData(img, 0, 0);
+  return LG;
+}
+
+// =================================================================== shared materials & sprites
+const M = {
+  soil: m("#3a2a1c", { v: .2, n: .09 }), soil2: m("#2c2016", { v: .2, n: .09 }), clay: m("#4a3a2a", { v: .16, n: .06 }), rock: m("#34312d", { v: .16, n: .05 }),
+  grass: m("#2f4524", { v: .3 }), moss: m("#2d4a27", { v: .32 }), stone: m("#57534c", { v: .2 }), pebble: m("#4c4842", { v: .25 }),
+  log1: m("#5b3e27", { v: .08 }), log2: m("#4a321f", { v: .08 }), logEnd: m("#7d5c3b"), roof: m("#29201a", { v: .14 }), roof2: m("#3a2c21"),
+  trim: m("#cbbf9f", { v: .05 }), frame: m("#24170f"), win: m("#ffb75a", { e: [1.05, .62, .24], v: .05 }),
+  wood: m("#6a4a2e", { v: .1 }), dwood: m("#3a281a", { v: .1 }), plank: m("#5a3f28", { v: .12 }),
+  bone: m("#d8d0bd", { v: .07 }), boneD: m("#9e9683", { v: .08 }),
+  bark: m("#261a12", { k: DECOR, v: .14 }), needle: m("#162a1c", { k: DECOR, v: .35 }), needle2: m("#21402a", { k: DECOR, v: .3 }),
+  root: m("#3b2a1a", { v: .15 }),
+  water: m("#123e4e", { k: LIQ, a: .72, v: .05 }),
+  glow: m("#8affd8", { k: DECOR, e: [.35, 1.0, .8], ev: .5 }),
+  skin: m("#e3b088"), shirt: m("#e6e0d0"), red: m("#c0392b"), belt: m("#9a2a20"), pants: m("#5a5e68"), lapti: m("#c9a35a"), hair: m("#9a7444")
+};
+const IVAN_MINI = ["..hhh..", ".hhhhh.", ".hssss.", "..sss..", ".wrrrw.", "wwwrwww", "swwrwws", ".BBBBB.", ".wrwrw.", "..p.p..", "..p.p..", ".ll.ll."];
+const IVAN_PAL = { h: { ...M.hair, k: DECOR }, s: { ...M.skin, k: DECOR }, w: { ...M.shirt, k: DECOR }, r: { ...M.red, k: DECOR }, B: { ...M.belt, k: DECOR }, p: { ...M.pants, k: DECOR }, l: { ...M.lapti, k: DECOR } };
+const MAVKA = ["..ggg..", ".ggggg.", ".gsssg.", ".gEsEg.", ".gsssg.", "g.www.g", "g.www.g", "..www..", ".wwwww.", ".wwwww.", "wwwwwww", ".w.w.w.", "..w.w.."];
+const MAVKA_PAL = { g: m("#2a4a30", { k: DECOR }), s: m("#dfe8d8", { k: DECOR, e: [.18, .26, .2] }), E: m("#c8ffd0", { k: DECOR, e: [.6, 1, .7] }), w: m("#e8efe0", { k: DECOR, e: [.2, .27, .22] }) };
+const SKEL = ["..bbb..", ".bbbbb.", ".bEbEb.", "..bbb..", "...b...", ".bbbbb.", "b.b.b.b", "..bbb..", "...b...", "..b.b..", "..b.b..", ".bb.bb."];
+const SKULL = [".www.", "wEwEw", ".www.", ".w.w."];
+const DOMOVOY = [".ffff.", "ffffff", "fEffEf", "ffffff", ".ffff.", "ff..ff"];
+const BEAR = ["....bbbbbb......", "..bbbbbbbbbbb...", ".bbbbbbbbbbbbbb.", "bbbbbbbbbbbbbbbb", "bbbbbbbbbbbbbbbb", ".bbbbbbbbbbbbbb.", "..bb.......bb..."];
+const PIKE = ["b..bbbb.", "bbbbbbbE", "b..bbbb."];
+const GAGANA = ["......dd.", ".....dddi", "..ddddd..", "ddddddd..", "..ddd....", "...d.d..."];
+const SHUBIN = ["..ccc...", ".ccccc..", ".cEcEc..", ".ccccc..", "cccccccL", "ccccccc.", "ccccccc.", ".ccccc..", ".cc.cc..", ".cc.cc.."];
+
+// ------------------------------------------------------------------- shared builders
+function izba(S, x, gy, w, h, o = {}) {
+  const top = gy - h;
+  for (let y = top; y < gy; y++) for (let xx = x; xx < x + w; xx++) S.put(xx, y, ((y - top) / 3 | 0) % 2 ? M.log1 : M.log2, (y - top) % 3 === 2 ? .62 : 1);
+  for (let y = top; y < gy; y += 3) { S.put(x - 1, y + 1, M.logEnd); S.put(x + w, y + 1, M.logEnd); }
+  const rh = o.roof || Math.round(w * .42), cx = x + w / 2;
+  for (let j = 0; j < rh; j++) { const half = (w / 2 + 3) * (1 - j / rh); for (let xx = Math.round(cx - half); xx <= Math.round(cx + half); xx++) S.put(xx, top - 1 - j, j % 3 === 0 ? M.roof2 : M.roof); }
+  S.put(Math.round(cx), top - rh - 1, M.trim); S.put(Math.round(cx), top - rh - 2, M.trim);
+  (o.win || []).forEach(([wx, wy, lit]) => {
+    const X = x + wx, Y = top + wy;
+    S.rect(X - 1, Y - 2, 9, 10, (a, b) => S.put(a, b, M.trim));
+    S.put(X + 3, Y - 3, M.trim); S.put(X + 2, Y - 3, M.trim); S.put(X + 4, Y - 3, M.trim);
+    S.rect(X + 1, Y, 5, 5, (a, b) => S.put(a, b, lit === false ? M.frame : M.win));
+    S.rect(X + 1, Y + 2, 5, 1, (a, b) => S.put(a, b, M.frame)); S.rect(X + 3, Y, 1, 5, (a, b) => S.put(a, b, M.frame));
+  });
+  if (o.door) S.rect(x + o.door, gy - 12, 6, 12, (a, b) => S.put(a, b, o.doorMat || M.dwood));
+  if (o.chimney) { const ch = o.chimney; S.rect(x + ch, top - rh + 2, 4, 6, (a, b) => S.put(a, b, M.stone)); for (let k = 0; k < 40; k++) S.fog(x + ch + 1 + Math.sin(k * .3) * 3 + S.rnd() * 3, top - rh - 2 - k, [.55, .55, .58], .25 * (1 - k / 40)); }
+}
+function spruce(S, x, gy, top, tw) {
+  for (let y = gy - 1; y > top; y--) for (let d = 0; d < tw; d++) S.put(x + d, y, M.bark, d === 0 ? .7 : 1);
+  for (let y = gy - 16; y > top - 4; y -= 5 + (S.rnd() * 3 | 0)) {
+    const len = 10 + (gy - y) * .08 + S.rnd() * 8;
+    for (const dir of [-1, 1]) {
+      const sx = dir < 0 ? x : x + tw - 1;
+      for (let t = 0; t < len; t++) {
+        const bx = sx + dir * t, by = y + t * .45;
+        for (let k = -1; k <= 2; k++) if (S.rnd() < .8 - t / len * .3) S.put(bx, by + k, S.rnd() < .2 ? M.needle2 : M.needle);
+      }
+    }
+  }
+}
+function golubets(S, x, gy, h) {
+  for (let y = gy - h; y < gy; y++) { S.put(x, y, M.wood); S.put(x + 1, y, M.wood, .8); }
+  for (let xx = x - 3; xx <= x + 4; xx++) S.put(xx, gy - h + 5, M.wood);
+  for (let j = 0; j < 3; j++) for (let xx = x - 3 + j; xx <= x + 4 - j; xx++) S.put(xx, gy - h - j, M.roof2);
+}
+function chain(S, x0, y0, x1, y1, mt) { S.line(x0, y0, x1, y1, (x, y) => { if ((x + y) % 3) S.put(x, y, mt); }); }
+function skyGrad(S, top, bot, horizon) { return y => mixc(top, bot, Math.min(1, y / horizon)); }
+
+// =================================================================== land generators (320 x 540)
+const LW = 320, LH = 540;
+
+function genPogost(S) {
+  const gy = x => 200 + Math.round((S.fbm(x * .02, 1) - .5) * 8);
+  const sky = skyGrad(S, C("#121722"), C("#3b3d4a"), 200);
+  const cave = C("#2a2118");
+  S.bgAll((x, y) => { if (y < gy(x)) { const hill = 158 + S.fbm(x * .025, 5) * 26; return y > hill ? mixc(C("#11151c"), C("#1a1e24"), S.nz(x * .3, y * .3) * .4) : sky(y); } return mixc(cave, C("#1a140f"), S.nz(x * .08, y * .08)); });
+  S.skyMark((x, y) => y < gy(x));
+  for (let x = 0; x < LW; x++) { const g = gy(x); for (let y = g; y < LH; y++) { const d = y - g; S.put(x, y, d < 2 ? M.grass : d < 70 ? (S.nz(x * .1, y * .1) > .55 ? M.soil2 : M.soil) : d < 170 ? M.clay : M.rock); } }
+  for (let k = 0; k < 160; k++) { const x = S.rnd() * LW, y = 230 + S.rnd() * 300; S.disc(x, y, 1 + S.rnd() * 2, (a, b) => { if (S.at(a, b) === SOLID) S.put(a, b, M.pebble); }); }
+  // caves
+  for (let y = 300; y < LH; y++) for (let x = 0; x < LW; x++) { const n = S.fbm(x * .022, y * .03, 4); if (n < .38 - (y < 330 ? (330 - y) * .01 : 0)) S.clear(x, y); }
+  // moon
+  S.disc(268, 42, 7, (x, y) => S.put(x, y, m("#e9e3c9", { k: DECOR, e: [.75, .72, .6], v: .03 })));
+  // izba with cellar
+  const g1 = gy(44);
+  S.rect(22, g1 + 6, 44, 18, (x, y) => S.clear(x, y));
+  S.rect(21, g1 + 24, 46, 2, (x, y) => S.put(x, y, M.plank));
+  for (let y = g1; y < g1 + 24; y++) { S.put(28, y, M.wood); S.put(31, y, M.wood); if ((y - g1) % 3 === 0) { S.put(29, y, M.wood); S.put(30, y, M.wood); } }
+  S.rect(50, g1 + 18, 6, 6, (x, y) => S.put(x, y, M.dwood)); S.rect(58, g1 + 19, 5, 5, (x, y) => S.put(x, y, M.plank));
+  S.put(46, g1 + 21, m("#ffcf7a", { k: DECOR, e: [1.1, .75, .35] })); S.put(46, g1 + 22, M.trim);
+  S.sprite(36, g1 + 18, DOMOVOY, { f: m("#5e5750", { k: DECOR }), E: m("#ffc15a", { k: DECOR, e: [1, .7, .2] }) });
+  izba(S, 18, g1, 54, 30, { win: [[8, 10], [36, 10]], door: 24, chimney: 40 });
+  // banya
+  const g2 = gy(98);
+  izba(S, 86, g2, 26, 18, { roof: 10, door: 10, doorMat: m("#3a1a10", { e: [.5, .15, .04] }) });
+  for (let k = 0; k < 26; k++) S.fog(100 + S.rnd() * 10 - 5, g2 - 26 - k, [.7, .7, .72], .22);
+  // fences
+  for (let x = 118; x < 138; x += 3) for (let y = gy(x) - 7; y < gy(x); y++) S.put(x, y, M.wood, .8);
+  for (let x = 156; x < 182; x += 3) for (let y = gy(x) - 7; y < gy(x); y++) S.put(x, y, M.wood, .8);
+  // well with shadoof
+  const gw = gy(145);
+  for (let y = gw; y < 330; y++) { S.clear(142, y); S.clear(143, y); S.clear(144, y); S.clear(145, y); S.clear(146, y); S.clear(147, y); S.put(141, y, M.stone); S.put(148, y, M.stone); }
+  S.rect(139, gw - 6, 12, 6, (x, y) => { if (x < 142 || x > 147) S.put(x, y, M.log1, (y % 2) ? .8 : 1); });
+  for (let y = gw - 26; y < gw; y++) S.put(158, y, M.wood);
+  S.line(146, gw - 34, 170, gw - 16, (x, y) => S.put(x, y, M.wood));
+  S.line(146, gw - 34, 146, gw - 6, (x, y) => S.put(x, y, M.dwood));
+  // cemetery
+  [[196, 15], [214, 13], [252, 16], [272, 12], [294, 15], [312, 11]].forEach(([x, h]) => {
+    const g = gy(x);
+    S.disc(x + 1, g + 1, 5, (a, b) => { if (b < g + 1) S.put(a, b, M.soil); });
+    golubets(S, x, g - 3, h);
+    S.rect(x - 6, g + 22, 15, 6, (a, b) => S.clear(a, b));
+    S.rect(x - 7, g + 21, 17, 1, (a, b) => S.put(a, b, M.dwood)); S.rect(x - 7, g + 28, 17, 1, (a, b) => S.put(a, b, M.dwood));
+    S.put(x - 7, g + 22, M.dwood); S.put(x + 9, g + 22, M.dwood);
+    for (let k = 0; k < 6; k++) S.put(x - 4 + k * 2, g + 26 + (k % 2), M.bone);
+  });
+  // fresh grave + broken coffin + Ivan
+  const gf = gy(234);
+  S.rect(228, gf - 1, 12, 13, (x, y) => S.clear(x, y));
+  S.disc(222, gf - 1, 5, (x, y) => { if (y < gf) S.put(x, y, M.soil2); });
+  S.rect(226, gf + 12, 16, 6, (x, y) => S.clear(x, y));
+  S.line(226, gf + 18, 241, gf + 11, (x, y) => S.put(x, y, M.dwood)); S.put(227, gf + 12, M.dwood); S.put(240, gf + 17, M.dwood);
+  S.sprite(243, gf - 12, IVAN_MINI, IVAN_PAL);
+  [[205, 176], [262, 172], [300, 183]].forEach(([x, y]) => { S.put(x, y, m("#bfe8ff", { k: DECOR, e: [.6, .9, 1.2] })); S.put(x, y - 1, m("#bfe8ff", { k: DECOR, e: [.3, .45, .6] })); });
+  // treasure, water pocket
+  S.disc(250, 420, 9, (x, y) => S.clear(x, y));
+  S.rect(245, 425, 11, 5, (x, y) => S.put(x, y, m("#6a4a22", { e: [.25, .18, .04] })));
+  S.rect(245, 423, 11, 2, (x, y) => S.put(x, y, m("#a07a2a", { e: [.5, .38, .08] })));
+  S.disc(70, 395, 14, (x, y) => { S.clear(x, y); if (y > 392) S.put(x, y, M.water); });
+  // way down
+  S.worm(145, 330, 175, 538, 4, 7, (x, y) => S.clear(x, y));
+  for (let k = 0; k < 40; k++) { const x = S.rnd() * LW | 0, y = 320 + S.rnd() * 210 | 0; if (S.at(x, y) === EMPTY && S.at(x, y + 1) === SOLID) S.put(x, y, M.bone); }
+  return { sky: [.42, .46, .6], amb: [.15, .15, .18], e2g: 14, glow2: 2.2, skyR: 4, bgDim: .6 };
+}
+
+function genLes(S) {
+  const gy = x => 150 + Math.round((S.fbm(x * .015, 2) - .5) * 40);
+  S.bgAll((x, y) => { if (y < gy(x)) { const ray = Math.max(0, Math.sin((x + y * .6) * .045)) ** 8 * .05; const c = mixc(C("#0b120d"), C("#16241a"), y / 160); return [c[0] + ray, c[1] + ray * 1.2, c[2] + ray]; } return mixc(C("#211a12"), C("#15100b"), S.nz(x * .07, y * .07)); });
+  S.skyMark((x, y) => y < gy(x));
+  for (let x = 0; x < LW; x++) { const g = gy(x); for (let y = g; y < LH; y++) { const d = y - g; S.put(x, y, d < 3 ? M.moss : d < 90 ? M.soil2 : d < 200 ? M.clay : M.rock); } }
+  for (let y = 210; y < LH; y++) for (let x = 0; x < LW; x++) { const n = S.fbm(x * .02, y * .026, 4); if (n < .37) S.clear(x, y); }
+  [12, 70, 150, 205].forEach((x, i) => {
+    const g = gy(x + 3);
+    spruce(S, x, g, -10, 5 + (i % 2));
+    for (let r = 0; r < 5; r++) { let rx = x + 2, ry = g; const dir = S.rnd() < .5 ? -1 : 1; for (let t = 0; t < 40 + S.rnd() * 50; t++) { rx += dir * (S.rnd() * .9); ry += .8 + S.rnd() * .4; if (S.at(rx, ry) === SOLID) S.put(rx, ry, M.root); } }
+  });
+  // anthill
+  const ga = gy(110);
+  S.disc(112, ga + 2, 14, (x, y) => { if (y <= ga + 2) S.put(x, y, m("#5a3d22", { v: .35 })); });
+  S.line(112, ga - 9, 112, ga + 6, (x, y) => S.clear(x, y)); S.line(104, ga - 2, 120, ga + 1, (x, y) => S.clear(x, y));
+  // ferns & fly agarics
+  for (let x = 0; x < LW; x += 2) { const g = gy(x); if (S.rnd() < .35) for (let h = 1; h < 2 + S.rnd() * 4; h++) S.put(x, g - h, m("#2b5a2a", { k: DECOR, v: .35 })); if (S.rnd() < .04) { S.put(x, g - 1, m("#d8d2c0", { k: DECOR })); S.put(x - 1, g - 2, m("#c8301e", { k: DECOR })); S.put(x, g - 2, m("#c8301e", { k: DECOR })); S.put(x + 1, g - 2, m("#c8301e", { k: DECOR })); } }
+  // hut on chicken legs + skull fence
+  const gh = gy(262);
+  const leg = m("#c98a2a", { k: DECOR, v: .1 });
+  for (const lx of [266, 282]) { S.line(lx, gh - 18, lx - 3, gh - 9, (x, y) => { S.put(x, y, leg); S.put(x + 1, y, leg); }); S.line(lx - 3, gh - 9, lx, gh - 1, (x, y) => { S.put(x, y, leg); S.put(x + 1, y, leg); }); S.put(lx - 2, gh - 1, leg); S.put(lx + 2, gh - 1, leg); S.put(lx + 3, gh - 1, leg); }
+  izba(S, 260, gh - 18, 30, 18, { roof: 12, win: [[11, 5]] });
+  [232, 240, 248, 300, 308, 316].forEach((x, i) => { const g = gy(x); for (let y = g - 11; y < g; y++) S.put(x, y, M.dwood); if (i !== 3) S.sprite(x - 2, g - 15, SKULL, { w: m("#d8d0bd", { k: DECOR }), E: m("#e8ff7a", { k: DECOR, e: [.9, 1.1, .3] }) }); });
+  // underground: rotten logs with foxfire, bear den, wolf eyes, mavka
+  [[60, 300], [190, 360], [250, 470], [90, 450]].forEach(([x, y]) => {
+    S.disc(x, y, 12, (a, b) => S.clear(a, b));
+    const fy = y + 8;
+    S.rect(x - 9, fy, 18, 3, (a, b) => S.put(a, b, m("#3a3020", { v: .2 })));
+    for (let k = 0; k < 9; k++) S.put(x - 8 + S.rnd() * 16, fy - 1 + S.rnd() * 4, M.glow);
+  });
+  S.disc(40, 260, 15, (x, y) => S.clear(x, y));
+  S.sprite(30, 262, BEAR, { b: m("#3a2616", { k: DECOR, v: .1 }) });
+  [[290, 330], [278, 333]].forEach(([x, y]) => S.put(x, y, m("#ffd24a", { k: DECOR, e: [1.2, .9, .2] })));
+  S.disc(284, 332, 10, (x, y) => { if (S.at(x, y) === SOLID && Math.hypot(x - 284, y - 332) > 8) return; });
+  S.sprite(186, 352, MAVKA, MAVKA_PAL);
+  S.worm(112, ga + 6, 150, 538, 3, 6, (x, y) => S.clear(x, y));
+  return { sky: [.26, .36, .28], amb: [.13, .15, .12], e2g: 14, glow2: 2.2, skyR: 6, bgDim: .6 };
+}
+
+function genTop(S) {
+  const wy = 168;
+  const floor = x => 205 + Math.round(S.fbm(x * .02, 7) * 40);
+  S.bgAll((x, y) => y < wy ? mixc(C("#141c19"), C("#2a352d"), y / wy) : mixc(C("#1c160f"), C("#120e0a"), S.nz(x * .06, y * .06)));
+  S.skyMark((x, y) => y < wy);
+  for (let x = 0; x < LW; x++) { const f = floor(x); for (let y = wy; y < LH; y++) { if (y < f) S.put(x, y, m("#2a3520", { k: LIQ, a: .86, v: .06 })); else { const d = y - f; S.put(x, y, d < 150 ? m("#241a12", { v: .22, n: .1 }) : d < 230 ? M.clay : M.rock); } } }
+  for (let x = 0; x < LW; x++) if (S.rnd() < .85) S.put(x, wy, m("#5c8a2c", { k: DECOR, v: .35 }));
+  [[30, 18], [95, 14], [170, 22], [240, 16], [300, 12]].forEach(([x, w]) => { S.disc(x, wy + 4, w / 2 + 4, (a, b) => { if (b <= wy + 2) S.put(a, b, M.moss); }); });
+  [[34, 70], [176, 60], [244, 82]].forEach(([x, h]) => { const base = wy - 8; for (let y = base - h; y < base; y++) { S.put(x, y, m("#4c4a42", { k: DECOR }), .9); S.put(x + 1, y, m("#3e3c35", { k: DECOR })); } for (let b = 0; b < 4; b++) { const by = base - h + 8 + b * 12, dir = b % 2 ? 1 : -1; S.line(x, by, x + dir * (8 + b * 2), by - 6, (a, c) => S.put(a, c, m("#4c4a42", { k: DECOR }))); } });
+  for (let x = 4; x < LW; x += 5 + (S.rnd() * 4 | 0)) if (S.rnd() < .4) { for (let y = wy - 10; y < wy; y++) S.put(x, y, m("#4a5a2a", { k: DECOR })); S.put(x, wy - 11, m("#5a3a1e", { k: DECOR })); S.put(x, wy - 12, m("#5a3a1e", { k: DECOR })); }
+  // peat: gas pockets, embers, bones
+  for (let k = 0; k < 16; k++) { const x = 15 + S.rnd() * 290, y = 260 + S.rnd() * 110; S.disc(x, y, 4 + S.rnd() * 6, (a, b) => { if (S.at(a, b) === SOLID) { S.clear(a, b); S.fog(a, b, [.45, .7, .4], .22); } }); }
+  for (let k = 0; k < 60; k++) { const x = S.rnd() * LW, y = 240 + S.rnd() * 140; if (S.at(x, y) === SOLID) S.put(x, y, m("#ff6a1e", { e: [.9, .3, .05], ev: .6 })); }
+  for (let k = 0; k < 4; k++) { const x = 30 + S.rnd() * 260, y = 300 + S.rnd() * 60; S.sprite(x, y, SKULL, { w: M.bone, E: m("#1a1410") }); }
+  for (let y = 420; y < LH; y++) for (let x = 0; x < LW; x++) if (S.fbm(x * .022, y * .03) < .37) S.clear(x, y);
+  S.worm(160, 250, 140, 538, 3, 6, (x, y) => { if (y > 300) S.clear(x, y); });
+  // wisps
+  [[60, 140], [128, 150], [205, 132], [270, 152], [150, 112]].forEach(([x, y], i) => { const c = i % 2 ? [.4, 1.0, .8] : [.5, .8, 1.2]; S.disc(x, y, 1.2, (a, b) => S.put(a, b, m("#c8ffe8", { k: DECOR, e: c }))); });
+  for (let y = 100; y < wy + 30; y++) for (let x = 0; x < LW; x++) { const n = S.fbm(x * .03, y * .06, 3); if (n > .45) S.fog(x, y, [.62, .72, .62], (n - .45) * 1.1 * (y < wy ? 1 : .5)); }
+  return { sky: [.3, .36, .32], amb: [.13, .15, .12], liqAtt: .975, e2g: 14, glow2: 2.4, skyR: 6, bgDim: .6 };
+}
+
+function genOmut(S) {
+  const wy = 84;
+  const bed = x => 470 + Math.round((S.fbm(x * .02, 9) - .5) * 40);
+  const leftBank = y => y < wy + 6 ? 92 : Math.max(0, 92 - (y - wy) * .25);
+  const rightBank = y => y < wy ? 256 : Math.min(LW, 256 + (y - wy) * .2);
+  S.bgAll((x, y) => y < wy ? mixc(C("#0e1420"), C("#233040"), y / wy) : mixc(C("#0b1a20"), C("#081217"), y / LH));
+  S.skyMark((x, y) => y < wy && x > 92 && x < 256);
+  for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) {
+    const lb = leftBank(y), rb = rightBank(y);
+    const solid = y >= bed(x) || (x < lb && y >= wy - 6) || (x > rb && y >= wy - 2);
+    if (solid) { const d = y - bed(x); S.put(x, y, d >= 0 && d < 10 ? m("#3b392c", { v: .2 }) : y < 140 ? M.soil : M.clay); }
+    else if (y >= wy) S.put(x, y, m("#123c4a", { k: LIQ, a: .7, v: .05 }));
+  }
+  S.skyMark((x, y) => y < wy - 6 || (y < wy && x >= 92 && x <= 256));
+  for (let y = 0; y < wy - 6; y++) for (let x = 0; x < LW; x++) S.sk[y * LW + x] = 1;
+  // mill and wheel
+  izba(S, 18, wy - 6, 54, 34, { roof: 22, win: [[34, 9]], door: 10 });
+  const cx = 100, cy = wy - 2, R = 19;
+  for (let a = 0; a < 6.28; a += .02) { S.put(cx + Math.cos(a) * R, cy + Math.sin(a) * R, m("#4a3220", { k: DECOR })); S.put(cx + Math.cos(a) * (R - 1), cy + Math.sin(a) * (R - 1), m("#4a3220", { k: DECOR })); }
+  for (let s = 0; s < 8; s++) { const a = s * Math.PI / 4; S.line(cx, cy, cx + Math.cos(a) * R, cy + Math.sin(a) * R, (x, y) => S.put(x, y, m("#3a2616", { k: DECOR }))); }
+  for (let x = 80; x < 125; x++) for (let k = 0; k < 2; k++) S.fog(x, wy - 1 - k * 2 + S.rnd() * 2, [.8, .85, .9], .3);
+  // sunken izbas, bell, algae, rusalki, pike
+  [[110, 6], [180, 3]].forEach(([x, wi], i) => { const g = bed(x + 15); izba(S, x, g, 32, 20, { roof: 12, win: [[wi + 6, 6, i === 1]] }); });
+  const bx = 230, bg = bed(232);
+  S.disc(bx, bg - 2, 6, (x, y) => { if (y < bg) S.put(x, y, m("#8a6a3a", { v: .1 })); });
+  S.rect(bx - 1, bg - 9, 3, 2, (x, y) => S.put(x, y, m("#6a4e2a")));
+  for (let k = 0; k < 26; k++) { let x = 100 + S.rnd() * 160, y = bed(x | 0); const h = 20 + S.rnd() * 60; for (let t = 0; t < h; t++) S.put(x + Math.sin(t * .2 + k) * 2, y - t, m("#2a5a2a", { k: DECOR, v: .3 })); }
+  S.sprite(150, 112, MAVKA, { g: m("#1a3a2a", { k: DECOR }), s: m("#d4e4e0", { k: DECOR, e: [.05, .09, .09] }), E: m("#c8fff0", { k: DECOR, e: [.4, 1, .9] }), w: m("#d8e8e4", { k: DECOR, e: [.04, .07, .07] }) });
+  S.sprite(205, 128, MAVKA, { g: m("#1a3a2a", { k: DECOR }), s: m("#d4e4e0", { k: DECOR, e: [.05, .09, .09] }), E: m("#c8fff0", { k: DECOR, e: [.4, 1, .9] }), w: m("#d8e8e4", { k: DECOR, e: [.04, .07, .07] }) }, true);
+  S.sprite(170, 300, PIKE, { b: m("#2c3a28", { k: DECOR }), E: m("#d0ff8a", { k: DECOR, e: [.3, .5, .1] }) });
+  S.worm(200, bed(200), 210, 538, 4, 7, (x, y) => S.clear(x, y));
+  return { sky: [.4, .46, .58], amb: [.1, .13, .17], liqAtt: .99, e2g: 14, glow2: 2.4, skyR: 5, bgDim: .6 };
+}
+
+function genMine(S, v) {
+  const P = {
+    copper: { rockA: "#3a342a", rockB: "#2a2620", bg: "#1d1913", lamp: [1.1, .7, .3] },
+    silver: { rockA: "#2b313b", rockB: "#20252d", bg: "#12161c", lamp: [.5, .75, 1.3] },
+    gold: { rockA: "#3a2a19", rockB: "#291d11", bg: "#1c140b", lamp: [1.2, .8, .3] }
+  }[v];
+  S.bgAll((x, y) => mixc(C(P.bg), C("#000000"), S.nz(x * .05, y * .05) * .5));
+  const rA = m(P.rockA, { v: .16, n: .05 }), rB = m(P.rockB, { v: .16, n: .05 });
+  for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) S.put(x, y, S.nz(x * .04, y * .04) > .5 ? rA : rB);
+  // veins
+  for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) {
+    const n = S.fbm(x * .015 + 40, y * .02, 3);
+    if (v === "copper" && n > .6) { const band = Math.sin(n * 90); S.put(x, y, band > .3 ? m("#2f8a62", { v: .1 }) : band > -.3 ? m("#1f6b4a", { v: .1 }) : m("#5cbf8c", { v: .08 })); }
+    if (v === "silver" && n > .62 && S.rnd() < .5) S.put(x, y, m("#cdd6e4", S.rnd() < .015 ? { e: [.3, .36, .42] } : {}));
+    if (v === "gold" && n > .63 && S.rnd() < .6) S.put(x, y, m("#e3b54a", S.rnd() < .03 ? { e: [.25, .17, .04], v: .2 } : { v: .2 }));
+  }
+  if (v === "copper") for (let k = 0; k < 300; k++) S.put(S.rnd() * LW, S.rnd() * LH, m("#c07a3e", { v: .2 }));
+  // caves
+  for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) if (S.fbm(x * .02, y * .026, 4) < .36) S.clear(x, y);
+  // main shaft with timbering and ladder
+  for (let y = 0; y < 400; y++) for (let x = 146; x < 166; x++) S.clear(x, y);
+  for (let y = 4; y < 400; y += 18) { S.rect(144, y, 24, 2, (a, b) => S.put(a, b, M.wood)); }
+  for (let y = 0; y < 400; y++) { S.put(145, y, M.wood, .8); S.put(166, y, M.wood, .8); S.put(149, y, M.dwood); S.put(153, y, M.dwood); if (y % 4 === 0) { S.put(150, y, M.dwood); S.put(151, y, M.dwood); S.put(152, y, M.dwood); } }
+  // drifts with lamps
+  [[120, -1], [230, 1], [330, -1]].forEach(([y, dir]) => {
+    const x0 = dir < 0 ? 20 : 166, x1 = dir < 0 ? 146 : 300;
+    S.rect(x0, y, x1 - x0, 14, (a, b) => S.clear(a, b));
+    for (let x = x0; x < x1; x += 16) { S.rect(x, y, 2, 14, (a, b) => S.put(a, b, M.wood, .85)); S.rect(x - 2, y, 6, 2, (a, b) => S.put(a, b, M.wood)); }
+    for (let x = x0 + 8; x < x1; x += 40) { S.put(x, y + 3, M.dwood); S.put(x, y + 4, m("#ffe0a0", { k: DECOR, e: P.lamp })); S.put(x, y + 5, m("#ffe0a0", { k: DECOR, e: P.lamp.map(c => c * .6) })); }
+    S.rect(x0, y + 12, x1 - x0, 1, (a, b) => { if ((a % 7) < 5) S.put(a, b, m("#4a4440")); });
+  });
+  if (v === "copper") {
+    S.disc(160, 455, 46, (x, y) => S.clear(x, y));
+    S.disc(160, 455, 50, (x, y) => { if (S.at(x, y) === SOLID) S.put(x, y, Math.sin((x + y) * .4) > 0 ? m("#2f8a62") : m("#1f6b4a")); });
+    [[130, 470], [190, 470]].forEach(([x, y]) => S.rect(x, y - 40, 6, 44, (a, b) => S.put(a, b, Math.sin(b * .6) > 0 ? m("#3a9a70") : m("#1f6b4a"))));
+    S.sprite(158, 488, ["g.gg.", ".gggg", "g.g.."], { g: m("#5cff9c", { k: DECOR, e: [.2, .8, .4] }) });
+    S.disc(160, 455, 3, (x, y) => S.put(x, y, m("#9affc8", { k: DECOR, e: [.3, .9, .5] })));
+  }
+  if (v === "silver") {
+    for (let k = 0; k < 40; k++) { const x = S.rnd() * LW | 0; for (let y = 1; y < LH; y++) if (S.at(x, y) === EMPTY && S.at(x, y - 1) === SOLID) { const h = 3 + S.rnd() * 9; for (let t = 0; t < h; t++) S.put(x, y + t, m("#a8d4e8", { k: DECOR, e: [.02, .05, .08] })); break; } }
+    S.disc(90, 480, 40, (x, y) => { if (S.at(x, y) !== SOLID || Math.hypot(x - 90, y - 480) < 36) { S.clear(x, y); if (y > 470) S.put(x, y, m("#0f2a44", { k: LIQ, a: .8 })); } });
+    for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) if (S.at(x, y) === EMPTY && S.at(x, y - 3) === SOLID && S.nz(x * .1, y * .1) > .55) S.fog(x, y, [.5, .8, .45], .15);
+    S.sprite(210, 228, SHUBIN, { c: m("#3a3028", { k: DECOR }), E: m("#b0e0ff", { k: DECOR, e: [.4, .7, 1] }), L: m("#8ac8ff", { k: DECOR, e: [.6, 1, 1.8] }) });
+  }
+  if (v === "gold") {
+    let x = -20, y = 60, a = .7;
+    for (let s = 0; s < 520; s++) {
+      a += Math.sin(s * .03) * .05; x += Math.cos(a) * 1.2; y += Math.sin(a) * 1.2;
+      if (x > 330) { a = Math.PI - a; } if (x < -10) a = Math.PI - a;
+      S.disc(x, y, 7, (px, py) => { const d = Math.hypot(px - x, py - y); S.put(px, py, d > 5.5 ? m("#4a3a14") : ((px + py) & 3) < 2 ? m("#7a6a2a", { v: .08 }) : m("#a8903a", { v: .08 })); });
+    }
+    S.disc(x, y, 9, (px, py) => S.put(px, py, m("#8a7a32")));
+    S.put(x + 3, y - 2, m("#ffcf4a", { k: DECOR, e: [1.4, 1, .2] }));
+    for (let k = 0; k < 900; k++) { const px = S.rnd() * LW | 0, py = S.rnd() * LH | 0; for (let t = 0; t < 30; t++) { if (S.at(px, py + t + 1) !== EMPTY) { if (S.at(px, py + t) === EMPTY) S.put(px, py + t, m("#d9a53a", { v: .25 })); break; } } }
+    for (let x2 = 0; x2 < LW; x2++) for (let y2 = 500; y2 < LH; y2++) if (S.at(x2, y2) === SOLID && S.rnd() < .03) S.put(x2, y2, m("#ff7a2a", { e: [.8, .35, .05] }));
+  }
+  S.worm(156, 400, 180, 538, 4, 7, (x, y) => S.clear(x, y));
+  return { amb: v === "silver" ? [.14, .15, .19] : v === "gold" ? [.19, .15, .11] : [.17, .16, .13], e2g: 16, glow2: 1.6, bgDim: .62 };
+}
+
+function genSmorodina(S) {
+  const riverY = 430;
+  S.bgAll((x, y) => mixc(C("#1e0e0a"), C("#090403"), Math.min(1, Math.abs(y - 300) / 300) * .6 + S.nz(x * .05, y * .05) * .3));
+  const basalt = m("#2a2220", { v: .16, n: .05 }), basalt2 = m("#1e1816", { v: .16 }), ash = m("#5a5550", { v: .2 }), sulfur = m("#b8b03a", { v: .2 });
+  for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) {
+    const lb = 70 + Math.sin(y * .03) * 10 + (y > 380 ? 0 : 0), rb = 250 + Math.cos(y * .025) * 12;
+    const ceil = 54 + S.fbm(x * .03, 1) * 30;
+    if (y < ceil || x < lb || x > rb || y > riverY + 40) S.put(x, y, S.nz(x * .05, y * .05) > .5 ? basalt : basalt2);
+  }
+  for (let x = 0; x < LW; x++) { let len = S.rnd() < .3 ? 4 + S.rnd() * 14 : 0; for (let y = 1; y < 120 && len > 0; y++) if (S.at(x, y) === EMPTY && S.at(x, y - 1) === SOLID) { for (let t = 0; t < len; t++) S.put(x, y + t, basalt2); break; } }
+  S.disc(160, 20, 12, (x, y) => S.clear(x, y));
+  S.worm(160, 0, 150, 70, 5, 7, (x, y) => S.clear(x, y));
+  for (let x = 60; x < 262; x++) for (let y = riverY; y < riverY + 40; y++) if (S.at(x, y) === EMPTY || x < 80 || x > 240) S.put(x, y, m("#ff7a1a", { k: LIQ, a: 1, v: .3, e: [1.2, .42, .07], ev: .6 }));
+  for (let x = 60; x < 262; x++) { const w = Math.sin(x * .2) * 2 + Math.sin(x * .07) * 2; for (let y = riverY - 3; y < riverY + w; y++) S.put(x, y, m("#ffb04a", { k: LIQ, a: 1, e: [1.4, .7, .15], ev: .5 })); }
+  // banks ledges
+  S.rect(0, 150, 80, 6, (x, y) => S.put(x, y, basalt)); S.rect(240, 168, 80, 6, (x, y) => S.put(x, y, basalt));
+  for (let x = 0; x < 80; x++) for (let y = 120; y < 150; y++) S.clear(x, y);
+  for (let x = 240; x < LW; x++) for (let y = 136; y < 168; y++) S.clear(x, y);
+  izba(S, 12, 150, 34, 18, { roof: 12, win: [[13, 5]], door: 4 });
+  // smithy with forge
+  S.rect(262, 150, 40, 18, (x, y) => S.put(x, y, M.log2, (y % 3 === 2) ? .6 : 1));
+  for (let j = 0; j < 9; j++) for (let x = 258 + j; x < 306 - j; x++) S.put(x, 149 - j, M.roof);
+  S.rect(270, 156, 10, 10, (x, y) => S.clear(x, y)); S.rect(271, 162, 8, 4, (x, y) => S.put(x, y, m("#ff8a2a", { e: [1.6, .7, .15], ev: .5 })));
+  S.rect(288, 162, 8, 3, (x, y) => S.put(x, y, m("#4a4a50"))); S.rect(290, 165, 4, 3, (x, y) => S.put(x, y, m("#3a3a40")));
+  // ash slopes and sulfur
+  for (let y = 180; y < riverY; y++) for (let x = 0; x < LW; x++) if (S.at(x, y) === SOLID && (S.at(x, y - 1) === EMPTY || S.at(x + 1, y) === EMPTY || S.at(x - 1, y) === EMPTY)) S.put(x, y, S.rnd() < .5 ? ash : (S.rnd() < .3 ? sulfur : basalt));
+  // Kalinov bridge
+  for (let x = 64; x < 258; x++) { const y = 250 + Math.round(Math.sin((x - 64) / 194 * Math.PI) * -10); for (let t = 0; t < 3; t++) S.put(x, y + t, m("#6a2a1a", { e: [.35, .07, .02], v: .2 })); if (x % 12 === 0) for (let t = 1; t < 7; t++) S.put(x, y - t, m("#4a1e12", { e: [.2, .04, .01] })); if (x % 30 === 7) S.sprite(x - 2, y - 5, SKULL, { w: M.bone, E: m("#200a05") }); }
+  // Chudo-yudo silhouette in the background
+  for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) {
+    const i = y * LW + x;
+    const body = ((x - 160) / 70) ** 2 + ((y - 360) / 40) ** 2 < 1;
+    let neck = false;
+    for (let h = 0; h < 6; h++) { const hx = 100 + h * 24, hy = 300 - Math.abs(h - 2.5) * 10; const t = (y - hy) / (340 - hy); if (t > 0 && t < 1 && Math.abs(x - lerp(hx, 160 + (h - 2.5) * 10, t)) < 3) neck = true; if ((x - hx) ** 2 + ((y - hy) * 1.4) ** 2 < 49) neck = true; }
+    if ((body || neck) && S.k[i] === EMPTY) { S.br[i] *= .35; S.bg[i] *= .3; S.bb[i] *= .3; }
+  }
+  for (let h = 0; h < 6; h++) { const hx = 100 + h * 24, hy = 300 - Math.abs(h - 2.5) * 10; S.put(hx + 2, hy - 1, m("#ff4a2a", { k: DECOR, e: [1.2, .2, .05] })); }
+  for (let k = 0; k < 90; k++) { const x = 70 + S.rnd() * 180, y = 280 + S.rnd() * 145; if (S.at(x, y) === EMPTY) S.put(x, y, m("#ffb04a", { k: DECOR, e: [.9, .4, .08], ev: .8 })); }
+  S.worm(20, 156, 30, 538, 4, 6, (x, y) => S.clear(x, y));
+  return { amb: [.17, .1, .08], e2g: 8, e2r: 24, glow2: 1.6, bgDim: .6 };
+}
+
+function genNav(S) {
+  S.bgAll((x, y) => mixc(C("#120d1c"), C("#07050b"), S.nz(x * .04, y * .04) * .8));
+  const ground = x => 336 + Math.round(S.fbm(x * .02, 3) * 10);
+  for (let x = 0; x < LW; x++) for (let y = ground(x); y < LH; y++) S.put(x, y, y - ground(x) < 4 ? m("#4a4452", { v: .25 }) : m("#2e2936", { v: .18, n: .06 }));
+  for (let y = 360; y < LH; y++) for (let x = 0; x < LW; x++) if (S.fbm(x * .022, y * .03) < .37) S.clear(x, y);
+  // bone terem with tent roof
+  const x0 = 104, x1 = 220, top = 170, base = ground(160);
+  for (let y = top; y < base; y++) for (let x = x0; x < x1; x++) { const row = (y - top) / 4 | 0, off = row % 2 ? 4 : 0; const u = (x + off - x0) % 8; S.put(x, y, u === 0 || u === 7 ? m("#9e9683") : (y - top) % 4 === 3 ? m("#6e6858") : m("#d6cfbc", { v: .06 })); }
+  for (let j = 0; j < 70; j++) { const half = (x1 - x0) / 2 * (1 - j / 70) + 2; for (let x = Math.round(162 - half); x <= Math.round(162 + half); x++) S.put(x, top - 1 - j, j % 4 === 0 ? m("#7a7488") : m("#2a2532", { v: .1 })); }
+  for (let y = top - 78; y < top - 70; y++) S.put(162, y, m("#c8c0e0", { e: [.3, .25, .5] }));
+  for (let x = x0 - 2; x < x1 + 2; x += 6) S.sprite(x, top - 4, SKULL, { w: M.bone, E: m("#b28aff", { k: DECOR, e: [.4, .25, .7] }) });
+  [[124, 196, true], [150, 196, false], [176, 196, false], [200, 196, false], [136, 250, false], [188, 250, false]].forEach(([x, y, warm]) => {
+    S.rect(x - 1, y - 1, 9, 12, (a, b) => S.put(a, b, m("#2a2532")));
+    S.rect(x, y, 7, 10, (a, b) => S.put(a, b, warm ? M.win : m("#7a5aa8", { e: [.25, .15, .5] })));
+    S.rect(x + 3, y, 1, 10, (a, b) => S.put(a, b, m("#2a2532")));
+  });
+  S.rect(152, base - 22, 20, 22, (x, y) => S.put(x, y, m("#1a1520")));
+  // chains
+  for (let k = 0; k < 9; k++) { const x = 20 + k * 34 + S.rnd() * 10; chain(S, x, 0, x + (S.rnd() - .5) * 10, 60 + S.rnd() * 120, m("#4a4a56", { k: DECOR })); }
+  // black-silver garden
+  [[250, 1], [285, -1], [305, 1], [40, -1], [70, 1]].forEach(([x, d]) => {
+    const g = ground(x);
+    for (let y = g - 40; y < g; y++) { S.put(x, y, m("#141219", { k: DECOR })); S.put(x + 1, y, m("#141219", { k: DECOR })); }
+    for (let b = 0; b < 5; b++) { const by = g - 40 + b * 6; S.line(x, by, x + d * (8 + b * 3) * (b % 2 ? -1 : 1), by - 10, (a, c) => S.put(a, c, m("#141219", { k: DECOR }))); }
+    for (let k = 0; k < 60; k++) S.put(x + (S.rnd() - .5) * 34, g - 44 + (S.rnd() - .5) * 26, m("#aab3c8", { k: DECOR, e: [.05, .06, .09], v: .2 }));
+  });
+  // crypt below: skeleton host, pool of dead water, cage
+  S.rect(30, 400, 260, 34, (x, y) => S.clear(x, y));
+  S.rect(30, 434, 260, 3, (x, y) => S.put(x, y, m("#4a4452")));
+  for (let k = 0; k < 8; k++) S.sprite(50 + k * 18, 422, SKEL, { b: m("#c8c0ac", { k: DECOR }), E: m("#d2b2ff", { k: DECOR, e: [.5, .35, .9] }) });
+  S.disc(250, 480, 18, (x, y) => { S.clear(x, y); if (y > 478) S.put(x, y, m("#5a5670", { k: LIQ, a: .8, e: [.06, .05, .1] })); });
+  for (let x = 210; x < 236; x += 3) for (let y = 404; y < 434; y++) S.put(x, y, m("#3a3a44", { k: DECOR }));
+  S.sprite(218, 421, IVAN_MINI, { h: m("#3a2a1a", { k: DECOR }), s: m("#d8c0a8", { k: DECOR }), w: m("#b8b0a0", { k: DECOR }), r: m("#8a2a20", { k: DECOR }), B: m("#5a2a20", { k: DECOR }), p: m("#3a3a44", { k: DECOR }), l: m("#6a5a3a", { k: DECOR }) });
+  // navy fog and ghost lights
+  for (let y = 250; y < LH; y++) for (let x = 0; x < LW; x++) { const n = S.fbm(x * .03, y * .05, 3); if (n > .5) S.fog(x, y, [.5, .42, .7], (n - .5) * .9); }
+  for (let k = 0; k < 10; k++) { const x = S.rnd() * LW, y = 100 + S.rnd() * 230; if (S.at(x, y) === EMPTY) S.disc(x, y, 1, (a, b) => S.put(a, b, m("#d8c8ff", { k: DECOR, e: [.5, .4, 1] }))); }
+  S.worm(270, 500, 280, 538, 4, 6, (x, y) => S.clear(x, y));
+  return { amb: [.15, .13, .2], e2g: 14, glow2: 2, bgDim: .6, exp: 1.05 };
+}
+
+function genBuyan(S) {
+  const sea = 262;
+  S.bgAll((x, y) => { if (y < sea) { const c = mixc(C("#0d1619"), C("#24363c"), y / sea); const cl = S.fbm(x * .02, y * .04, 4); return cl > .55 ? mixc(c, C("#3a4c52"), (cl - .55) * 2) : c; } return mixc(C("#06161b"), C("#020a0d"), (y - sea) / (LH - sea)); });
+  S.skyMark((x, y) => y < sea);
+  const bed = x => 470 + Math.round((S.fbm(x * .02, 4) - .5) * 50);
+  const island = x => { const d = Math.abs(x - 168); return d < 70 ? 226 + Math.round((d / 70) ** 3 * 120 + S.fbm(x * .05, 2) * 10) : 999; };
+  for (let x = 0; x < LW; x++) for (let y = sea - 3; y < LH; y++) {
+    const isl = island(x);
+    if (y >= bed(x)) S.put(x, y, m("#2a2e2c", { v: .2, n: .05 }));
+    else if (y >= isl) S.put(x, y, m("#c8c2b0", { v: .1, n: .06 }));
+    else if (y >= sea + Math.round(Math.sin(x * .12) * 2 + Math.sin(x * .05 + 1) * 3)) S.put(x, y, m("#0f3440", { k: LIQ, a: .84, v: .05 }));
+  }
+  for (let x = 0; x < LW; x++) { const y = sea + Math.round(Math.sin(x * .12) * 2 + Math.sin(x * .05 + 1) * 3); if (island(x) > y && S.rnd() < .5) S.put(x, y - 1, m("#cfe0e0", { k: DECOR, v: .1 })); }
+  // Alatyr
+  S.disc(120, 226, 13, (x, y) => { if (y < 232) S.put(x, y, m("#f2eddc", { e: [.35, .33, .26], v: .04 })); });
+  for (let k = 0; k < 5; k++) S.put(114 + k * 3, 220 + (k % 2) * 3, m("#a89a6a", { e: [.6, .5, .2] }));
+  // oak
+  const ox = 182;
+  for (let y = 70; y < island(ox) + 2; y++) for (let d = -6; d <= 6; d++) S.put(ox + d, y, m("#2e2014", { k: DECOR, v: .12 }), Math.abs(d) > 4 ? .7 : 1);
+  [[-1, 110, 70], [1, 100, 90], [-1, 86, 50], [1, 80, 60], [1, 120, 50]].forEach(([d, y, len]) => S.line(ox, y, ox + d * len, y - 24, (x, yy) => S.put(x, yy, m("#2e2014", { k: DECOR })), 3));
+  for (let k = 0; k < 2200; k++) { const a = S.rnd() * 6.28, r = Math.sqrt(S.rnd()); const x = ox + Math.cos(a) * r * 95, y = 64 + Math.sin(a) * r * 46; S.put(x, y, S.rnd() < .25 ? m("#4a4a22", { k: DECOR }) : m("#1e2e18", { k: DECOR, v: .3 })); }
+  for (let r = 0; r < 8; r++) { let x = ox + (S.rnd() - .5) * 8, y = island(ox); const dir = r % 2 ? 1 : -1; for (let t = 0; t < 140; t++) { x += dir * (.3 + S.rnd() * .5); y += .9; if (y >= LH) break; S.put(x, y, m("#3a2a1a", { k: S.at(x, y) === LIQ ? DECOR : SOLID })); } }
+  // chest on chains
+  chain(S, 222, 92, 224, 118, m("#6a6a70", { k: DECOR })); chain(S, 238, 94, 236, 118, m("#6a6a70", { k: DECOR }));
+  S.rect(220, 118, 20, 12, (x, y) => S.put(x, y, (x === 220 || x === 239 || y === 118 || y === 123) ? m("#6a6a70", { k: DECOR }) : m("#4a3520", { k: DECOR })));
+  S.put(229, 124, m("#d6a640", { k: DECOR, e: [.4, .3, .05] }));
+  S.sprite(150, 26, GAGANA, { d: m("#101214", { k: DECOR }), i: m("#a8b0bc", { k: DECOR, e: [.2, .22, .26] }) });
+  // Skoropeya
+  for (let t = 0; t < 70; t++) { const a = t * .18; S.disc(120 + Math.cos(a) * (16 - t * .08), 232 + Math.sin(a) * 4 - t * .02, 1.4, (x, y) => S.put(x, y, m("#3a5a3a", { k: DECOR, v: .2 }))); }
+  // lightning
+  let lx = 54, ly = 0;
+  while (ly < sea) { const nx = lx + (S.rnd() - .5) * 18, ny = ly + 6 + S.rnd() * 10; S.line(lx, ly, nx, ny, (x, y) => S.put(x, y, m("#eef4ff", { k: DECOR, e: [1.5, 1.7, 2.2] }))); if (S.rnd() < .2) { let bx = nx, by = ny; for (let b = 0; b < 4; b++) { const bx2 = bx + (S.rnd() - .3) * 14, by2 = by + 6; S.line(bx, by, bx2, by2, (x, y) => S.put(x, y, m("#cfe0ff", { k: DECOR, e: [.6, .7, 1] }))); bx = bx2; by = by2; } } lx = nx; ly = ny; }
+  for (let k = 0; k < 20; k++) { const x = 30 + S.rnd() * 260, y = bed(x | 0) - 1; S.disc(x, y, 2 + S.rnd() * 3, (a, b) => S.put(a, b, m("#3a4240"))); }
+  for (let k = 0; k < 18; k++) { let x = S.rnd() * LW, y = bed(x | 0); for (let t = 0; t < 20 + S.rnd() * 50; t++) S.put(x + Math.sin(t * .25 + k) * 2, y - t, m("#1e4a3a", { k: DECOR })); }
+  return { sky: [.42, .5, .56], amb: [.12, .14, .16], liqAtt: .99, e2g: 10, e2r: 26, glow2: 1.6, skyR: 5, bgDim: .6 };
+}
+
+// =================================================================== hero game screen (320 x 180), animated
+function genHero(S) {
+  const W = 320;
+  const gy = x => 46 + Math.round((S.fbm(x * .03, 2) - .5) * 8);
+  const ct = x => 92 + Math.round((S.fbm(x * .04, 5) - .5) * 18);
+  const cb = x => 150 + Math.round((S.fbm(x * .035, 8) - .5) * 14);
+  S.bgAll((x, y) => { if (y < gy(x)) { const ray = Math.max(0, Math.sin((x + y * .7) * .05)) ** 10 * .06; const c = mixc(C("#0a110c"), C("#17251b"), y / 50); return [c[0] + ray * .8, c[1] + ray, c[2] + ray * .7]; } return mixc(C("#231b12"), C("#120d08"), S.nz(x * .08, y * .08)); });
+  S.skyMark((x, y) => y < gy(x));
+  for (let x = 0; x < W; x++) { const g = gy(x); for (let y = g; y < 180; y++) { const d = y - g; S.put(x, y, d < 2 ? M.moss : d < 70 ? M.soil2 : M.clay); } }
+  for (let k = 0; k < 120; k++) S.disc(S.rnd() * W, 50 + S.rnd() * 130, 1 + S.rnd() * 1.5, (a, b) => { if (S.at(a, b) === SOLID) S.put(a, b, M.pebble); });
+  [14, 88, 196, 276].forEach((x, i) => { const g = gy(x + 3); for (let y = 0; y < g; y++) for (let d = 0; d < 6 + i % 2; d++) S.put(x + d, y, M.bark, d === 0 ? .65 : 1); for (let r = 0; r < 4; r++) { let rx = x + 3, ry = g; const dir = r % 2 ? 1 : -1; for (let t = 0; t < 50; t++) { rx += dir * S.rnd() * .8; ry += .9; if (S.at(rx, ry) === SOLID) S.put(rx, ry, M.root); } } });
+  for (let x = 0; x < W; x += 2) { const g = gy(x); if (S.rnd() < .4) for (let h = 1; h < 2 + S.rnd() * 4; h++) S.put(x, g - h, m("#2b5a2a", { k: DECOR, v: .35 })); }
+  const ga = gy(150);
+  S.disc(152, ga + 2, 12, (x, y) => { if (y <= ga + 2) S.put(x, y, m("#5a3d22", { v: .35 })); });
+  for (let x = 12; x < 308; x++) for (let y = ct(x); y < cb(x); y++) S.clear(x, y);
+  S.worm(240, gy(240), 236, ct(236) + 4, 4, 5, (x, y) => S.clear(x, y));
+  for (let x = 250; x < 300; x++) for (let y = cb(x); y < cb(x) + 10 - Math.abs(x - 275) * .3; y++) S.clear(x, y);
+  for (let x = 250; x < 300; x++) for (let y = cb(275) - 2; y < 180; y++) if (S.at(x, y) === EMPTY) S.put(x, y, M.water);
+  for (let x = 14; x < 306; x += 3) if (S.rnd() < .5) { const top = ct(x); const h = 3 + S.rnd() * 14; for (let t = 0; t < h; t++) S.put(x + Math.sin(t * .4) * .6, top + t, m("#3b2a1a", { k: DECOR, v: .2 })); }
+  const logY = cb(185) - 3;
+  S.rect(166, logY, 38, 4, (x, y) => S.put(x, y, m("#3a3020", { v: .22 })));
+  for (let k = 0; k < 16; k++) S.put(167 + S.rnd() * 36, logY - 1 + S.rnd() * 5, M.glow);
+  [62, 70, 77, 84].forEach(x => { const f = cb(x); S.put(x, f - 1, m("#b8c0d0", { k: DECOR })); S.put(x - 1, f - 2, m("#5ab0ff", { k: DECOR, e: [.25, .6, 1.2] })); S.put(x, f - 2, m("#5ab0ff", { k: DECOR, e: [.25, .6, 1.2] })); S.put(x + 1, f - 2, m("#5ab0ff", { k: DECOR, e: [.25, .6, 1.2] })); });
+  const ivX = 128, ivY = cb(131) - 12;
+  S.sprite(ivX, ivY, IVAN_MINI, IVAN_PAL);
+  S.put(ivX + 7, ivY + 5, M.wood); S.put(ivX + 8, ivY + 4, M.wood); S.put(ivX + 8, ivY + 3, M.wood);
+  const mvX = 46, mvY = cb(49) - 13;
+  S.sprite(mvX, mvY, MAVKA, MAVKA_PAL, true);
+  return { ivX, ivY, mvX, mvY, torch: [ivX + 9, ivY + 1], P: { sky: [.22, .32, .24], amb: [.1, .095, .085], e2g: 11, glow2: 1.8, skyR: 5, bgDim: .58 } };
+}
+
+function startHero() {
+  const cv = document.getElementById("gameCv"), ctx = cv.getContext("2d");
+  const S = new Scene(320, 180, 7);
+  const H = genHero(S);
+  const LG = lightScene(S, H.P);
+  const img = ctx.createImageData(320, 180);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let t0 = performance.now(), paused = reduce, last = 0, visible = true;
+  const sparks = [], flies = Array.from({ length: 9 }, (_, i) => ({ x: 20 + i * 34, y: 20 + (i * 13) % 22, p: i }));
+  const tx = H.torch[0], ty = H.torch[1];
+  const from = [tx - 3, ty + 2], to = [H.mvX + 4, H.mvY + 6];
+  function frame(now) {
+    const t = (now - t0) / 1000;
+    const fl = .92 + .08 * Math.sin(t * 23) * Math.sin(t * 7.3);
+    const cyc = t % 2.6, dyn = [{ x: tx, y: ty, r: 92, i: 1.05 * fl, c: [1, .62, .28] }];
+    if (Math.random() < .5) sparks.push({ x: tx + (Math.random() - .5) * 2, y: ty - 1, vx: (Math.random() - .5) * .3, vy: -.4 - Math.random() * .5, l: 30 + Math.random() * 20, c: [1, .7, .3] });
+    let px = -1, py = -1;
+    if (cyc < .8) {
+      const k = cyc / .8; px = lerp(from[0], to[0], k); py = lerp(from[1], to[1], k) - Math.sin(k * Math.PI) * 8;
+      dyn.push({ x: px, y: py, r: 34, i: 1.1, c: [1, .45, .15] });
+      for (let s = 0; s < 3; s++) sparks.push({ x: px, y: py, vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4, l: 14, c: [1, .5, .15] });
+    } else if (cyc < 1.25) {
+      const k = (cyc - .8) / .45;
+      dyn.push({ x: to[0], y: to[1], r: 44 * (1 - k), i: 1.6, c: [1, .6, .25] });
+      if (k < .2) for (let s = 0; s < 14; s++) sparks.push({ x: to[0], y: to[1], vx: (Math.random() - .5) * 2.2, vy: (Math.random() - .7) * 2.2, l: 24 + Math.random() * 16, c: [1, .55, .2] });
+    }
+    compose(S, LG, img.data, { flick: fl, dyn });
+    const d = img.data;
+    const add = (x, y, c, a) => { x |= 0; y |= 0; if (x < 0 || y < 0 || x >= 320 || y >= 180) return; const j = (y * 320 + x) * 4; d[j] = Math.min(255, d[j] + c[0] * a * 255); d[j + 1] = Math.min(255, d[j + 1] + c[1] * a * 255); d[j + 2] = Math.min(255, d[j + 2] + c[2] * a * 255); };
+    for (let i = sparks.length - 1; i >= 0; i--) { const p = sparks[i]; p.x += p.vx; p.y += p.vy; p.vy += .01; p.l--; if (p.l <= 0 || S.at(p.x, p.y) === SOLID) { sparks.splice(i, 1); continue; } add(p.x, p.y, p.c, Math.min(1, p.l / 15)); }
+    if (px >= 0) { add(px, py, [1, .9, .6], 1); add(px + 1, py, [1, .7, .3], 1); add(px, py + 1, [1, .7, .3], .8); }
+    add(tx, ty, [1, .85, .5], fl); add(tx, ty - 1, [1, .6, .2], fl * .9); add(tx + (Math.random() < .5 ? 1 : 0), ty - 2, [1, .4, .1], .7);
+    flies.forEach(f => { f.p += .02; const x = f.x + Math.sin(f.p * 1.3) * 10, y = f.y + Math.cos(f.p) * 5; if (S.at(x, y) === EMPTY) add(x, y, [.8, 1, .4], .55 + .45 * Math.sin(f.p * 5)); });
+    ctx.putImageData(img, 0, 0);
+  }
+  function loop(now) { if (!paused && visible && now - last > 33) { frame(now); last = now; } requestAnimationFrame(loop); }
+  frame(performance.now() + 300);
+  requestAnimationFrame(loop);
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(cv);
+  const btn = document.getElementById("pauseBtn");
+  btn.textContent = paused ? "Пуск" : "Пауза";
+  btn.addEventListener("click", () => { paused = !paused; btn.textContent = paused ? "Пуск" : "Пауза"; });
+}
+
+// =================================================================== pixel icons
+const ICONS = {
+  spindle: { rows: [".....rrr.....", "...rrRrRr....", "bbbrrrrrrrbbb", "...rRrRrr....", ".....rrr....."], pal: { r: "#c8392a", R: "#8f1f17", b: "#a8804e" } },
+  candle: { rows: ["..y..", ".yoy.", ".yoy.", "..k..", "wwwww", "wwwww", "wWwww", "wwwWw", "wwwww", "wWwww", ".www."], pal: { y: "#ffd66a", o: "#ff8a2a", k: "#2a1a10", w: "#efe6c8", W: "#c9bc96" } },
+  grivna: { rows: ["..sssss..", ".sSSSSSs.", "sSSWSSSSs", ".sssssss."], pal: { s: "#8a8c90", S: "#c8ccd2", W: "#ffffff" } },
+  zachin: { rows: ["....h....", "...sss...", "....s....", "..wwwww..", ".w.wrw.w.", "...wrw...", "...p.p...", "...p.p...", "..ll.ll.."], pal: { h: "#6a4a2a", s: "#c48a66", w: "#3a2a1e", r: "#c0392b", p: "#4a4a52", l: "#8a6a3a" } },
+  alatyr: { rows: ["....l....", ".l..w..l.", "...www...", "..wwwww..", "lwwwWwwwl", "..wwwww..", "...www...", ".l..w..l.", "....l...."], pal: { l: "#c8a040", w: "#5a5448", W: "#2a2620" } },
+  flame: { rows: ["....y....", "...yy....", "...yoy...", "..yoory..", "..yoroy..", ".yorrroy.", ".yorRroy.", "..yorroy.", "...yyyy.."], pal: { y: "#e8a020", o: "#e05a1a", r: "#b8301a", R: "#7a1a10" } },
+  key: { rows: ["..ggg....", ".g...g...", ".g...g...", "..ggg....", "...g.....", "...g.....", "...ggg...", "...g.....", "...gg...."], pal: { g: "#4a3a2a" } },
+  man: { rows: ["...hhh...", "..hhhhh..", "..hssss..", "...sss...", "..wrrrw..", ".wwwrwww.", ".swwrwws.", "..BBBBB..", "..wrwrw..", "...p.p...", "..ll.ll.."], pal: { h: "#b08a4a", s: "#e3b088", w: "#e6e0d0", r: "#c0392b", B: "#9a2a20", p: "#6a6e78", l: "#c9a35a" } },
+  bear: { rows: ["......bb.", "..bbbbbbb", ".bbbbbbbe", "bbbbbbbbb", "bbbbbbbb.", ".bb..bb..", ".bb..bb.."], pal: { b: "#7a5236", e: "#1a1008" } },
+  wolf: { rows: [".......b.", "......bbb", "b.bbbbbbe", ".bbbbbbb.", "..bbbbb..", "..b.b.b..", "..b.b..b."], pal: { b: "#9a9a92", e: "#ffd24a" } },
+  falcon: { rows: ["....b....", "...bbb...", "b..bbb..b", "bbbbbbbbb", ".bbbbbbb.", "...bbb...", "..b.b.b.."], pal: { b: "#a8885a" } },
+  pike: { rows: ["b...bbb..", "bb.bbbbbb", "bbbbbbbeb", "bb.bbbbbb", "b...bbb.."], pal: { b: "#6a8a5a", e: "#ffe080" } },
+  mouse: { rows: ["......bb.", "...bbbbbb", "..bbbbbbe", "tbbbbbbb.", "t..b..b.."], pal: { b: "#9a9088", t: "#c8a89a", e: "#1a1008" } }
+};
+function pixCanvas(rows, pal) {
+  const h = rows.length, w = rows[0].length, c = document.createElement("canvas");
+  c.width = w; c.height = h; c.className = "px";
+  const x = c.getContext("2d");
+  rows.forEach((row, j) => { for (let i = 0; i < w; i++) { const col = pal[row[i]]; if (col) { x.fillStyle = col; x.fillRect(i, j, 1, 1); } } });
+  return c;
+}
+function jugRows(lvl) {
+  const base = [".ccccccc.", "..ciiic..", "..ciiic..", ".ciiiiic.", "ciiiiiiic", "ciiiiiiic", "ciiiiiiic", "ciiiiiiic", ".ciiiiic.", "..ccccc.."];
+  return base.map((r, j) => j >= 10 - lvl ? r.replace(/i/g, "f") : r);
+}
+const JUG = { live: "#4ac08a", dead: "#7a6a9a", poppy: "#c8382a", fire: "#ff8a2a", milk: "#eae2cc" };
+function fillIcons() {
+  document.querySelectorAll("[data-ico]").forEach(el => { const ic = ICONS[el.dataset.ico]; if (ic) el.replaceChildren(pixCanvas(ic.rows, ic.pal)); });
+  document.querySelectorAll("[data-jug]").forEach(el => el.replaceChildren(pixCanvas(jugRows(+el.dataset.lvl), { c: "#8a5a3a", i: "#140f0a", f: JUG[el.dataset.jug] })));
+}
+
+// =================================================================== Ivan: portrait, ladder, random Ivans
+const BASE = [
+  "................", "......hhhh......", ".....hhhhhh.....", "....hhhhhhhh....", "....hhhhhhhhh...", "....hhsssssss...",
+  "....hsssssess...", "....hssssssss...", ".....sssssSs....", ".....hhssshh....", "......hhhhh.....", ".....wrrrrrw....",
+  "....wwwwrwwww...", "...wwwwwrwwwww..", "...wwWwwrwwWww..", "...ssWwwrwwWss..", "...ssBBBBBBBss..", ".....wwwwwwW....",
+  ".....rwrwrwr....", ".....ppp.ppp....", ".....ppp.ppp....", ".....ooo.ooo....", ".....ooo.ooo....", "....llll.llll..."
+];
+const PAL0 = { h: "#9a7444", s: "#e2ae86", S: "#c48a66", e: "#2a1a12", w: "#e6dfcf", W: "#b9b09c", r: "#c0392b", B: "#8e2a1f", p: "#565a66", o: "#d6cfbd", l: "#c9a35a" };
+const STEPS = [
+  { name: "Живой", note: "Тень на месте, рубаха белая", pal: {}, set: [], glow: {}, shadow: true },
+  { name: "Заложный", note: "Тени нет, на рубахе могильная земля", pal: { s: "#d2b9a0", S: "#b29a84", w: "#cfc7b2", W: "#a49c86" }, set: [[5, 17, "d"], [9, 18, "d"], [11, 17, "d"], [5, 21, "d"], [10, 22, "d"], [4, 23, "d"], [12, 23, "d"], [7, 13, "d"]], extra: { d: "#4a3626" }, glow: {} },
+  { name: "Навий", note: "Серая кожа, глаза светятся", pal: { s: "#a7aca4", S: "#868b84", h: "#6d6a62", w: "#a9aaa2", W: "#878880", r: "#7a5450", B: "#5e4a48", p: "#4a4d55", o: "#9c9a90", l: "#8a7a58" }, set: [[10, 6, "E"]], extra: { E: "#cfefff" }, glow: { E: "#9fdcff" }, alpha: .85 },
+  { name: "Упырь", note: "Чужой румянец, клыки, кровь", pal: { s: "#d9c0b0", S: "#b98f86" }, set: [[10, 6, "E"], [11, 7, "k"], [9, 8, "f"], [10, 8, "k"], [10, 9, "x"], [8, 12, "x"], [9, 13, "x"], [7, 14, "x"], [9, 14, "x"], [8, 17, "x"], [10, 17, "x"]], extra: { E: "#ff3b2f", k: "#c0504a", f: "#f4f0e6", x: "#6e0f12" }, glow: { E: "#ff3b2f" } },
+  { name: "Волкодлак", note: "Шерсть, уши, хвост, жёлтые глаза", pal: { h: "#5e4e3c", s: "#8a7458", S: "#6e5c46", w: "#b9ae96" }, set: [[5, 0, "h"], [5, 1, "h"], [6, 1, "h"], [10, 0, "h"], [10, 1, "h"], [9, 1, "h"], [12, 7, "s"], [13, 7, "s"], [12, 8, "s"], [13, 8, "n"], [10, 6, "E"], [3, 17, "c"], [12, 17, "c"], [3, 18, "h"], [2, 19, "h"], [2, 20, "h"], [3, 19, "h"], [6, 18, "."], [9, 18, "."]], extra: { E: "#ffd23a", n: "#1a1210", c: "#e8e2d0" }, glow: { E: "#ffd23a" } },
+  { name: "Ведьмак", note: "Тёмные одежды, тени с пальцев", pal: { h: "#1e1a22", s: "#9aa58e", S: "#7a8670", w: "#2b2730", W: "#1c1a20", r: "#7a2a3a", B: "#3a1a24", p: "#1e1c22", o: "#3a3640", l: "#4a3e30" }, set: [[4, 9, "h"], [4, 10, "h"], [4, 11, "h"], [4, 12, "h"], [3, 12, "h"], [3, 13, "h"], [10, 6, "E"], [3, 17, "q"], [3, 18, "q"], [3, 20, "q"], [12, 17, "q"], [12, 19, "q"], [12, 21, "q"]], extra: { E: "#c28cff", q: "#6a46a0" }, glow: { E: "#c28cff", q: "#5a3a90" } },
+  { name: "Бессмертный", note: "Кости, корона, кафтан Кощея", pal: { h: "#d9d1bb", s: "#d9d1bb", S: "#9e9784", w: "#1d1b24", W: "#141219", r: "#b8902e", B: "#b8902e", p: "#24212b", o: "#2e2a36", l: "#3a3328" }, set: [[5, 0, "g"], [7, 0, "g"], [9, 0, "g"], [11, 0, "g"], [5, 1, "g"], [6, 1, "g"], [7, 1, "g"], [8, 1, "g"], [9, 1, "g"], [10, 1, "g"], [11, 1, "g"], [10, 6, "E"], [9, 6, "z"], [11, 6, "z"], [8, 8, "z"], [10, 8, "z"], [9, 9, "."], [10, 9, "."], [3, 11, "v"], [2, 12, "v"], [2, 13, "v"], [2, 14, "v"], [2, 15, "v"], [2, 16, "v"], [2, 17, "v"], [3, 18, "v"], [3, 19, "v"], [3, 20, "v"], [3, 21, "v"]], extra: { g: "#d6a640", E: "#b8ffcf", z: "#151318", v: "#2a1f2e" }, glow: { E: "#8affb0", g: "#7a5a10" } }
+];
+function drawIvan(cv, step, sc) {
+  const st = STEPS[step], rows = BASE.map(r => r.split(""));
+  st.set.forEach(([x, y, ch]) => { rows[y][x] = ch; });
+  const pal = Object.assign({}, PAL0, st.pal, st.extra || {});
+  const ctx = cv.getContext("2d"), ox = (cv.width - 16 * sc) / 2, oy = cv.height - 24 * sc - 3 * sc;
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  if (st.shadow) { ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.beginPath(); ctx.ellipse(cv.width / 2, oy + 24 * sc + sc * .6, 5.5 * sc, 1.1 * sc, 0, 0, 6.3); ctx.fill(); }
+  ctx.globalAlpha = st.alpha || 1;
+  rows.forEach((row, y) => row.forEach((ch, x) => {
+    const col = pal[ch]; if (!col) return;
+    if (st.glow[ch]) { ctx.shadowColor = st.glow[ch]; ctx.shadowBlur = sc * 2.6; } else ctx.shadowBlur = 0;
+    ctx.fillStyle = col; ctx.fillRect(Math.round(ox + x * sc), Math.round(oy + y * sc), sc, sc);
+  }));
+  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+}
+const IVANS = [
+  { name: "Иван Попялов", trait: "Двенадцать лет пролежал в золе. Огонь и зола ему не вредят, у печи лечится вдвое.", tale: "Сказка «Иван Попялов», сборник Афанасьева." },
+  { name: "Иван-дурак", trait: "Дуракам счастье: Доля ходит за ним по пятам, одна дорога на каждом Распутье бесплатна.", tale: "«Сивка-бурка» и десятки других сказок." },
+  { name: "Иван-царевич", trait: "Начинает с конём. Серый волк служит охотнее, но Кощей узнаёт его с первого взгляда.", tale: "«Иван-царевич и серый волк», «Марья Моревна»." },
+  { name: "Иван Быкович", trait: "Сын коровы, богатырская сила и палица. Три ночи на Калиновом мосту даются ему легче.", tale: "Сказка «Иван Быкович»." },
+  { name: "Иван Сученко", trait: "Вскормлен собакой: чует нечисть сквозь стены, собаки на него не лают.", tale: "«Иван Сученко и Белый Полянин»." },
+  { name: "Ивашко Медведко", trait: "Сын медведя: облик медведя открыт с первой земли, но люди и Домовой его боятся.", tale: "Сказка «Ивашко Медведко»." },
+  { name: "Покатигорошек", trait: "Родился из горошины: маленький, пролезает в щели, а железная булава у него в пять пудов.", tale: "Сказка «Покатигорошек», укр. «Котигорошко»." },
+  { name: "Иван — крестьянский сын", trait: "Отцовский наказ: Деды учат его быстрее, каждый упокоенный даёт двойной дар.", tale: "«Иван — крестьянский сын и чудо-юдо»." },
+  { name: "Иван-солдат", trait: "Начинает с солдатским мешком: «Полезай в мешок!» работает на любого, кроме босса.", tale: "«Солдат и смерть»." },
+  { name: "Иван — вдовий сын", trait: "Сирота: Деды приходят к нему чаще, но Недоля тоже.", tale: "Сказки о вдовьем сыне." }
+];
+let ivIdx = 0;
+function showIvan(i) {
+  ivIdx = i; const v = IVANS[i];
+  document.getElementById("ivName").textContent = v.name;
+  document.getElementById("ivTrait").textContent = v.trait;
+  document.getElementById("ivTale").textContent = v.tale;
+}
+function setupIvan() {
+  drawIvan(document.getElementById("ivanPortrait"), 0, 6);
+  showIvan(0);
+  document.getElementById("reroll").addEventListener("click", () => { let j; do { j = Math.floor(Math.random() * IVANS.length); } while (j === ivIdx); showIvan(j); });
+  const lad = document.getElementById("ladder");
+  STEPS.forEach((s, i) => {
+    const d = document.createElement("div"); d.className = "rung";
+    const cv = document.createElement("canvas"); cv.width = 120; cv.height = 168; cv.className = "px"; cv.setAttribute("aria-label", "Иван, ступень " + i + ": " + s.name);
+    d.append(cv);
+    d.insertAdjacentHTML("beforeend", `<span class="n">ступень ${i}</span><b>${s.name}</b><span>${s.note}</span>`);
+    lad.append(d);
+    drawIvan(cv, i, 6);
+  });
+}
+
+// =================================================================== realms gallery, anatomy, map
+const REALMS = [
+  { id: "pogost", gen: genPogost, seed: 11, name: "Погост и деревня", lands: "земли 1–3", text: "Сумерки, луна, тёплые окна изб — единственный тёплый свет. Под каждым голубцом гроб, под избой подпол с Домовым, колодец ведёт вниз.", sw: ["#121722", "#3b3d4a", "#5b3e27", "#ffb75a", "#3a2a1c"] },
+  { id: "les", gen: genLes, seed: 21, name: "Дремучий лес", lands: "земли 4–6", text: "Ели уходят за край экрана, свет еле пробивается. Внизу светятся гнилушки, в берлоге спит медведь, на опушке избушка на курьих ножках и черепа с горящими глазами.", sw: ["#0b120d", "#162a1c", "#2d4a27", "#8affd8", "#c98a2a"] },
+  { id: "top", gen: genTop, seed: 31, name: "Топи", lands: "земли 7–9", text: "Зелёный туман, кочки, мёртвые деревья, огоньки над водой. Под ряской бурая вода, под водой тлеющий торф с газом и костями.", sw: ["#2a352d", "#2a3520", "#5c8a2c", "#241a12", "#ff6a1e"] },
+  { id: "omut", gen: genOmut, seed: 41, name: "Омут", lands: "земли 10–12", text: "Мельница наверху, свет гаснет с глубиной. На дне затопленные избы и колокол в иле — намёк на Китеж. У поверхности русалки, в толще щука.", sw: ["#233040", "#123c4a", "#2a5a2a", "#d4e4e0", "#8a6a3a"] },
+  { id: "med", gen: S => genMine(S, "copper"), seed: 51, name: "Медное царство", lands: "земли 13–15", text: "Шахта с крепью и лестницей, малахит полосами, медная руда, фонари в штреках. Внизу малахитовый зал и ящерка Хозяйки.", sw: ["#3a342a", "#2f8a62", "#5cbf8c", "#c07a3e", "#ffe0a0"] },
+  { id: "serebro", gen: S => genMine(S, "silver"), seed: 61, name: "Серебряное царство", lands: "земли 16–18", text: "Холодный камень, серебряные жилы, ледяные сосульки, подземное озеро. В штреке Шубин с синим фонарём, в верхних полостях копится газ.", sw: ["#2b313b", "#cdd6e4", "#a8d4e8", "#0f2a44", "#8ac8ff"] },
+  { id: "zoloto", gen: S => genMine(S, "gold"), seed: 71, name: "Золотое царство", lands: "земли 19–21", text: "Тёплая порода, золотые жилы, золотой песок оседает на каждом уступе. Сквозь всю землю проходит чешуйчатое тело Великого Полоза.", sw: ["#3a2a19", "#e3b54a", "#d9a53a", "#a8903a", "#ff7a2a"] },
+  { id: "smorodina", gen: genSmorodina, seed: 81, name: "Смородина и Калинов мост", lands: "земли 22–24", text: "Огненная река внизу, раскалённый мост над пропастью, сера и пепел, изба богатырей и кузница. За мостом в темноте шестиглавый силуэт Чуда-юда.", sw: ["#1e0e0a", "#2a2220", "#6a2a1a", "#ff7a1a", "#b8b03a"] },
+  { id: "nav", gen: genNav, seed: 91, name: "Тридевятое царство", lands: "земли 25–27", text: "Терем из костей под шатровой крышей, цепи с потолка, чёрно-серебряный сад, навий туман. Одно тёплое окно — Марья Моревна. Внизу Бессмертная рать и пленный Иван.", sw: ["#120d1c", "#d6cfbc", "#2a2532", "#7a5aa8", "#ffb75a"] },
+  { id: "buyan", gen: genBuyan, seed: 101, name: "Море-Окиян и остров Буян", lands: "земли 28–30", text: "Шторм и молния, белый остров. Алатырь светится, на дубу на цепях висит сундук, на вершине птица Гагана, у камня свернулась змея Скоропея.", sw: ["#24363c", "#0f3440", "#c8c2b0", "#f2eddc", "#1e2e18"] }
+];
+const rendered = {};
+function buildGallery() {
+  const grid = document.getElementById("realmGrid");
+  REALMS.forEach((R, i) => {
+    const art = document.createElement("article"); art.className = "realm";
+    art.innerHTML = `<div class="cv"><canvas class="px" width="${LW}" height="${LH}" aria-label="Набросок: ${R.name}"></canvas><span class="lands">${R.lands}</span></div>
+      <div class="info"><span class="eyebrow">Царство ${["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "Тридесятое"][i]}</span><h3>${R.name}</h3><p>${R.text}</p><div class="sw">${R.sw.map(c => `<i style="background:${c}"></i>`).join("")}</div></div>`;
+    grid.append(art);
+    R.cv = art.querySelector("canvas");
+  });
+}
+function renderRealm(R) {
+  const S = new Scene(LW, LH, R.seed);
+  const P = R.gen(S);
+  renderTo(R.cv, S, P);
+  rendered[R.id] = R.cv;
+}
+const ANNOT = [
+  { x: 150, y: 70, t: "Небо и деревня: единственная светлая полоса земли" },
+  { x: 240, y: 188, t: "Свежая могила: здесь встаёт Иван" },
+  { x: 40, y: 214, t: "Подпол с Домовым: тайник и мастерская" },
+  { x: 152, y: 214, t: "Колодец: короткий путь вниз" },
+  { x: 268, y: 226, t: "Гробы под голубцами: заложные встают ночью" },
+  { x: 70, y: 395, t: "Подземная вода: здесь можно наполнить крынку" },
+  { x: 250, y: 420, t: "Клад: светится только на Купалу" },
+  { x: 175, y: 528, t: "Выход: нора в следующую землю" }
+];
+function buildAnatomy() {
+  const wrap = document.getElementById("anatomy");
+  [0, 1, 2].forEach(k => { const v = document.createElement("div"); v.className = "vp"; v.style.top = (k * 180 / LH * 100) + "%"; v.style.height = (180 / LH * 100) + "%"; v.innerHTML = `<span>экран ${k + 1}</span>`; wrap.append(v); });
+  ANNOT.forEach((a, i) => { const t = document.createElement("div"); t.className = "tag"; t.style.left = (a.x / LW * 100) + "%"; t.style.top = (a.y / LH * 100) + "%"; t.innerHTML = `<i>${i + 1}</i>`; wrap.append(t); });
+  document.getElementById("anatLegend").innerHTML = ANNOT.map((a, i) => `<li><i>${i + 1}</i><span>${a.t}</span></li>`).join("");
+}
+function copyAnatomy() {
+  const src = rendered.pogost; if (!src) return;
+  const cv = document.getElementById("anatCv"); cv.getContext("2d").drawImage(src, 0, 0);
+}
+const SIDES = { pogost: "к Чисту полю → по меже", les: "← Лысая гора, говорят, за болотом", omut: "звон из-под воды → Китеж?", zoloto: "← река течёт к рахманам", smorodina: "← за чёртом в Пекло" };
+function buildChart() {
+  const chart = document.getElementById("chart");
+  REALMS.forEach((R, ri) => {
+    const row = document.createElement("div"); row.className = "crow";
+    const known = ri <= 1;
+    row.innerHTML = `<div class="nm">${known || ri < 4 ? R.name : "Незнаемое царство"}<small>${R.lands}</small></div>`;
+    for (let k = 0; k < 3; k++) {
+      const no = ri * 3 + k + 1, node = document.createElement("div");
+      node.className = "node" + (no > 5 ? " unk" : "") + (no === 5 ? " cur" : "");
+      const c = document.createElement("canvas"); c.width = 160; c.height = 100; node.append(c);
+      node.insertAdjacentHTML("beforeend", `<span class="no">${no}</span>`);
+      row.append(node);
+      R["n" + k] = c;
+    }
+    const side = document.createElement("div"); side.className = "side"; side.textContent = SIDES[R.id] || ""; if (!SIDES[R.id]) side.style.borderLeft = "none"; row.append(side);
+    chart.append(row);
+    if (ri < REALMS.length - 1) { const s = document.createElement("div"); s.className = "stone-row"; s.innerHTML = `<span>◆ Распутье</span>`; chart.append(s); }
+  });
+}
+function fillChart(R) {
+  for (let k = 0; k < 3; k++) {
+    const c = R["n" + k], ctx = c.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(R.cv, 0, k * 180, LW, 200, 0, 0, c.width, c.height);
+  }
+}
+function drawStone() {
+  const S = new Scene(96, 84, 5);
+  S.bgAll(() => C("#0b0d0b")); S.skyMark(() => true);
+  for (let y = 0; y < 84; y++) for (let x = 0; x < 96; x++) { const dx = (x - 48) / 34, dy = (y - 46) / 36; if (dx * dx + (dy < 0 ? dy * dy * 1.2 : dy * dy * .4) < 1 && y < 80) S.put(x, y, m("#8a8478", { v: .18, n: .08 })); }
+  for (let l = 0; l < 6; l++) for (let x = 26; x < 70; x++) if (((x * 7 + l * 13) % 9) < 5) S.put(x, 26 + l * 7, m("#3a3630"));
+  for (let x = 0; x < 96; x++) for (let y = 78; y < 84; y++) S.put(x, y, m("#2a3020", { v: .3 }));
+  renderTo(document.getElementById("stoneCv"), S, { sky: [.6, .62, .6], amb: [.25, .25, .25], skyR: 2, e2g: 1, glow2: 0 });
+}
+function drawBook() {
+  const cv = document.getElementById("bookCv"), ctx = cv.getContext("2d");
+  const pal = { g: "#2a4a30", s: "#dfe8d8", E: "#4aa86a", w: "#e8efe0" };
+  MAVKA.forEach((row, j) => { for (let i = 0; i < 7; i++) { const c = pal[row[i]]; if (c) { ctx.fillStyle = c; ctx.fillRect(i, j, 1, 1); } } });
+}
+
+// =================================================================== boot
+fillIcons();
+startHero();
+setupIvan();
+buildGallery();
+buildAnatomy();
+buildChart();
+drawStone();
+drawBook();
+let qi = 0;
+(function next() {
+  if (qi >= REALMS.length) return;
+  const R = REALMS[qi++];
+  try { renderRealm(R); fillChart(R); if (R.id === "pogost") copyAnatomy(); } catch (e) { console.error(R.id, e); }
+  setTimeout(next, 30);
+})();
+})();
+</script>
