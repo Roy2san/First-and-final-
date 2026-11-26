@@ -9,8 +9,9 @@
 4. Что делает человеческие истории увлекательными
 5. Восприятие и важные оговорки
 6. Соцсети и YouTube: успешные и провальные ролики
-7. Как это превращено в правила скилла
-8. Источники
+7. Кино и длинные форматы: что затягивает
+8. Как это превращено в правила скилла
+9. Источники
 
 ---
 
@@ -121,7 +122,18 @@
 - нечестный или непонятный поворот;
 - монотонный ритм.
 
-## 7. Как это превращено в правила скилла
+## 7. Кино и длинные форматы: что затягивает
+
+- **Четыре части.** Thompson (Storytelling in the New Hollywood, 1999) и Cutting (Psychonomic Bulletin & Review 2016; 150 фильмов за 75 лет) описывают популярные фильмы как четыре части примерно равной длины: завязка, осложнение, развитие, кульминация, а также необязательные пролог и эпилог. Части разделены поворотами, критический поворот приходится на середину. Плотность монтажных переходов подтверждает эту разбивку статистически. Почти все протагонисты появляются в завязке.
+- **Эмоциональные качели** (Berger, Kim, Meyer, Journal of Consumer Research 2021). Фильмы с большей эмоциональной волатильностью, то есть с большими перепадами между позитивом и негативом, получают более высокие оценки, особенно в жанрах, которые смотрят ради ощущений.
+- **Форма и скорость истории** (Toubia, Berger, Eliashberg, PNAS 2021; около 50 000 текстов). Фильмы и эпизоды, которые «быстрее движутся» по смыслу, нравятся больше. Эпизоды сериалов, которые охватывают слишком много тем, нравятся меньше. Laurino Dos Santos & Berger (2022): лучше оценивают фильмы и эпизоды, которые начинаются медленнее и ускоряются к концу.
+- **Порядок подачи** (Brewer & Lichtenstein 1981–1982, структурно-аффективная теория). Если исход отложен, возникает саспенс. Если исход показан до причин, возникает любопытство. Если информация скрыта и внезапно раскрыта, возникает сюрприз. Позднейшие работы показывают, что в реальных фильмах эти эмоции смешиваются и одна структура редко даёт только одну эмоцию.
+- **Привязанность к героям** (теория аффективной диспозиции, Zillmann; проверка Kaspar et al., Frontiers in Psychology 2016). Саспенс и удовольствие зависят от отношения к персонажам: зритель хочет хорошего симпатичным и плохого несимпатичным. Чем больше симпатия к протагонисту, тем сильнее саспенс и интерес после просмотра.
+- **Структура управляет вниманием** («нейрокинематика», Hasson et al., Projections 2008). Серия Хичкока синхронизировала мозговую активность зрителей гораздо сильнее, чем несмонтированная запись реальной жизни. Чем жёстче авторский контроль над структурой, тем одинаковее и сильнее вовлечение аудитории.
+- **Клиффхэнгеры** (метаанализ Ghibellini & Meier, Humanities and Social Sciences Communications 2025; 59 публикаций). Тенденция возвращаться к прерванному делу (эффект Овсянкиной) общая и устойчивая. А «незаконченное лучше помнится» (эффект Зейгарник) универсально не подтверждается. Прямых исследований клиффхэнгеров нет, так что это перенос, а не доказательство.
+- **Практика длинного YouTube.** Утёкший гайд MrBeast (подлинность не подтверждена) называет контрольные точки: первая минута, около 3-й минуты (поворот или эскалация) и около 6-й (ещё одна, даже если она требует подготовки). Если зритель досмотрел до середины, он, вероятно, досмотрит до конца. Креаторы советуют держать не больше 2–3 открытых вопросов одновременно и делать рехук каждые 60–90 секунд. Независимых проверок этих правил нет.
+
+## 8. Как это превращено в правила скилла
 
 | Находка | Правило в SKILL.md |
 |---|---|
@@ -142,7 +154,18 @@
 | Метка «ИИ» срезает погружение | Финальный аудит на узнаваемые паттерны |
 | Ясность ценится | Принцип «человечный ≠ с ошибками» |
 
-## 8. Источники
+## 9. Источники
+
+**Кино и длинные форматы**
+- Thompson (1999). Storytelling in the New Hollywood. Harvard University Press. Обзор: https://www.davidbordwell.net/blog/2011/06/09/cognitive-scientists-1-screenplay-gurus-0/
+- Cutting (2016). Narrative theory and the dynamics of popular movies. Psychonomic Bulletin & Review 23(6). https://pmc.ncbi.nlm.nih.gov/articles/PMC5133278
+- Berger, Kim, Meyer (2021). What Makes Content Engaging? How Emotional Dynamics Shape Success. Journal of Consumer Research 48(2). https://faculty.wharton.upenn.edu/wp-content/uploads/2016/11/Emotional-Volatility-1.pdf
+- Toubia, Berger, Eliashberg (2021). How quantifying the shape of stories predicts their success. PNAS 118(26). https://business.columbia.edu/sites/default/files-efs/citation_file_upload/Toubia,%20Berger%20and%20Eliashberg%202021.pdf
+- Brewer, Lichtenstein (1982). Stories are to entertain: A structural-affect theory of stories. Technical Report 265, University of Illinois. https://www.ideals.illinois.edu/items/17648
+- Kaspar, Zimmermann, Wilbers (2016). Affective disposition theory and suspense. Frontiers in Psychology. https://www.frontiersin.org/articles/10.3389/fpsyg.2016.01913/full
+- Hasson et al. (2008). Neurocinematics: The Neuroscience of Film. Projections 2(1). https://pmc.ncbi.nlm.nih.gov/articles/PMC2818432
+- Ghibellini, Meier (2025). Interruption, recall and resumption: a meta-analysis of the Zeigarnik and Ovsiankina effects. Humanities and Social Sciences Communications. https://ideas.repec.org/a/pal/palcom/v12y2025i1d10.1057_s41599-025-05000-w.html
+
 
 **Соцсети, реклама, YouTube**
 - Berger, Milkman (2012). What Makes Online Content Viral? Journal of Marketing Research 49(2). https://faculty.wharton.upenn.edu/wp-content/uploads/2011/11/Virality.pdf
