@@ -155,6 +155,30 @@ def rhythm(sents):
     }
 
 
+VO_LABEL = re.compile(
+    r"^\s*(?:[*_>]+\s*)*(?:\[[^\]]{0,30}\]\s*)?(голос|закадр\w*|диктор|текст за кадром|рассказчи\w+|vo|v\.o\.|voice(?:-?over)?|narrator)"
+    r"\s*(?:\([^)]*\))?\s*:\**\s*(.*)$", re.I)
+OTHER_LABEL = re.compile(r"^\s*(?:[*_>]+\s*)*[\w .()/-]{1,30}:\**(\s|$)")
+
+
+def voiceover_words(text):
+    """Слова закадрового текста: строки с меткой «Голос:», «VO:», «Narrator:» и т. п.
+    и строки сразу под меткой, стоящей отдельно. None, если меток нет."""
+    words, found, inside = 0, False, False
+    for line in text.splitlines():
+        m = VO_LABEL.match(line)
+        if m:
+            found, inside = True, True
+            words += len(WORD.findall(m.group(2)))
+            continue
+        if not line.strip() or OTHER_LABEL.match(line) or line.lstrip().startswith(("#", "[", "|")):
+            inside = False
+            continue
+        if inside:
+            words += len(WORD.findall(line))
+    return words if found else None
+
+
 def main(argv):
     as_json = "--json" in argv
     args = [a for a in argv if a != "--json"]
@@ -172,6 +196,10 @@ def main(argv):
     dashes = len(re.findall(r"\s[—–]\s|—", prose_only(text)))
     triads = len(re.findall(r"\b\w+,\s+\w+,?\s+(и|and)\s+\w+\b", text, re.I))
     per_k = (lambda n: round(n * 1000 / words, 1)) if words else (lambda n: 0)
+    vo = voiceover_words(text)
+    vo_basis = "по меткам закадра" if vo is not None else "весь текст"
+    vo_words = vo if vo is not None else len(WORD.findall(prose_only(text)))
+    vo_sec = (round(vo_words / 160 * 60), round(vo_words / 130 * 60))
 
     warnings = []
     if rh.get("cv") is not None and rh["cv"] < 0.4:
@@ -204,6 +232,7 @@ def main(argv):
         "rhythm": rh,
         "dashes_per_1000_words": per_k(dashes),
         "triads": triads,
+        "voiceover": {"basis": vo_basis, "words": vo_words, "seconds_range": vo_sec},
         "warnings": warnings,
         "hits": hits,
     }
@@ -220,6 +249,7 @@ def main(argv):
         print(f"Ритм: в среднем {rh['mean_words']} слов, σ={rh['stdev_words']}, CV={rh['cv']}, "
               f"коротких(≤4): {rh['short_sentences_le4']}, длинных(≥25): {rh['long_sentences_ge25']}")
     print(f"Тире: {per_k(dashes)} на 1000 слов | тройки: {triads}")
+    print(f"Озвучка ({vo_basis}): {vo_words} слов ≈ {vo_sec[0]}–{vo_sec[1]} сек при 130–160 слов/мин")
     if warnings:
         print("\nПредупреждения:")
         for w in warnings:
