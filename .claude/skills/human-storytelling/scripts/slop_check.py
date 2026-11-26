@@ -91,8 +91,30 @@ def detect_lang(text):
     return "ru" if cyr >= lat else "en"
 
 
+MARKUP_LINE = re.compile(r"^\s*(#.*|[-*_]{3,}|\|.*\||```.*)$")
+LINE_PREFIX = re.compile(
+    r"^\s*(?:[*_>]+\s*)*"                      # markdown bullets, bold, quotes
+    r"(?:\[[^\]]{0,30}\]\s*)?"                   # [0–4 с], [0:00]
+    r"(?:\d{1,2}:\d{2}(?:\s*[–-]\s*\d{1,2}:\d{2})?\s*)?"  # 0:00–0:04
+    r"(?:[\w .()/-]{1,30}:\*{0,2}(?:\s+|$))?"         # labels: «Голос:», «VO:», «КАДР:»
+)
+
+
+def prose_only(text):
+    """Убирает разметку сценария (заголовки, таймкоды, метки «Кадр:», «Голос:»),
+    чтобы ритм и начала предложений считались по самому тексту."""
+    out = []
+    for line in text.splitlines():
+        if MARKUP_LINE.match(line):
+            out.append("")
+            continue
+        line = LINE_PREFIX.sub("", line, count=1).replace("**", "")
+        out.append(line)
+    return "\n".join(out)
+
+
 def sentences(text):
-    parts = [p.strip() for p in SENT_SPLIT.split(text) if p and p.strip()]
+    parts = [p.strip() for p in SENT_SPLIT.split(prose_only(text)) if p and p.strip()]
     return [p for p in parts if WORD.search(p)]
 
 
@@ -147,7 +169,7 @@ def main(argv):
     hits, nominal = scan(text, RU_PATTERNS if lang == "ru" else EN_PATTERNS)
     sents = sentences(text)
     rh = rhythm(sents)
-    dashes = len(re.findall(r"\s[—–]\s|—", text))
+    dashes = len(re.findall(r"\s[—–]\s|—", prose_only(text)))
     triads = len(re.findall(r"\b\w+,\s+\w+,?\s+(и|and)\s+\w+\b", text, re.I))
     per_k = (lambda n: round(n * 1000 / words, 1)) if words else (lambda n: 0)
 
