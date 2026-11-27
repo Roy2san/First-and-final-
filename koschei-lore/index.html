@@ -1,4 +1,4 @@
-<title>Кощеева игла</title>
+<title>Кощей</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,6 +118,14 @@ td.row-h { font-weight: 600; white-space: nowrap; }
 
 /* ladder */
 .ladder { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.ladder.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 760px) { .ladder.three { grid-template-columns: minmax(0, 1fr); } }
+.step.h .pips i { border-color: var(--ally); } .step.h .pips i.on { background: var(--ally); }
+.block > h4.sub { font-family: var(--f-mono); font-weight: 400; font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.side-q { display: flex; flex-direction: column; gap: 12px; }
+.ending .kind { font-family: var(--f-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.ending.main { border-color: var(--accent); }
+.pipsk { display: inline-flex; gap: 3px; } .pipsk i { width: 7px; height: 7px; transform: rotate(45deg); border: 1px solid var(--foe); } .pipsk i.on { background: var(--foe); }
 @media (max-width: 1060px) { .ladder { grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); } }
 .step { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
 .step-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -259,8 +267,8 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
 <header class="mast">
   <div class="wrap">
     <span class="eyebrow">Лор-библия · рогалик в духе Noita · славянский фольклор</span>
-    <h1>Кощеева игла</h1>
-    <p class="lede">Ты напоил прикованного Кощея водой, и он в благодарность <em>простил тебе смерть</em>: вынул её, вложил в иглу и спрятал. Теперь каждая гибель «не своя», и ты возвращаешься всё большей нечистью.</p>
+    <h1>Кощей</h1>
+    <p class="lede">Кощей застрял в своём бессмертии: колдун не может умереть, пока не передаст силу. Он <em>простил тебе смерть</em> — вынул её, спрятал в свою иглу рядом со своей и ждёт наследника. Каждая гибель возвращает тебя к избушке Яги, и всё меньше человеком.</p>
     <div class="counts" id="counts"></div>
     <p class="status" id="status"></p>
     <p class="status"><a href="https://claude.ai/artifact/TNT6FZTAJJoANjpSP4ewVu" target="_blank" rel="noopener" style="color:#F0B9A8">Наброски визуала: игровой экран, царства, карта, интерфейс →</a> · <a href="https://claude.ai/artifact/2gAAGjT9dyXaEgWzGAMk5Q" target="_blank" rel="noopener" style="color:#F0B9A8">Бестиарий в пикселях →</a></p>
@@ -275,6 +283,7 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
     <a href="#bestiary" data-v="bestiary">Бестиарий</a>
     <a href="#feuds" data-v="feuds">Кто кого</a>
     <a href="#forms" data-v="forms">Облики</a>
+    <a href="#souls" data-v="souls">Души</a>
     <a href="#bosses" data-v="bosses">Боссы</a>
     <a href="#items" data-v="items">Артефакты</a>
     <a href="#secrets" data-v="secrets">Секреты</a>
@@ -288,21 +297,22 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
 <section class="view" data-view="core">
   <div class="view-head">
     <span class="eyebrow">Ядро лора</span>
-    <h2>Прощёная смерть</h2>
-    <p class="lede">Всё в игре держится на одном народном представлении: смерть бывает своя и не своя. Отсюда цикл перерождений, лестница нечисти, враги, союзники и концовки.</p>
+    <h2>Кощей ищет наследника</h2>
+    <p class="lede">Колдун не может умереть, пока не передаст силу. Кощей застрял в своём бессмертии и выбрал тебя. На этом поверье держится всё: перерождения, скверна, оружие, финалы и название игры.</p>
   </div>
 
   <div class="block">
     <h3>Завязка</h3>
     <div class="two">
       <div class="prose">
-        <p>В чулане у царицы Марьи Моревны висит на двенадцати цепях тощий старик и просит пить. Герой подаёт ведро, второе, третье, и Кощей рвёт цепи. Так начинается сказка «Марья Моревна» из сборника Афанасьева. Потом Кощей догоняет героя и отпускает его, потому что тот был добр.</p>
-        <p>В игре это «прощаю» понято буквально. Кощей прощает герою смерть: вынимает её, кладёт в иглу и прячет в собственной цепи, в одном яйце со своей. Он считает это щедрым подарком. Он сам когда-то был пленником (древнерусское «кощей» значит «пленник, раб»), и бессмертие кажется ему свободой.</p>
-        <p>Без своей смерти любая гибель становится «не своей». Герой встаёт снова, но каждый раз немного другим: сначала у него пропадает тень, потом его перестают пускать в избы, потом его начинает жечь соль. Цель игры — найти иглу, пока ты ещё помнишь, зачем она тебе.</p>
+        <p>В чулане у царицы Марьи Моревны висит на двенадцати цепях тощий старик и просит пить. Иван подаёт ведро, второе, третье, и Кощей рвёт цепи. Так начинается сказка «Марья Моревна» из сборника Афанасьева.</p>
+        <p>«Первый раз тебя прощаю», — говорит потом Кощей. В игре это понято буквально: он вынимает из Ивана смерть и прячет её в свою иглу, рядом со своей. Теперь Иван не может умереть насовсем. Каждый раз, когда его убивают, Навь выплёвывает его обратно к избушке Бабы-Яги, и забег начинается заново.</p>
+        <p>Зачем Кощею это? По народному поверью, колдун не может умереть, пока не передаст свою силу другому: он мучается, пока кто-нибудь не возьмёт его за руку или пока не разберут конёк крыши. Кощей не всесилен, он застрял в собственном бессмертии. Древнерусское «кощей» и значило «пленник, раб». Он выбрал Ивана наследником, и весь путь — его испытание.</p>
+        <p>Отсюда и название игры. Сломаешь иглу — Кощей наконец умрёт, а ты снова станешь человеком. Заберёшь иглу себе — станешь новым Кощеем.</p>
       </div>
-      <div class="quote">
-        <q>Ну, Иван-царевич, первый раз тебя прощаю, за твою доброту, что водой меня напоил.</q>
-        <cite>«Марья Моревна», Народные русские сказки А. Н. Афанасьева. В игре героя зовут Прощёный.</cite>
+      <div class="side-q">
+        <div class="quote"><q>Ну, Иван-царевич, первый раз тебя прощаю, за твою доброту, что водой меня напоил.</q><cite>«Марья Моревна», Народные русские сказки А. Н. Афанасьева.</cite></div>
+        <div class="quote"><q>Была бы чага по ногате, а кощей по резане.</q><cite>«Слово о полку Игореве»: «кощей» здесь — пленник, которого продали бы за гроши.</cite></div>
       </div>
     </div>
   </div>
@@ -312,17 +322,17 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
     <div class="two">
       <div class="prose">
         <p>Этнограф Д. К. Зеленин (1916) показал, что в народных верованиях покойники делятся на два резко отличных разряда. Умершие своей смертью уходят к предкам: их зовут «деды» и «родители», поминают на Радуницу и осенние Деды, и они помогают роду.</p>
-        <p>Умершие не своей смертью (утопленники, убитые, опойцы, некрещёные дети, колдуны) становятся «заложными». Земля их не принимает, и они ходят среди живых, пока не выйдет отпущенный им век. Из них получаются русалки, упыри, игоши, кикиморы.</p>
-        <p>Это и есть игровой цикл. Каждая смерть героя «не своя», поэтому он возвращается заложным и поднимается на ступень нечисти. Каждый, кого ты упокоил в забеге (вернул его смерть, дал имя, похоронил по обычаю), уходит в деды и помогает тебе дальше.</p>
+        <p>Умершие не своей смертью (утопленники, опойцы, убитые, некрещёные дети, колдуны) становятся «заложными». Земля их не принимает, и они ходят среди живых, пока не выйдет отпущенный им век. Из них получаются русалки, упыри, игоши, кикиморы.</p>
+        <p>Это и есть цикл игры. Без своей смерти каждая гибель Ивана «не своя», и он возвращается немного нечистью. Навь полна заложных, и их души становятся твоим оружием. Кого ты отпустил, а не взял, тот уходит к дедам и помогает.</p>
       </div>
       <div class="tbl-wrap">
         <table>
           <thead><tr><th></th><th>Деды · своя смерть</th><th>Заложные · не своя</th></tr></thead>
           <tbody>
-            <tr><td class="row-h">Кто</td><td>умершие в свой срок, по обычаю</td><td>утопленники, убитые, опойцы, некрещёные дети, колдуны</td></tr>
+            <tr><td class="row-h">Кто</td><td>умершие в свой срок, по обычаю</td><td>утопленники, опойцы, убитые, некрещёные дети, колдуны</td></tr>
             <tr><td class="row-h">Где лежат</td><td>на кладбище, в родной земле</td><td>за оградой, у дорог, в болоте; земля их «не принимает»</td></tr>
             <tr><td class="row-h">Что делают</td><td>приходят на поминальные дни, берегут род</td><td>бродят, пока не истечёт их век; вредят живым</td></tr>
-            <tr><td class="row-h">В игре</td><td>союзники между забегами</td><td>враги и твоё возможное будущее</td></tr>
+            <tr><td class="row-h">В игре</td><td>союзники на погосте</td><td>враги и души-заклинания</td></tr>
           </tbody>
         </table>
       </div>
@@ -330,46 +340,97 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
   </div>
 
   <div class="block">
-    <h3>Лестница нечисти</h3>
-    <p class="prose">Семь ступеней. Каждая смерть поднимает на одну. Каждая ступень даёт силу и отнимает что-то человеческое, а мир меняет к тебе отношение: светлые отворачиваются, нечисть начинает принимать за своего, обереги из твоих рук начинают бить тебя самого. Спуститься вниз можно, но редко и дорого: молодильное яблоко, сброшенная змеиная кожа, купальский костёр до третьей ступени.</p>
+    <h3>Две ветки: чистый и нечистый</h3>
+    <p class="prose">Скверна копится между забегами. Каждая смерть и каждая взятая душа тянут Ивана к нави; отпущенные души, баня с третьим паром, купальский костёр и молодильные яблоки возвращают к людям. Это выбор стиля игры. На ветке нави больше силы и душ, но настоящие обереги от нечисти (соль, железо, серебро, полынь, осина, петушиный крик) бьют по тебе самому. На ветке чистого обереги и деды на твоей стороне, но души держатся хуже.</p>
+    <h4 class="sub">Ветка чистого</h4>
+    <div class="ladder three" id="ladderH"></div>
+    <h4 class="sub">Ветка нави</h4>
     <div class="ladder" id="ladder"></div>
+  </div>
+
+  <div class="block">
+    <h3>Герой: Иван-наследник</h3>
+    <div class="two">
+      <div class="prose">
+        <p>Каждый забег — новый Иван из сказок: Попялов, Быкович, Сученко, Медведко, Покатигорошек, Иван-дурак, Иван-царевич, крестьянский сын, вдовий сын, солдат. У каждого одна черта из его сказки. Какая выпадет, решают рожаницы, если оставить им трапезу на погосте.</p>
+        <p>Вместе с «прощением» Иван получил первую долю кощеевой силы — умение оборачиваться. Облики взяты из былин о Волхе Всеславьевиче, сыне княжны и Змея. Оборот сделан по поверью: оборотень перекидывается кувырком через нож, воткнутый в пень. Выбьют нож — останешься зверем до конца земли.</p>
+        <p>Каждый облик открывается двумя путями. Светлый: пощадить зверя («Не тронь меня, я тебе пригожусь») или пройти испытание. Тёмный: взять облик из души нечисти сразу, но со скверной. Все облики, собранные за игру, сходятся в финале на Буяне.</p>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Облик Волха</th><th>Что даёт</th><th>На Буяне</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Ясный сокол</td><td>полёт</td><td>сбивает утку</td></tr>
+            <tr><td class="row-h">Серый волк</td><td>скорость и чутьё</td><td>ловит зайца</td></tr>
+            <tr><td class="row-h">Щука</td><td>плавание в любой жидкости</td><td>достаёт яйцо</td></tr>
+            <tr><td class="row-h">Тур — золотые рога</td><td>таран, ломает стены</td><td>валит дуб</td></tr>
+            <tr><td class="row-h">Горностай</td><td>узкие лазы; в былине перегрыз тетивы — портит оружие врагов</td><td></td></tr>
+            <tr><td class="row-h">Муравей</td><td>трещины в пиксель; в былине Волх обернул муравьями всю дружину</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Души и бесы</h3>
+    <div class="two">
+      <div class="prose">
+        <p>Ты забираешь души заложных и нечисти как заклинания: утопленник даёт водяные чары, упырь — кровопийство, огненный змей — пламя. Заговор из четырёх звеньев — это жезл, души — заряды в нём. Как в Noita: жезл и заклинания.</p>
+        <p>По поверьям, бесы, которых держит колдун, требуют работы; если работы им не дать, они мучают самого колдуна. Им велели вить верёвки из песка. В игре: если долго не колдуешь, души начинают бить тебя. Мешочек песка или решето займут их надолго.</p>
+        <p>Каждую душу можно не брать, а отпустить. Тогда она уходит к дедам и помогает на погосте, а ты сдвигаешься к ветке чистого. Полный список во вкладке <a href="#souls">Души</a>.</p>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Звено заговора</th><th>Формула</th><th>В игре</th></tr></thead>
+          <tbody>
+            <tr><td class="row-h">Зачин</td><td>«Встану, благословясь, пойду…»</td><td>запуск</td></tr>
+            <tr><td class="row-h">Место силы</td><td>«На море-окияне, на острове Буяне…»</td><td>усиление</td></tr>
+            <tr><td class="row-h">Обращение</td><td>душа заложного: к кому взываешь</td><td>что летит</td></tr>
+            <tr><td class="row-h">Закрепка</td><td>«Ключ, замок, язык»</td><td>держит эффект</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div class="block">
     <h3>Кто такой Кощей</h3>
     <div class="two">
       <ul class="facts">
-        <li><span class="src folk">Фольк</span><span>Слово «кощей» в древнерусском значит «пленник, раб». В «Слове о полку Игореве»: «была бы чага по ногате, а кощей по резане», то есть пленник стоил бы гроши.</span></li>
+        <li><span class="src folk">Фольк</span><span>Слово «кощей» в древнерусском значит «пленник, раб». В «Слове о полку Игореве»: «была бы чага по ногате, а кощей по резане».</span></li>
         <li><span class="src folk">Фольк</span><span>В «Марье Моревне» он сам пленник: висит на двенадцати цепях, пока герой не напоит его тремя вёдрами воды.</span></li>
-        <li><span class="src folk">Фольк</span><span>Смерть его вынесена из тела: на море-окияне, на острове Буяне, дуб, под ним сундук, в сундуке заяц, в зайце утка, в утке яйцо, в яйце игла. Пока игла цела, его не берёт ни меч, ни огонь.</span></li>
-        <li><span class="src folk">Фольк</span><span>Он похищает невест и цариц, ездит на вещем коне от кобылиц Бабы-яги. Догнать его может только брат этого коня. Когда герой перекидывает яйцо с руки на руку, Кощея бросает из угла в угол.</span></li>
+        <li><span class="src folk">Фольк</span><span>Смерть его вынесена из тела: на острове Буяне дуб, под ним сундук, в сундуке заяц, в зайце утка, в утке яйцо, в яйце игла.</span></li>
+        <li><span class="src folk">Фольк</span><span>Колдун, по поверью, не может умереть, пока не передаст силу; умирающего мучает, пока не разберут конёк крыши.</span></li>
+        <li><span class="src folk">Фольк</span><span>Ездит на вещем коне от кобылиц Бабы-яги; догнать его может только брат этого коня. Когда герой перекидывает яйцо с руки на руку, Кощея бросает из угла в угол.</span></li>
         <li><span class="src recon">Рекон</span><span>В. В. Иванов и В. Н. Топоров видят за Кощеем и Змеем древнего противника Громовержца: того, кто крадёт жену или скот и прячется в дереве, камне, воде.</span></li>
-        <li><span class="src game">Игра</span><span>Кощей — собиратель смертей. Его Тридевятое царство населено людьми, которым он «простил». Он не злодей в бытовом смысле: он искренне считает бессмертие милостью и не понимает, почему от неё бегут.</span></li>
+        <li><span class="src game">Игра</span><span>Кощей ищет наследника. Его царство населено теми, кому он «простил» смерть и кто не выдержал испытания. Бой с ним проигрывается.</span></li>
       </ul>
       <div class="prose">
-        <p>Отсюда тон игры. Кощей разговаривает с героем как старший с младшим: он уже прошёл этот путь и ждёт, что ты тоже поймёшь. Его войско — такие же прощёные, как ты, только дошедшие до конца лестницы. Убивая их, ты видишь, кем станешь. Упокаивая их, ты отнимаешь у Кощея подданных.</p>
-        <p>Второй слой: Марья Моревна, единственная, кто однажды уже держал Кощея в цепях. В игре она пленница в Тридевятом царстве и знает, как с ним обращаться: она выведывает у него, где смерть, как царевны в сказках.</p>
+        <p>Отсюда тон игры. Кощей говорит с Иваном весь путь, как старший с младшим: он уже прошёл эту дорогу и ждёт, что ты поймёшь. На каждой смерти — короткое «Прощаю». Его войско — такие же прощёные, только не дошедшие до конца. Убивая их, ты видишь, кем станешь. Упокаивая, отнимаешь у Кощея подданных.</p>
+        <p>Малое зеркало Кощея ждёт в первой же деревне: Старый колдун, который не может умереть и протягивает тебе руку. Тот же выбор, что в финале, только в малом.</p>
+        <p>Второй голос — Марья Моревна, единственная, кто однажды уже держал Кощея в цепях. Она в плену в его царстве и выведывает, где смерть, как царевны в сказках.</p>
       </div>
     </div>
   </div>
 
   <div class="block">
     <h3>Цепь смерти</h3>
-    <p class="prose">Дорога к игле повторяет сказочную матрёшку. На каждом звене нужен свой облик героя, и все облики добываются в разных биомах. Подробно во вкладке <a href="#forms">Облики</a>.</p>
+    <p class="prose">Финал повторяет сказочную матрёшку. В сказках иглу добывают звери, которых герой пощадил; у нас — облики, собранные за игру. Подробно во вкладке <a href="#forms">Облики</a>.</p>
     <div class="chain" id="chain-core"></div>
   </div>
 
   <div class="block">
     <h3>Цикл забега</h3>
     <ol class="loop">
-      <li><b>Погост</b>Встаёшь из свежей могилы. Земля тебя не приняла. Изба, Домовой, Деды, тайник.</li>
-      <li><b>Распутье</b>Камень с тремя надписями: прямо, направо, налево. Три дара, у каждого цена.</li>
-      <li><b>Царство</b>Три земли биома, хозяин места, босс, секреты. Тридевять земель — 27 уровней.</li>
-      <li><b>Смерть</b>Шёпот Кощея: «Прощаю». Ступень нечисти растёт, календарь сдвигается на следующий праздник.</li>
-      <li><b>Деды</b>Упокоенные за забег становятся предками и ждут на погосте с дарами.</li>
+      <li><b>Избушка Яги</b>Навь выплёвывает тебя в свежую могилу у избушки старшей Яги, на краю погоста. Она кормит, расспрашивает, отправляет дальше.</li>
+      <li><b>Царство</b>Три земли, каждая — вертикальная карта в три экрана. Хозяин места, босс, секреты, души.</li>
+      <li><b>Распутье</b>У камня избушка сестры-Яги: кормит, торгует, испытывает. Камень даёт три дороги, у каждой цена.</li>
+      <li><b>Смерть</b>Голос Кощея: «Прощаю». Скверна растёт, календарь сдвигается, забег начинается заново.</li>
+      <li><b>Деды</b>Отпущенные души ждут на погосте с дарами к следующему забегу.</li>
     </ol>
     <div class="prose">
-      <p>Сказочная формула «в тридевятом царстве, в тридесятом государстве» даёт структуру мира: девять царств по три земли, всего 27, и Тридевятое царство Кощея — последнее. Тридесятое — это море-окиян и остров Буян, куда попадают только с выведанной тайной. Календарь народных праздников (Святки, Купала, Русальная неделя, Ильин день, Деды, Карачун) меняет правила каждого забега.</p>
+      <p>Сказочная формула «в тридевятом царстве, в тридесятом государстве» даёт структуру мира: девять царств по три земли, и Кощеево царство — последнее. Граница миров — огненная река Смородина и Калинов мост: подземные царства за ней уже тот свет, как тридесятое царство у Проппа. Тридесятое государство — море-окиян и остров Буян. Календарь народных праздников (Святки, Купала, Русальная неделя, Ильин день, Деды, Карачун) меняет правила каждого забега.</p>
     </div>
   </div>
 
@@ -382,14 +443,15 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
     <h3>Как читать эту библию</h3>
     <div class="legend">
       <div><span class="src folk">Фольк</span><span>Записано в фольклоре: сказки, былины, поверья, заговоры.</span></div>
-      <div><span class="src lit">Лит</span><span>Литературная обработка: Пушкин, Ершов, Гоголь, Бажов.</span></div>
+      <div><span class="src lit">Лит</span><span>Литературная обработка: Пушкин, Ершов, Бажов, лубок.</span></div>
       <div><span class="src recon">Рекон</span><span>Научная реконструкция или спорное свидетельство.</span></div>
-      <div><span class="src game">Игра</span><span>Наш вымысел, построенный на фольклоре.</span></div>
+      <div><span class="src game">Игра</span><span>Наш вымысел, собранный из настоящих мотивов.</span></div>
       <div><span class="st ally">Помощник</span><span>Помогает, учит, торгует, даёт облик.</span></div>
       <div><span class="st neutral">Двоякий</span><span>Хозяин места: награждает за уважение, карает за нарушение.</span></div>
       <div><span class="st foe">Враг</span><span>Нападает. Почти у каждого есть народная слабость.</span></div>
-      <div><span class="orig">укр. · бел. · южн.-слав.</span><span>Происхождение: вост.-слав., рус. Север, Урал, зап.-слав., книжн. (апокрифы, лубок).</span></div>
+      <div><span class="orig">укр. · бел. · южн.-слав.</span><span>Происхождение: вост.-слав., рус. Север, Урал, зап.-слав., книжн.</span></div>
     </div>
+    <p class="prose">Чего в игре нет и почему (Вий, интернет-пантеон, «Явь — Правь — Навь»), сказано в конце вкладки <a href="#decisions">Решения</a>.</p>
   </div>
 </section>
 
@@ -398,6 +460,7 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
 <section class="view" data-view="bestiary" hidden></section>
 <section class="view" data-view="feuds" hidden></section>
 <section class="view" data-view="forms" hidden></section>
+<section class="view" data-view="souls" hidden></section>
 <section class="view" data-view="bosses" hidden></section>
 <section class="view" data-view="items" hidden></section>
 <section class="view" data-view="secrets" hidden></section>
@@ -424,8 +487,8 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
 <script>
 (() => {
   "use strict";
-  const FILES = ["world", "forms", "bosses", "bestiary", "feuds", "items", "secrets", "decisions"];
-  const VIEWS = ["core", "world", "bestiary", "feuds", "forms", "bosses", "items", "secrets", "decisions"];
+  const FILES = ["world", "forms", "souls", "bosses", "bestiary", "feuds", "items", "secrets", "decisions"];
+  const VIEWS = ["core", "world", "bestiary", "feuds", "forms", "souls", "bosses", "items", "secrets", "decisions"];
   const D = {};
   const rendered = {};
   const SRC = { folk: "Фольк", lit: "Лит", recon: "Рекон", game: "Игра" };
@@ -449,25 +512,30 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
     { n: 2, name: "Навий", look: "Кожа серая, на золе не остаётся следов.", gift: "Проходишь навий туман; русалки и мавки не нападают первыми.", cost: "Домовой молчит; святая и крещенская вода жжёт; серебро ранит." },
     { n: 3, name: "Упырь", look: "Чужой румянец, клыки.", gift: "Лечишься кровью; возвращаешься из любой могилы, не только с погоста.", cost: "Мак заставляет считать зёрна; осина и петушиный крик валят с ног; из избы гонят." },
     { n: 4, name: "Волкодлак", look: "Шерсть, глаза светятся в темноте.", gift: "Облики дешевле; можно «съесть луну» и погрузить землю во тьму.", cost: "Человеческий облик возвращается только через пень с ножами; на Егорья волки служат не тебе." },
-    { n: 5, name: "Ведьмак", look: "Тени тянутся из-под ногтей.", gift: "Порча и заговоры на чужое; путь на Лысую гору; нечисть торгует как со своим.", cost: "Умереть можно, только передав силу или разобрав конёк крыши; гроза Перуна бьёт прицельно." },
-    { n: 6, name: "Бессмертный", look: "Кости, кожа как пергамент.", gift: "Неуязвим ко всему, кроме иглы.", cost: "Светлые вещи рассыпаются в руках, Деды уходят. Дойти до конца так — концовка «Бессмертный»." }
+    { n: 5, name: "Ведьмак", look: "Тени тянутся из-под ногтей.", gift: "Больше гнёзд для душ; порча и заговоры на чужое; путь на Лысую гору.", cost: "Умереть можно, только передав силу или разобрав конёк крыши; гроза Перуна бьёт прицельно." },
+    { n: 6, name: "Бессмертный", look: "Кости, корона, кожа как пергамент.", gift: "Неуязвим ко всему, кроме иглы.", cost: "Светлые вещи рассыпаются в руках, Деды уходят. Ты уже почти Кощей." }
+  ];
+  const LADDER_H = [
+    { n: 1, name: "Обережённый", look: "Рубаха светлее, вышивка ярче.", gift: "Обереги вдвое сильнее, петушиный крик лечит.", cost: "Бесы злее: души требуют работы чаще." },
+    { n: 2, name: "Помнящий", look: "За спиной иногда видны деды.", gift: "Деды приходят на помощь в бою; пощажённые звери отдают облики без испытания.", cost: "«Русским духом пахнет»: нечисть чует тебя издалека." },
+    { n: 3, name: "Чистый", look: "Тень яркая даже в Нави.", gift: "Ирий и Китеж открыты; сёстры-Яги дают лучшие дары.", cost: "Держишь только одну душу; Кощей испытывает строже." }
   ];
   const CHAIN = [
-    { k: "звено 1", name: "Море-Окиян", text: "Добраться до острова через бурю Стратим-птицы.", forms: ["lebed", "sokol"] },
+    { k: "звено 1", name: "Море-Окиян", text: "Перелететь бурю Стратим-птицы или переплыть море.", forms: ["sokol", "shchuka"] },
     { k: "звено 2", name: "Остров Буян", text: "Бел-горюч камень Алатырь, птица Гагана, змея Скоропея.", forms: [] },
-    { k: "звено 3", name: "Дуб", text: "Вывернуть с корнем, чтобы сундук упал и разбился.", forms: ["medved", "tur"] },
-    { k: "звено 4", name: "Сундук", text: "Кованый. Падает и бьётся, или открывается разрыв-травой.", forms: ["medved"] },
-    { k: "звено 5", name: "Заяц", text: "Выскакивает и бежит. Догнать и разорвать.", forms: ["volk"] },
+    { k: "звено 3", name: "Дуб", text: "Свалить, чтобы сундук упал и разбился.", forms: ["tur"] },
+    { k: "звено 4", name: "Сундук", text: "Кованый. Разбивается при падении или отпирается разрыв-травой.", forms: [] },
+    { k: "звено 5", name: "Заяц", text: "Выскакивает и бежит по всему острову. Догнать.", forms: ["volk"] },
     { k: "звено 6", name: "Утка", text: "Вылетает из зайца. Сбить в воздухе.", forms: ["sokol"] },
-    { k: "звено 7", name: "Яйцо", text: "Падает в море. Достать со дна. Силой не разбить: только мышкин хвостик или лоб Кощея.", forms: ["shchuka", "mysh"] },
-    { k: "звено 8", name: "Две иглы", text: "Кощеева и твоя. Что сломать, решаешь ты.", forms: [] }
+    { k: "звено 7", name: "Яйцо", text: "Падает в море. Достать со дна. Силой не разбить: бьют о лоб Кощея, по секрету — мышкиным хвостиком.", forms: ["shchuka", "mysh"] },
+    { k: "звено 8", name: "Игла", text: "В ней две смерти, Кощеева и твоя. Сломать или забрать.", forms: [] }
   ];
   const ENDINGS = [
-    { name: "Своя смерть", how: "Сломать свою иглу.", text: "Ты умираешь в свой срок и уходишь к дедам в Ирий. Кощей остаётся жить и ждать следующего, кого можно простить.", cls: "" },
-    { name: "Пепел по ветру", how: "Сломать иглу Кощея.", text: "Кощей умирает, как в сказке: его сжигают и развеивают пепел. Ты остаёшься без смерти и бродишь заложным, пока не истечёт век.", cls: "" },
-    { name: "Возвращённая смерть", how: "Сломать обе иглы и отдать украденные смерти их владельцам.", text: "Истинная концовка. Нужны упокоенные Деды, писанки, затянувшие цепи, и знание, куда несут смерти. Мир снова умеет умирать.", cls: "true" },
-    { name: "Бессмертный", how: "Оставить иглы себе или дойти до шестой ступени.", text: "Ты садишься на костяной престол. Начинается следующий забег, и теперь прощаешь ты.", cls: "" },
-    { name: "Китеж", how: "Секрет. Дойти до Буяна живым, без единой ступени нечисти.", text: "Град на Светлояре открывает ворота тому, кто не стал нечистью. Ты уходишь туда, где нет ни смерти, ни бессмертия.", cls: "" }
+    { kind: "основная", name: "Сломать иглу", how: "Сломать иглу на Буяне.", text: "Кощей наконец умирает: он этого и ждал. Твоя смерть возвращается, ты снова человек и проживёшь свой срок.", cls: "main" },
+    { kind: "основная", name: "Забрать иглу", how: "Забрать иглу себе.", text: "Две смерти у тебя в руке, и сила Кощея переходит к тебе. Ты садишься на костяной престол. Теперь понятно, почему игра так называется.", cls: "main" },
+    { kind: "секретная · истинная", name: "Отпустить всех", how: "Дойти до Буяна на ветке чистого, отпустив все взятые души, и сломать иглу.", text: "Смерти, которые Кощей собирал веками, возвращаются ко всем заложным. Навь пустеет, мир снова умеет умирать.", cls: "true" },
+    { kind: "секретная", name: "Китеж", how: "Дойти до Буяна, ни разу не умерев.", text: "Град на Светлояре открывает ворота тому, кто не стал нечистью. Ты уходишь туда, где нет ни смерти, ни бессмертия.", cls: "" },
+    { kind: "секретная · шутка", name: "Не напоил", how: "В прологе не подать прикованному старику третье ведро.", text: "Кощей не рвёт цепи, сказки не было. Титры за минуту.", cls: "" }
   ];
 
   function renderCore() {
@@ -479,9 +547,17 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
         <div class="kv gift"><span class="lbl">Даёт</span><span>${esc(s.gift)}</span></div>
         <div class="kv cost"><span class="lbl">Отнимает</span><span>${esc(s.cost)}</span></div>
       </article>`).join("");
+    document.getElementById("ladderH").innerHTML = LADDER_H.map(s => `
+      <article class="step h">
+        <div class="step-top"><span class="lbl">Чистота ${s.n}</span><span class="pips" aria-hidden="true">${Array.from({ length: 3 }, (_, i) => `<i class="${i < s.n ? "on" : ""}"></i>`).join("")}</span></div>
+        <h4>${esc(s.name)}</h4>
+        <p class="look">${esc(s.look)}</p>
+        <div class="kv gift"><span class="lbl">Даёт</span><span>${esc(s.gift)}</span></div>
+        <div class="kv cost"><span class="lbl">Отнимает</span><span>${esc(s.cost)}</span></div>
+      </article>`).join("");
     document.getElementById("chain-core").innerHTML = chainHTML();
     document.getElementById("endings").innerHTML = ENDINGS.map(e => `
-      <article class="ending ${e.cls}"><h4>${esc(e.name)}</h4><span class="how">${esc(e.how)}</span><p>${esc(e.text)}</p></article>`).join("");
+      <article class="ending ${e.cls}"><span class="kind">${esc(e.kind)}</span><h4>${esc(e.name)}</h4><span class="how">${esc(e.how)}</span><p>${esc(e.text)}</p></article>`).join("");
   }
   function chainHTML() {
     return CHAIN.map(c => `<div class="link"><span class="k">${esc(c.k)}</span><h4>${esc(c.name)}</h4><p>${esc(c.text)}</p><div class="chips">${formPills(c.forms)}</div></div>`).join("");
@@ -602,12 +678,12 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
 
   // ---------- forms ----------
   function renderForms(el) {
-    const intro = head("Облики", "Чем стать, чтобы дойти до иглы", "В сказке иглу добывают звери, которых герой пощадил. Здесь эти звери — облики героя. У каждого облика светлый путь (милосердие, помощь, испытание) и тёмный (ритуал, сорванная шкура), который поднимает на ступень нечисти.");
+    const intro = head("Облики", "Чем стать, чтобы дойти до иглы", "Умение оборачиваться — первая доля кощеевой силы. Шесть обликов Волха нужны для мира и финала, сказочные облики — запасные пути и секреты. Оборот — кувырок через нож в пне. Светлый путь к облику — пощада и испытание, тёмный — душа нечисти и ступень скверны.");
     if (!D.forms) { el.innerHTML = intro + `<div class="block"><h3>Цепь смерти</h3><div class="chain">${chainHTML()}</div></div>` + wip("Облики"); return; }
     el.innerHTML = intro + `<div class="block"><h3>Цепь смерти</h3><div class="chain">${chainHTML()}</div></div>
       <div class="block"><h3>Все облики</h3><div class="grid">${D.forms.map(f => `
         <article class="card" id="f-${esc(f.id)}">
-          <div class="card-h"><div><h4>${esc(f.name)}</h4><span class="alt">${esc(f.source)}</span></div>${src(f.src)}</div>
+          <div class="card-h"><div><h4>${esc(f.name)}</h4><span class="alt">${esc(f.group ? f.group + " · " : "")}${esc(f.source)}</span></div>${src(f.src)}</div>
           ${f.chain ? `<div class="sec"><span class="lbl">Звено цепи</span><p><b>${esc(f.chain)}</b></p></div>` : ""}
           ${sec("Что умеет", para(f.ability))}
           ${sec("Физика", para(f.physics))}
@@ -617,6 +693,26 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
           ${sec("Риск", para(f.risk))}
           <div class="chips">${biomePills(f.where)}</div>
         </article>`).join("")}</div></div>`;
+  }
+
+  // ---------- souls
+  const SOF = { kind: "all" };
+  function renderSouls(el) {
+    if (!D.souls) { el.innerHTML = head("Души", "Души и бесы", "Заклинания из душ заложных.") + wip("Души"); return; }
+    const kinds = [...new Set(D.souls.map(s => s.kind))];
+    el.innerHTML = head("Души", "Души и бесы", `${D.souls.length} душ. Каждая — заклинание в заговоре и бес на службе: держишь — растёт скверна, бес требует работы. Отпустишь — душа уходит к дедам и помогает.`) +
+      `<div class="filters"><div class="frow"><span class="lbl">Вид</span>${[["all", "Все"], ...kinds.map(k => [k, k])].map(([v, t]) => `<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${SOF.kind === v}">${esc(t)}</button>`).join("")}</div></div>
+      <div class="grid">${D.souls.filter(s => SOF.kind === "all" || s.kind === SOF.kind).map(s => `
+        <article class="card" id="d-${esc(s.id)}">
+          <div class="card-h"><div><h4>${esc(s.name)}</h4><span class="alt">из кого: <button type="button" class="namebtn" data-find="${esc(s.from)}">${esc(s.from)}</button></span></div><span class="pipsk" title="Скверна ${s.skverna} из 3" aria-label="Скверна ${s.skverna} из 3">${[1, 2, 3].map(i => `<i class="${i <= s.skverna ? "on" : ""}"></i>`).join("")}</span></div>
+          <div class="meta"><span class="lbl">${esc(s.kind)}</span>${src(s.src)}</div>
+          ${sec("В заговоре", para(s.spell))}
+          ${sec("Если бес без работы", para(s.torment))}
+          ${sec("Если отпустить", para(s.release))}
+          ${sec("Основа", para(s.folk))}
+          <div class="chips">${biomePills(s.biomes)}</div>
+        </article>`).join("")}</div>`;
+    el.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => { SOF.kind = b.dataset.v; renderSouls(el); }));
   }
 
   // ---------- bosses ----------
@@ -696,7 +792,7 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
   function renderDecisions(el) {
     if (!D.decisions) { el.innerHTML = head("Решения", "Вопросы и развилки", "Что нужно решить, прежде чем строить дальше.") + wip("Решения"); return; }
     const groups = [...new Set(D.decisions.map(d => d.group))];
-    el.innerHTML = head("Решения", "Вопросы и развилки", "Что нужно решить тебе, что я принял по умолчанию и что нужно прислать, чтобы связать лор с готовой механикой.") +
+    el.innerHTML = head("Решения", "Вопросы и развилки", "Что ещё открыто, что уже принято после слияния с черновиком «Кощей. Лор v1» из прошлого чата, и что убрано из игры ради аутентичности.") +
       groups.map(g => `<div class="block"><h3>${esc(g)}</h3><div class="dec">${D.decisions.filter(d => d.group === g).map(d => `
         <article class="q" id="q-${esc(d.id)}">
           <span class="qid">${esc(d.id)}</span><h4>${esc(d.title)}</h4>
@@ -712,7 +808,7 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
     return `<div class="view-head"><span class="eyebrow">${esc(eyebrow)}</span><h2>${esc(title)}</h2><p class="lede">${esc(lede)}</p></div>`;
   }
 
-  const RENDER = { world: renderWorld, bestiary: renderBestiary, feuds: renderFeuds, forms: renderForms, bosses: renderBosses, items: renderItems, secrets: renderSecrets, decisions: renderDecisions };
+  const RENDER = { world: renderWorld, bestiary: renderBestiary, feuds: renderFeuds, forms: renderForms, souls: renderSouls, bosses: renderBosses, items: renderItems, secrets: renderSecrets, decisions: renderDecisions };
 
   // ---------- routing ----------
   let current = "core";
@@ -735,7 +831,7 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
     const h = decodeURIComponent(location.hash.slice(1));
     if (VIEWS.includes(h)) { show(h, true); return; }
     // anchors inside rendered views: b-*, f-*, c-*, x-*, i-*, s-*, q-*
-    const pref = { b: "world", f: "forms", c: "bestiary", x: "bosses", i: "items", s: "secrets", q: "decisions" }[h.split("-")[0]];
+    const pref = { b: "world", f: "forms", c: "bestiary", x: "bosses", i: "items", s: "secrets", q: "decisions", d: "souls" }[h.split("-")[0]];
     if (pref) { show(pref, false); const t = document.getElementById(h); if (t) t.scrollIntoView({ block: "start" }); return; }
     show("core", false);
   }
@@ -753,12 +849,12 @@ footer ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column
 
   // ---------- counters ----------
   function counts() {
-    const C = [["bestiary", "существ"], ["world", "мест"], ["forms", "обликов"], ["bosses", "боссов"], ["items", "артефактов"], ["secrets", "секретов"], ["decisions", "решений"]];
+    const C = [["bestiary", "существ"], ["world", "мест"], ["forms", "обликов"], ["souls", "душ"], ["bosses", "боссов"], ["items", "артефактов"], ["secrets", "секретов"], ["decisions", "решений"]];
     document.getElementById("counts").innerHTML = C.map(([k, t]) => D[k] ? `<span class="count"><b>${D[k].length}</b>${t}</span>` : `<span class="count wip"><b>·</b>${t} в работе</span>`).join("");
-    const missing = { bestiary: "бестиарий", feuds: "кто кого", items: "артефакты", secrets: "секреты", bosses: "боссы", decisions: "решения", world: "мир", forms: "облики" };
+    const missing = { souls: "души", bestiary: "бестиарий", feuds: "кто кого", items: "артефакты", secrets: "секреты", bosses: "боссы", decisions: "решения", world: "мир", forms: "облики" };
     const m = Object.keys(missing).filter(k => !D[k]).map(k => missing[k]);
     document.getElementById("status").textContent = m.length ? `Наполняется: ${m.join(", ")}.` : "Все разделы на месте. Дальше — правки по твоим решениям.";
-    const tabN = { bestiary: "bestiary", items: "items", secrets: "secrets", decisions: "decisions" };
+    const tabN = { bestiary: "bestiary", souls: "souls", items: "items", secrets: "secrets", decisions: "decisions" };
     Object.keys(tabN).forEach(k => {
       const a = document.querySelector(`#tabs a[data-v="${k}"]`);
       if (a && D[k] && !a.querySelector(".n")) a.insertAdjacentHTML("beforeend", `<span class="n">${D[k].length}</span>`);

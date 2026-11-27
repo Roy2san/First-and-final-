@@ -72,6 +72,7 @@ section { display: flex; flex-direction: column; gap: 18px; scroll-margin-top: 1
 .thread i { position: absolute; inset: 0; width: 68%; background: repeating-linear-gradient(115deg, #d03a2a 0 .5cqw, #8f1f17 .5cqw .8cqw); }
 .wax { width: 19cqw; height: .7cqw; background: rgba(30, 26, 18, .8); border: .15cqw solid #0d0b08; position: relative; }
 .wax i { position: absolute; inset: 0; width: 45%; background: linear-gradient(#efe6c8, #b9ac86); }
+.wax.demons { width: 12cqw; } .wax.demons i { width: 62%; background: repeating-linear-gradient(90deg, #6a46a0 0 .6cqw, #3a2560 .6cqw .9cqw); }
 .pips { display: flex; gap: .55cqw; padding-left: .2cqw; }
 .pips b { width: 1.05cqw; height: 1.05cqw; transform: rotate(45deg); border: .15cqw solid #d0472d; background: rgba(0, 0, 0, .4); }
 .pips b.on { background: #d0472d; box-shadow: 0 0 .8cqw #d0472d; }
@@ -231,7 +232,7 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var
 <header class="top">
   <div class="wrap">
     <span class="eyebrow">Наброски визуала · всё ниже нарисовано кодом в браузере</span>
-    <h1>Кощеева игла</h1>
+    <h1>Кощей</h1>
     <p class="lede">Мрачный пиксельный мир со светом, как в Noita, и интерфейс из вещей, которые видел бы сказочный Иван: веретено, свеча, вышивка, береста, резная доска, лубочный чертёж. Каждая земля — отдельная вертикальная карта в три экрана высотой.</p>
     <nav class="jump" aria-label="Разделы">
       <a href="#screen">Игровой экран</a><a href="#ivan">Иван</a><a href="#land">Устройство земли</a><a href="#realms">Царства</a><a href="#map">Карта мира</a><a href="#ui">Интерфейс</a><a href="#art">Правила визуала</a>
@@ -262,13 +263,14 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var
         <span class="lbl">Купала · ночь</span>
       </div>
       <div class="bl">
+        <div class="row"><span class="lbl">бесы ждут работы</span><span class="wax demons"><i></i></span></div>
         <div class="charm">
           <span class="slot"><span data-ico="zachin"></span></span>
           <span class="slot"><span data-ico="alatyr"></span></span>
           <span class="slot active"><span data-ico="flame"></span></span>
           <span class="slot"><span data-ico="key"></span></span>
         </div>
-        <span class="charm-cap">Встану · на Алатыре · огнём · ключ-замок</span>
+        <span class="charm-cap">Встану · на Алатыре · душа огненного змея · ключ-замок</span>
       </div>
       <div class="br">
         <div class="jugs">
@@ -281,14 +283,14 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var
       <div class="tip" style="left: 6%; top: 52%;"><b>Мавка</b><br>спины нет · боится полыни</div>
     </div>
   </div>
-  <div class="ctrl"><button class="btn" id="pauseBtn" type="button">Пауза</button><span class="caption">Слева сверху: нить жизни на веретене, свеча (запас сил на полёт и заговоры), ступени нечисти вышитыми ромбами. Внизу слева: доска заговора из четырёх звеньев, как жезл в Noita. Справа: крынки с водами и облик.</span></div>
+  <div class="ctrl"><button class="btn" id="pauseBtn" type="button">Пауза</button><span class="caption">Слева сверху: нить жизни на веретене, свеча (запас сил на полёт и заговоры), ступени нечисти вышитыми ромбами. Внизу слева: доска заговора из четырёх звеньев (жезл), в гнезде обращения — душа огненного змея (заклинание), над ней шкала бесов: не колдуешь — начнут бить. Справа: крынки с водами и облик.</span></div>
 </section>
 
 <section id="ivan">
   <div class="sh">
     <span class="eyebrow">Набросок 2</span>
     <h2>Иван, каждый раз другой</h2>
-    <p>Герой — просто Иван. Каждый забег выпадает новый Иван из сказок, и у каждого одна черта из его сказки. Ниже тот же Иван на семи ступенях нечисти: по силуэту видно, сколько раз он уже был «прощён».</p>
+    <p>Герой — просто Иван, наследник, которого выбрал Кощей. Каждый забег выпадает новый Иван из сказок с одной чертой из его сказки. Умение оборачиваться он получил вместе с «прощением». Ниже тот же Иван на ветке нави: по силуэту видно, сколько раз он уже был «прощён».</p>
   </div>
   <div class="ivan-card">
     <canvas class="px" id="ivanPortrait" width="132" height="168" aria-label="Портрет Ивана в пикселях"></canvas>
@@ -307,7 +309,7 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var
   <div class="sh">
     <span class="eyebrow">Набросок 3</span>
     <h2>Земля — это отдельная карта</h2>
-    <p>Одна земля — вертикальный срез шириной в экран и глубиной в три экрана. Сверху вход, снизу выход, по бокам тайники. Три земли — одно царство, между царствами камень Распутья. Это в разы меньше биома Noita: землю можно пройти за несколько минут, а вылизать за полчаса.</p>
+    <p>Одна земля — вертикальный срез шириной в экран и глубиной в три экрана. Сверху вход, снизу выход, по бокам тайники. В первую землю Навь выплёвывает Ивана после каждой смерти. Три земли — одно царство, между царствами камень Распутья. Это в разы меньше биома Noita: землю можно пройти за несколько минут, а вылизать за полчаса.</p>
   </div>
   <div class="anat">
     <div class="landwrap" id="anatomy">
@@ -329,7 +331,7 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var
   <div class="sh">
     <span class="eyebrow">Набросок 4</span>
     <h2>Девять царств и Тридесятое</h2>
-    <p>По одной земле из каждого царства в полный рост. У каждого царства своя палитра и свой главный свет: окна изб, гнилушки, болотные огни, фонари в штреках, огненная река, одно тёплое окно у Кощея.</p>
+    <p>По одной земле из каждого царства в полный рост, в порядке пути: Смородина — граница, за ней подземные царства уже на том свете. У каждого царства своя палитра и свой главный свет: окна изб, гнилушки, болотные огни, фонари в штреках, огненная река, одно тёплое окно у Кощея.</p>
   </div>
   <div class="realms" id="realmGrid"></div>
   <p class="note">Наброски рисуются по очереди после загрузки страницы. Свет считается как в Noita: тьма по умолчанию, каждый светящийся пиксель освещает округу.</p>
@@ -356,7 +358,8 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var
     <div class="kit-item"><h4>Нить жизни</h4><div class="kit-demo"><span class="pxbig pxi" data-ico="spindle"></span><span class="big-thread"><i></i></span></div><p>Здоровье — нить на веретене. Доля прядёт, Недоля обрывает. Получил удар — нить разматывается и рвётся.</p></div>
     <div class="kit-item"><h4>Ступени нечисти</h4><div class="kit-demo"><span class="pips"><b class="on"></b><b class="on"></b><b class="on"></b><b></b><b></b><b></b></span></div><p>Шесть вышитых ромбов: орнамент «засеянное поле». Каждая смерть вышивает следующий красной нитью. Шесть — Бессмертный.</p></div>
     <div class="kit-item"><h4>Свеча</h4><div class="kit-demo"><span class="pxbig pxi" data-ico="candle"></span><span class="wax" style="width:200px;height:10px"><i></i></span></div><p>Запас сил на полёт, облики и заговоры. Тает, пока тратишь, и снова отливается, когда стоишь на земле. Заодно освещает.</p></div>
-    <div class="kit-item"><h4>Заговор</h4><div class="kit-demo" style="padding-bottom:26px"><div class="charm"><span class="slot"><span data-ico="zachin"></span><small>зачин</small></span><span class="slot"><span data-ico="alatyr"></span><small>место</small></span><span class="slot active"><span data-ico="flame"></span><small>обращение</small></span><span class="slot"><span data-ico="key"></span><small>закрепка</small></span></div></div><p>Резная доска с четырьмя гнёздами — замена жезла Noita. Звенья — берестяные таблички с формулами настоящих заговоров.</p></div>
+    <div class="kit-item"><h4>Заговор</h4><div class="kit-demo" style="padding-bottom:26px"><div class="charm"><span class="slot"><span data-ico="zachin"></span><small>зачин</small></span><span class="slot"><span data-ico="alatyr"></span><small>место</small></span><span class="slot active"><span data-ico="flame"></span><small>обращение</small></span><span class="slot"><span data-ico="key"></span><small>закрепка</small></span></div></div><p>Резная доска с четырьмя гнёздами — жезл. Звенья — берестяные таблички с формулами настоящих заговоров, а в гнездо обращения вставляются души заложных: утопленник даёт воду, огненный змей — пламя.</p></div>
+    <div class="kit-item"><h4>Бесы</h4><div class="kit-demo"><span style="color:#b9b19c">бесы ждут работы</span><span class="wax demons" style="width:160px;height:10px"><i></i></span></div><p>Каждая взятая душа — бес на службе. Долго не колдуешь — шкала полнится, и бесы бьют тебя самого. Мешочек песка занимает их: по поверью, бесам велят вить верёвки из песка.</p></div>
     <div class="kit-item"><h4>Сосуды</h4><div class="kit-demo"><span class="jug"><span data-jug="live" data-lvl="8"></span>живая</span><span class="jug"><span data-jug="dead" data-lvl="5"></span>мёртвая</span><span class="jug"><span data-jug="fire" data-lvl="6"></span>огненная</span><span class="jug"><span data-jug="milk" data-lvl="3"></span>молоко</span></div><p>Крынки вместо фляг Noita. Жидкость в них ведёт себя как в мире: льётся, смешивается, горит.</p></div>
     <div class="kit-item"><h4>Облики</h4><div class="kit-demo"><div class="ringset"><span class="form-ring sm"><span data-ico="man"></span></span><span class="form-ring sm"><span data-ico="bear"></span></span><span class="form-ring sm"><span data-ico="wolf"></span></span><span class="form-ring sm"><span data-ico="falcon"></span></span><span class="form-ring sm"><span data-ico="pike"></span></span><span class="form-ring sm"><span data-ico="mouse"></span></span></div></div><p>Кольцо обликов. Открытые светятся, тёмный путь помечен красной каймой.</p></div>
   </div>
@@ -374,16 +377,16 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; color: var
           </div>
         </div>
       </div>
-      <p class="shot-cap">Распутье между царствами. Замена Святой горы Noita: три дара, у каждого цена.</p>
+      <p class="shot-cap">Распутье у избушки сестры-Яги: она кормит, торгует и испытывает, а камень предлагает три дороги. Замена Святой горы Noita.</p>
     </div>
     <div>
       <div class="shot death">
         <span class="big">Прощаю.</span>
         <q>Ну, Иван, первый раз тебя прощаю, за твою доброту, что водой меня напоил.</q>
         <span class="pips"><b class="on"></b><b class="new"></b><b></b><b></b><b></b><b></b></span>
-        <small>Иван Попялов встаёт навьим. На золе больше не остаётся следов.</small>
+        <small>Навь выплёвывает Ивана Попялова к избушке Яги. Скверна растёт: на золе больше не остаётся следов.</small>
       </div>
-      <p class="shot-cap">Экран смерти. Голос Кощея и новый вышитый ромб.</p>
+      <p class="shot-cap">Экран смерти. Голос Кощея, который выбрал тебя наследником, и новый вышитый ромб.</p>
     </div>
     <div>
       <div class="shot book">
@@ -1172,15 +1175,15 @@ function setupIvan() {
 
 // =================================================================== realms gallery, anatomy, map
 const REALMS = [
-  { id: "pogost", gen: genPogost, seed: 11, name: "Погост и деревня", lands: "земли 1–3", text: "Сумерки, луна, тёплые окна изб — единственный тёплый свет. Под каждым голубцом гроб, под избой подпол с Домовым, колодец ведёт вниз.", sw: ["#121722", "#3b3d4a", "#5b3e27", "#ffb75a", "#3a2a1c"] },
+  { id: "pogost", gen: genPogost, seed: 11, name: "Погост у избушки", lands: "земли 1–3", text: "Сюда Навь выплёвывает Ивана после каждой смерти. Сумерки, луна, тёплые окна изб — единственный тёплый свет. Под каждым голубцом гроб, под избой подпол с Домовым, колодец ведёт вниз.", sw: ["#121722", "#3b3d4a", "#5b3e27", "#ffb75a", "#3a2a1c"] },
   { id: "les", gen: genLes, seed: 21, name: "Дремучий лес", lands: "земли 4–6", text: "Ели уходят за край экрана, свет еле пробивается. Внизу светятся гнилушки, в берлоге спит медведь, на опушке избушка на курьих ножках и черепа с горящими глазами.", sw: ["#0b120d", "#162a1c", "#2d4a27", "#8affd8", "#c98a2a"] },
-  { id: "top", gen: genTop, seed: 31, name: "Топи", lands: "земли 7–9", text: "Зелёный туман, кочки, мёртвые деревья, огоньки над водой. Под ряской бурая вода, под водой тлеющий торф с газом и костями.", sw: ["#2a352d", "#2a3520", "#5c8a2c", "#241a12", "#ff6a1e"] },
+  { id: "top", gen: genTop, seed: 31, name: "Гиблые болота", lands: "земли 7–9", text: "Зелёный туман, кочки, мёртвые деревья, огоньки над водой. Под ряской бурая вода, под водой тлеющий торф с газом и костями.", sw: ["#2a352d", "#2a3520", "#5c8a2c", "#241a12", "#ff6a1e"] },
   { id: "omut", gen: genOmut, seed: 41, name: "Омут", lands: "земли 10–12", text: "Мельница наверху, свет гаснет с глубиной. На дне затопленные избы и колокол в иле — намёк на Китеж. У поверхности русалки, в толще щука.", sw: ["#233040", "#123c4a", "#2a5a2a", "#d4e4e0", "#8a6a3a"] },
-  { id: "med", gen: S => genMine(S, "copper"), seed: 51, name: "Медное царство", lands: "земли 13–15", text: "Шахта с крепью и лестницей, малахит полосами, медная руда, фонари в штреках. Внизу малахитовый зал и ящерка Хозяйки.", sw: ["#3a342a", "#2f8a62", "#5cbf8c", "#c07a3e", "#ffe0a0"] },
-  { id: "serebro", gen: S => genMine(S, "silver"), seed: 61, name: "Серебряное царство", lands: "земли 16–18", text: "Холодный камень, серебряные жилы, ледяные сосульки, подземное озеро. В штреке Шубин с синим фонарём, в верхних полостях копится газ.", sw: ["#2b313b", "#cdd6e4", "#a8d4e8", "#0f2a44", "#8ac8ff"] },
-  { id: "zoloto", gen: S => genMine(S, "gold"), seed: 71, name: "Золотое царство", lands: "земли 19–21", text: "Тёплая порода, золотые жилы, золотой песок оседает на каждом уступе. Сквозь всю землю проходит чешуйчатое тело Великого Полоза.", sw: ["#3a2a19", "#e3b54a", "#d9a53a", "#a8903a", "#ff7a2a"] },
-  { id: "smorodina", gen: genSmorodina, seed: 81, name: "Смородина и Калинов мост", lands: "земли 22–24", text: "Огненная река внизу, раскалённый мост над пропастью, сера и пепел, изба богатырей и кузница. За мостом в темноте шестиглавый силуэт Чуда-юда.", sw: ["#1e0e0a", "#2a2220", "#6a2a1a", "#ff7a1a", "#b8b03a"] },
-  { id: "nav", gen: genNav, seed: 91, name: "Тридевятое царство", lands: "земли 25–27", text: "Терем из костей под шатровой крышей, цепи с потолка, чёрно-серебряный сад, навий туман. Одно тёплое окно — Марья Моревна. Внизу Бессмертная рать и пленный Иван.", sw: ["#120d1c", "#d6cfbc", "#2a2532", "#7a5aa8", "#ffb75a"] },
+  { id: "smorodina", gen: genSmorodina, seed: 81, name: "Смородина и Калинов мост", lands: "земли 13–15", text: "Граница миров: за мостом начинается Навь. Огненная река внизу, раскалённый мост над пропастью, сера и пепел, изба богатырей и кузница. За мостом в темноте шестиглавый силуэт Чуда-юда.", sw: ["#1e0e0a", "#2a2220", "#6a2a1a", "#ff7a1a", "#b8b03a"] },
+  { id: "med", gen: S => genMine(S, "copper"), seed: 51, name: "Медное царство", lands: "земли 16–18", text: "Уже на том свете. Шахта с крепью и лестницей, малахит полосами, медная руда, фонари в штреках. Внизу малахитовый зал и ящерка Хозяйки.", sw: ["#3a342a", "#2f8a62", "#5cbf8c", "#c07a3e", "#ffe0a0"] },
+  { id: "serebro", gen: S => genMine(S, "silver"), seed: 61, name: "Серебряное царство", lands: "земли 19–21", text: "Холодный камень, серебряные жилы, ледяные сосульки, подземное озеро. В штреке Шубин с синим фонарём, в верхних полостях копится газ.", sw: ["#2b313b", "#cdd6e4", "#a8d4e8", "#0f2a44", "#8ac8ff"] },
+  { id: "zoloto", gen: S => genMine(S, "gold"), seed: 71, name: "Золотое царство", lands: "земли 22–24", text: "Тёплая порода, золотые жилы, золотой песок оседает на каждом уступе. Сквозь всю землю проходит чешуйчатое тело Великого Полоза.", sw: ["#3a2a19", "#e3b54a", "#d9a53a", "#a8903a", "#ff7a2a"] },
+  { id: "nav", gen: genNav, seed: 91, name: "Кощеево царство", lands: "земли 25–27", text: "Тридевятое царство. Терем из костей под шатровой крышей, цепи с потолка, чёрно-серебряный сад, навий туман. Одно тёплое окно — Марья Моревна. Внизу Бессмертная рать и пленный Иван.", sw: ["#120d1c", "#d6cfbc", "#2a2532", "#7a5aa8", "#ffb75a"] },
   { id: "buyan", gen: genBuyan, seed: 101, name: "Море-Окиян и остров Буян", lands: "земли 28–30", text: "Шторм и молния, белый остров. Алатырь светится, на дубу на цепях висит сундук, на вершине птица Гагана, у камня свернулась змея Скоропея.", sw: ["#24363c", "#0f3440", "#c8c2b0", "#f2eddc", "#1e2e18"] }
 ];
 const rendered = {};
@@ -1202,7 +1205,7 @@ function renderRealm(R) {
 }
 const ANNOT = [
   { x: 150, y: 70, t: "Небо и деревня: единственная светлая полоса земли" },
-  { x: 240, y: 188, t: "Свежая могила: здесь встаёт Иван" },
+  { x: 240, y: 188, t: "Свежая могила у избушки Яги: сюда Навь выплёвывает Ивана" },
   { x: 40, y: 214, t: "Подпол с Домовым: тайник и мастерская" },
   { x: 152, y: 214, t: "Колодец: короткий путь вниз" },
   { x: 268, y: 226, t: "Гробы под голубцами: заложные встают ночью" },
