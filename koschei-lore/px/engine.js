@@ -1,0 +1,934 @@
+/* Пиксельный конструктор «Кощеевой иглы».
+   Масштаб: Иван = 24 px роста; 1 аршин = 10 px (~71 см). Всё рисуется в одном масштабе.
+   PX.creature(spec) / PX.item(spec) -> {w, h, p:Int32Array(-1 пусто | 0xRRGGBB), e:Uint8Array(свечение), foot}
+   Работает и в браузере, и в node (без DOM). PX.draw(canvas, spr, zoom, opts) — только браузер.
+
+   Существо: { t: 'hum'|'beast'|'bird'|'snake'|'wyrm'|'dragon'|'fish'|'spirit'|'idol'|'blob'|'swarm'|'centaur'|'rider', h: рост px, ... }
+   hum:    build thin|normal|stout|fat|hunched|giant|child|tiny; skin; head human|skull|wolf|dog|bear|goat|pig|bird|cat|stump|frog;
+           hair: цвет; hairStyle short|long|loose|braid|wild|bald|kerchief; hat fur|helmet|crown|kokoshnik|hood|wreath|cap|horns|antlers;
+           beard short|long|huge|moss (+beardC); top shirt|robe|dress|shroud|sarafan|coat|armor|rags|fur|bark|none|bones|straw;
+           cloth, trim, sleeve, pants, feet; legs legs|hooves|bone|boneleg|chicken|tail|fishtail|wisp|roots|pole|fur;
+           pose down|out|up|hold|reach|dance; hold staff|sword|scythe|sickle|club|mace|spear|torch|lamp|spindle|gusli|bow|hammer|tongs|axe|broom|pestle|book|bowl|pick|sack|apple|candle|shield|whip|wheel|horn;
+           eyes, glowEyes, oneEye, lids, fangs, claws, belly, hump, halo, cloak, wings bird|bat|paper|owl|swan|fire, tail devil|wolf|thin;
+           fx: [drips, frost, fire, moss, mushrooms, shadowHands, chains, hollowBack, smoke, sparks, ash, gold, blood, soil];
+           translucent, aura: цвет свечения.
+   beast:  head wolf|dog|fox|bear|horse|deer|indrik|bull|cow|goat|cat|lion|hare|mouse|hedgehog|pig|weasel; len, color, belly, mane, horns,
+           pose stand|sit|sleep|run, pattern spots|stripes|dapple, tailT, glowEyes, wings, fire, woodLeg, saddle.
+   bird:   kind songbird|raptor|crow|duck|swan|goose|chicken|rooster|cuckoo|firebird|human; pose perch|fly; color, wing, belly, beak, legsC, span, crown, face.
+   snake:  len, thick, pose slither|coil|rise, color, belly, crown, rooster, wings. wyrm: len, thick, amp, fire. dragon: len, heads, wings, fire, legsN, mouthOpen, fireFinger.
+   fish:   kind pike|catfish|carp|whale, len. spirit: kind wisp|fog|whirl|orb|flame. idol: faces, heads, silverHead, horns, sun, hammer, spindle, wind, dark.
+   blob:   kind kolobok|mound|stone. swarm: of: spec | variants: [spec], n, gap. centaur/rider: horse: beast spec, man: hum spec.
+*/
+const PX = (() => {
+  "use strict";
+  const hexI = h => parseInt(String(h).replace("#", ""), 16);
+  const C = c => c == null ? null : (typeof c === "number" ? c : hexI(c));
+  const rgb = c => [(c >> 16) & 255, (c >> 8) & 255, c & 255];
+  const I3 = (r, g, b) => (Math.max(0, Math.min(255, Math.round(r))) << 16) | (Math.max(0, Math.min(255, Math.round(g))) << 8) | Math.max(0, Math.min(255, Math.round(b)));
+  const mul = (c, f) => { const [r, g, b] = rgb(C(c)); return I3(r * f, g * f, b * f); };
+  const mix = (a, b, t) => { const A = rgb(C(a)), B = rgb(C(b)); return I3(A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t, A[2] + (B[2] - A[2]) * t); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const R = Math.round;
+  function rng(seed) { let s = seed >>> 0 || 1; return () => { s = (s + 0x6D2B79F5) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
+
+  class Spr {
+    constructor(W, H, seed) { this.W = W; this.H = H; this.p = new Int32Array(W * H).fill(-1); this.e = new Uint8Array(W * H); this.r = rng(seed); }
+    set(x, y, c, em) { if (c == null) return; x = R(x); y = R(y); if (x < 0 || y < 0 || x >= this.W || y >= this.H) return; const i = y * this.W + x; this.p[i] = C(c); this.e[i] = em ? 1 : 0; }
+    get(x, y) { x = R(x); y = R(y); return (x < 0 || y < 0 || x >= this.W || y >= this.H) ? -1 : this.p[y * this.W + x]; }
+    del(x, y) { x = R(x); y = R(y); if (x < 0 || y < 0 || x >= this.W || y >= this.H) return; this.p[y * this.W + x] = -1; this.e[y * this.W + x] = 0; }
+    ell(cx, cy, rx, ry, c, em) {
+      if (rx < .6 && ry < .6) { this.set(cx, cy, c, em); return; }
+      rx = Math.max(rx, .5); ry = Math.max(ry, .5);
+      for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
+        const dx = (x - cx) / (rx + .3), dy = (y - cy) / (ry + .3); if (dx * dx + dy * dy <= 1) this.set(x, y, c, em);
+      }
+    }
+    rect(x, y, w, h, c, em) { x = R(x); y = R(y); w = R(w); h = R(h); for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) this.set(x + i, y + j, c, em); }
+    poly(pts, c, em) {
+      const ys = pts.map(p => p[1]), y0 = Math.floor(Math.min(...ys)), y1 = Math.ceil(Math.max(...ys));
+      for (let y = y0; y <= y1; y++) {
+        const yy = y + .01, xs = [];
+        for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; if ((a[1] <= yy && b[1] > yy) || (b[1] <= yy && a[1] > yy)) xs.push(a[0] + (yy - a[1]) / (b[1] - a[1]) * (b[0] - a[0])); }
+        xs.sort((p, q) => p - q);
+        for (let k = 0; k + 1 < xs.length; k += 2) for (let x = R(xs[k]); x <= R(xs[k + 1]); x++) this.set(x, y, c, em);
+      }
+    }
+    line(x0, y0, x1, y1, c, t, em) {
+      const n = Math.max(1, Math.ceil(Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0))));
+      for (let s = 0; s <= n; s++) { const x = lerp(x0, x1, s / n), y = lerp(y0, y1, s / n); if (!t || t <= 1.2) this.set(x, y, c, em); else this.ell(x, y, t / 2, t / 2, c, em); }
+    }
+    cap(x0, y0, x1, y1, r0, r1, c, em) { const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0))); for (let s = 0; s <= n; s++) { const t = s / n, r = lerp(r0, r1, t); this.ell(lerp(x0, x1, t), lerp(y0, y1, t), r, r, c, em); } }
+    path(pts, r0, r1, c, em, fn) {
+      let tot = 0; const seg = []; for (let i = 1; i < pts.length; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(l); tot += l; }
+      let acc = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i], n = Math.max(1, Math.ceil(seg[i - 1]));
+        for (let s = 0; s <= n; s++) { const t = s / n, d = (acc + seg[i - 1] * t) / (tot || 1), r = lerp(r0, r1, d), x = lerp(a[0], b[0], t), y = lerp(a[1], b[1], t); this.ell(x, y, r, r, fn ? fn(d, x, y) : c, em); }
+        acc += seg[i - 1];
+      }
+    }
+    each(fn) { for (let y = 0; y < this.H; y++) for (let x = 0; x < this.W; x++) { const c = this.p[y * this.W + x]; if (c >= 0) fn(x, y, c); } }
+    hole(cx, cy, rx, ry) { rx = Math.max(rx, .5); ry = Math.max(ry, .5); for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) { const dx = (x - cx) / (rx + .2), dy = (y - cy) / (ry + .2); if (dx * dx + dy * dy <= 1) this.del(x, y); } }
+    tex(target, alt, p) { target = C(target); alt = C(alt); this.each((x, y, c) => { if (c === target && this.r() < p) this.p[y * this.W + x] = alt; }); }
+  }
+
+  // ---------------------------------------------------------------- finishing: translucency, shading, outline, crop
+  function finish(s, o) {
+    const { W, H } = s;
+    if (o.translucent) s.each((x, y) => { if (((x + y * 2) % 3 === 0) && !s.e[y * W + x]) s.del(x, y); });
+    if (!o.flat) {
+      const src = Int32Array.from(s.p);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x, c = src[i]; if (c < 0 || s.e[i]) continue;
+        const up = y > 0 ? src[i - W] : -1, lf = x > 0 ? src[i - 1] : -1, dn = y < H - 1 ? src[i + W] : -1, rt = x < W - 1 ? src[i + 1] : -1;
+        if (up < 0 || lf < 0) s.p[i] = mix(c, 0xffffff, .1);
+        else if (dn < 0 || rt < 0) s.p[i] = mul(c, .8);
+      }
+    }
+    if (!o.noOutline) {
+      const src = Int32Array.from(s.p), em = Uint8Array.from(s.e);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x; if (src[i] >= 0) continue;
+        let nb = -1;
+        for (const [dx, dy] of [[0, -1], [-1, 0], [1, 0], [0, 1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue; const j = yy * W + xx; if (src[j] >= 0 && !em[j]) { nb = src[j]; break; } }
+        if (nb >= 0) s.p[i] = mix(mul(nb, .3), 0x0d0a09, .5);
+      }
+    }
+    if (o.aura) {
+      const src = Int32Array.from(s.p), a = C(o.aura);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x; if (src[i] >= 0 || (x + y) % 2) continue;
+        if ((x > 0 && src[i - 1] >= 0) || (x < W - 1 && src[i + 1] >= 0) || (y > 0 && src[i - W] >= 0) || (y < H - 1 && src[i + W] >= 0)) { s.p[i] = a; s.e[i] = 1; }
+      }
+    }
+    let x0 = W, x1 = -1, y0 = H, y1 = -1;
+    s.each((x, y) => { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; });
+    if (x1 < 0) return { w: 1, h: 1, p: new Int32Array([-1]), e: new Uint8Array(1), foot: 0 };
+    const base = s.base != null ? s.base : y1;
+    y1 = Math.max(y1, base);
+    const w = x1 - x0 + 1, h = y1 - y0 + 1, p = new Int32Array(w * h).fill(-1), e = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const j = (y + y0) * W + x + x0; p[y * w + x] = s.p[j]; e[y * w + x] = s.e[j]; }
+    return { w, h, p, e, foot: base - y0 };
+  }
+
+  // ---------------------------------------------------------------- held items (shared by humanoids)
+  function held(s, kind, x, y, h, o) {
+    const k = h / 24, wood = C(o.woodC || "#7a5530"), iron = C(o.ironC || "#9aa0a8");
+    switch (kind) {
+      case "staff": s.line(x, y - 13 * k, x, y + 11 * k, wood, Math.max(1, k)); s.ell(x, y - 13 * k, k, k * 1.2, mul(wood, 1.2)); break;
+      case "sword": s.line(x, y, x + 3 * k, y - 13 * k, iron, Math.max(1, k)); s.line(x - 2 * k, y - 1, x + 2.5 * k, y + .2, C("#c8a040"), 1); s.set(x - .5, y + 1.5 * k, C("#5a3a20")); if (o.glowBlade) s.line(x + 1, y - 2, x + 3 * k, y - 13 * k, C(o.glowBlade), 1, true); break;
+      case "scythe": s.line(x - 2 * k, y + 10 * k, x + 2 * k, y - 16 * k, wood, Math.max(1, k * .8)); s.path([[x + 2 * k, y - 16 * k], [x - 4 * k, y - 18 * k], [x - 10 * k, y - 14 * k]], k * .9, .5, C("#c8ccd2")); break;
+      case "sickle": s.line(x, y, x, y + 3 * k, wood); s.path([[x, y], [x + 2 * k, y - 3 * k], [x, y - 6 * k], [x - 2.5 * k, y - 5 * k]], Math.max(.6, k * .6), .5, C("#d8dce2")); break;
+      case "club": s.cap(x, y + 2 * k, x + 4 * k, y - 11 * k, k * .9, k * 2.2, C(o.clubC || "#5a3a1e")); break;
+      case "mace": s.line(x, y + 2 * k, x + 3 * k, y - 9 * k, wood, Math.max(1, k)); s.ell(x + 3.5 * k, y - 11 * k, 2.4 * k, 2.4 * k, iron); for (let a = 0; a < 6; a++) s.set(x + 3.5 * k + Math.cos(a) * 3 * k, y - 11 * k + Math.sin(a) * 3 * k, mul(iron, .7)); break;
+      case "spear": s.line(x - 2 * k, y + 10 * k, x + 4 * k, y - 18 * k, wood, Math.max(1, k * .8)); s.poly([[x + 3 * k, y - 18 * k], [x + 5.5 * k, y - 18 * k], [x + 5 * k, y - 23 * k]], iron); break;
+      case "torch": s.line(x, y + 2 * k, x + 1 * k, y - 5 * k, wood, Math.max(1, k)); s.ell(x + 1 * k, y - 6.5 * k, 1.3 * k, 2 * k, C("#ffb040"), true); s.set(x + 1 * k, y - 8.5 * k, C("#ffe080"), true); break;
+      case "lamp": s.line(x, y, x, y + 2 * k, C("#3a3a3a")); s.rect(x - 1.5 * k, y + 2 * k, 3 * k + 1, 3 * k + 1, C(o.lampC || "#ffd27a"), true); s.rect(x - 1.5 * k, y + 1.5 * k, 3 * k + 1, 1, C("#4a4a4a")); break;
+      case "spindle": s.line(x - 3 * k, y - 4 * k, x + 2 * k, y + 2 * k, wood, 1); s.ell(x - .5 * k, y - 1 * k, 1.5 * k, 1.5 * k, C(o.threadC || "#d8d0b8")); break;
+      case "gusli": s.poly([[x - 5 * k, y - 2 * k], [x + 4 * k, y - 4 * k], [x + 5 * k, y + 2 * k], [x - 4 * k, y + 3 * k]], C("#8a5a2a")); for (let i = 0; i < 4; i++) s.line(x - 4 * k, y - 1 * k + i * k, x + 4 * k, y - 3 * k + i * 1.2 * k, C("#e8d8a0")); break;
+      case "bow": s.path([[x, y - 9 * k], [x + 3 * k, y - 4 * k], [x + 3 * k, y + 4 * k], [x, y + 9 * k]], k * .7, k * .7, wood); s.line(x, y - 9 * k, x, y + 9 * k, C("#e0d8c0")); break;
+      case "hammer": s.line(x, y + 2 * k, x + 2 * k, y - 6 * k, wood, Math.max(1, k)); s.rect(x, y - 8.5 * k, 5 * k, 3 * k, iron); break;
+      case "tongs": s.line(x, y, x + 6 * k, y - 5 * k, C("#5a5a60"), 1); s.line(x, y + 1, x + 6 * k, y - 3 * k, C("#5a5a60"), 1); s.ell(x + 7 * k, y - 4 * k, 1.2 * k, 1.2 * k, C("#ff7a2a"), true); break;
+      case "axe": s.line(x, y + 2 * k, x + 2 * k, y - 8 * k, wood, Math.max(1, k)); s.poly([[x + 2 * k, y - 8 * k], [x + 6 * k, y - 10 * k], [x + 6 * k, y - 4 * k], [x + 2 * k, y - 6 * k]], C(o.axeC || "#a8aeb6"), !!o.axeGlow); break;
+      case "broom": s.line(x, y - 6 * k, x, y + 8 * k, wood, 1); s.poly([[x - 1.5 * k, y + 8 * k], [x + 1.5 * k, y + 8 * k], [x + 3 * k, y + 14 * k], [x - 3 * k, y + 14 * k]], C("#8a7a3a")); break;
+      case "pestle": s.line(x, y - 10 * k, x, y + 6 * k, C("#c8b890"), Math.max(1, k * 1.3)); break;
+      case "book": s.rect(x - 2 * k, y - 3 * k, 5 * k, 6 * k, C(o.bookC || "#5a2a1a")); s.rect(x - 1 * k, y - 2 * k, 3 * k, 1, C("#c8a040")); break;
+      case "bowl": s.ell(x + 1 * k, y, 3 * k, 1.5 * k, C("#8a5a3a")); s.ell(x + 1 * k, y - 1 * k, 2.4 * k, .8 * k, C(o.bowlC || "#4a8a3a")); break;
+      case "pick": s.line(x, y + 3 * k, x + 2 * k, y - 7 * k, wood, Math.max(1, k)); s.path([[x - 3 * k, y - 6 * k], [x + 2 * k, y - 8 * k], [x + 7 * k, y - 6 * k]], k * .7, .4, iron); break;
+      case "sack": s.ell(x + 1 * k, y + 3 * k, 3 * k, 3.5 * k, C(o.sackC || "#a8946a")); s.rect(x, y - 1 * k, 2 * k, 1.5 * k, C("#6a5a3a")); break;
+      case "apple": s.ell(x + 1 * k, y, 1.3 * k, 1.3 * k, C("#c8302a")); s.set(x + 1 * k, y - 1.6 * k, C("#3a6a2a")); break;
+      case "candle": s.rect(x, y - 4 * k, Math.max(1, k * 1.3), 5 * k, C("#efe4c0")); s.ell(x + .5, y - 5.2 * k, .8 * k, 1.2 * k, C("#ffc050"), true); break;
+      case "shield": s.ell(x + 1 * k, y, 3 * k, 4.5 * k, C(o.shieldC || "#a8301e")); s.ell(x + 1 * k, y, 1 * k, 1 * k, C("#c8a040")); break;
+      case "whip": s.line(x, y, x + 2 * k, y - 3 * k, wood, 1); s.path([[x + 2 * k, y - 3 * k], [x + 8 * k, y - 5 * k], [x + 12 * k, y], [x + 10 * k, y + 6 * k]], .6, .5, C("#5a3a20")); break;
+      case "wheel": s.ell(x + 2 * k, y - 2 * k, 4 * k, 4 * k, wood); s.hole(x + 2 * k, y - 2 * k, 2.6 * k, 2.6 * k); for (let a = 0; a < 4; a++) s.line(x + 2 * k, y - 2 * k, x + 2 * k + Math.cos(a * 1.57) * 3 * k, y - 2 * k + Math.sin(a * 1.57) * 3 * k, wood); break;
+      case "horn": s.path([[x, y], [x + 3 * k, y - 2 * k], [x + 4 * k, y - 6 * k]], k * .6, k * 1.4, C("#d8c8a0")); break;
+      case "plough": s.line(x, y, x + 8 * k, y + 10 * k, wood, Math.max(1, k)); s.poly([[x + 7 * k, y + 9 * k], [x + 11 * k, y + 11 * k], [x + 7 * k, y + 11 * k]], iron); break;
+    }
+  }
+
+  // ---------------------------------------------------------------- humanoid
+  function hum(s, o, cx, yb) {
+    const h = o.h || 24;
+    const build = o.build || "normal";
+    const kW = { thin: .26, normal: .36, stout: .48, fat: .58, hunched: .36, giant: .36, tiny: .5, child: .42 }[build] || .36;
+    const small = build === "tiny" || build === "child";
+    const headH = Math.max(3, R(h * (o.headK || (small ? .32 : build === "giant" ? .16 : .21))));
+    const headW = Math.max(3, R(headH * (o.headW || .92)));
+    const sw = Math.max(3, R(h * kW));
+    const top = yb - h + 1;
+    const lean = build === "hunched" ? Math.max(1, R(h * .1)) : 0;
+    const hx = cx + lean, hcy = top + (headH - 1) / 2;
+    const tTop = top + headH;
+    const upper = !!o.upper;
+    const legLen = upper ? 0 : R((h - headH) * (o.legK || .44));
+    const hipY = yb - legLen;
+    const skin = C(o.skin || "#e3b088"), main = C(o.cloth || "#e6e0d0"), trim = C(o.trim || "#c0392b");
+    const pants = C(o.pants || "#565a66"), feetC = C(o.feet || "#c9a35a");
+    const garment = o.top || "shirt";
+    const armW = Math.max(1, R(h / 13));
+    const sleeve = C(o.sleeve || (garment === "none" ? o.skin || "#e3b088" : garment === "bones" ? "#d8d0bc" : garment === "sarafan" ? "#e6e0d0" : garment === "fur" ? o.cloth || "#5a4a3a" : o.cloth || "#e6e0d0"));
+    const handC = C(o.hands || (garment === "bones" ? "#d8d0bc" : o.skin || "#e3b088"));
+    const feetH = Math.max(1, R(h / 16));
+    const shY = tTop + Math.max(1, R(armW / 2));
+    const shL = cx - sw / 2 + armW / 2 + lean * .6, shR = cx + sw / 2 - armW / 2 + lean * .6;
+    const armLen = Math.max(3, R((hipY - tTop) * 1.0 + (upper ? h * .1 : 1)));
+    const pose = o.pose || (o.hold ? "hold" : "down");
+    let hL = [shL - 1, shY + armLen], hR = [shR + 1, shY + armLen];
+    if (pose === "out") { hL = [shL - armLen * .85, shY + armLen * .25]; hR = [shR + armLen * .85, shY + armLen * .25]; }
+    if (pose === "up") { hL = [shL - armLen * .35, shY - armLen * .8]; hR = [shR + armLen * .35, shY - armLen * .8]; }
+    if (pose === "hold") hR = [shR + armLen * .5, shY + armLen * .6];
+    if (pose === "reach") { hR = [shR + armLen * .95, shY + armLen * .1]; hL = [shL + armLen * .3, shY + armLen * .45]; }
+    if (pose === "dance") { hL = [shL - armLen * .6, shY - armLen * .5]; hR = [shR + armLen * .6, shY - armLen * .5]; }
+    const fx = o.fx || [];
+    const has = f => fx.includes(f);
+
+    // halo, wings, cloak, tail (behind)
+    if (o.halo) { s.ell(hx, hcy, headW * .95, headH * .95, C("#d6a640"), true); s.ell(hx, hcy, headW * .75, headH * .75, C("#f2d27a"), true); }
+    if (o.wings) wingsHum(s, o.wings, cx, tTop, hipY, sw, h, o);
+    if (o.cloak) s.poly([[cx - sw / 2 + lean, tTop], [cx + sw / 2 + lean, tTop], [cx + sw * .75, yb - feetH], [cx - sw * .95, yb - feetH]], C(o.cloak));
+    if (o.tail) {
+      const tc = C(o.tailC || o.cloth || "#3a2a20");
+      if (o.tail === "devil") { s.path([[cx - sw * .3, hipY - 1], [cx - sw * .9, hipY + legLen * .4], [cx - sw * 1.3, hipY + legLen * .2]], .6, .5, tc); s.ell(cx - sw * 1.35, hipY + legLen * .15, 1, 1.2, tc); }
+      else if (o.tail === "wolf") s.path([[cx - sw * .3, hipY - 1], [cx - sw * .9, hipY + legLen * .3], [cx - sw * 1.1, hipY + legLen * .7]], Math.max(1, h * .05), Math.max(1, h * .06), tc);
+      else s.path([[cx - sw * .3, hipY - 1], [cx - sw * 1.1, hipY + legLen * .6]], .6, .5, tc);
+    }
+    // back arm
+    s.cap(shL, shY, hL[0], hL[1], armW * .55, armW * .5, mul(sleeve, .78));
+    s.ell(hL[0], hL[1], armW * .6, armW * .6, mul(handC, .85));
+    if (o.hold2) held(s, o.hold2, hL[0], hL[1], h, o);
+
+    // legs
+    const lt = o.legs || "legs";
+    if (!upper) {
+      const lw = Math.max(1, R(sw * .3)), gap = Math.max(1, R(sw * .14));
+      const xL = R(cx - gap / 2 - lw), xR = R(cx + gap / 2);
+      const legC = lt === "hooves" || lt === "fur" ? C(o.furC || o.cloth || "#4a3a2a") : pants;
+      if (["legs", "hooves", "fur", "boneleg", "roots"].includes(lt)) {
+        for (const [xx, i] of [[xL, 0], [xR, 1]]) {
+          if (lt === "boneleg" && i === 0) { s.rect(xx + R(lw / 2) - (lw > 2 ? 1 : 0), hipY, Math.max(1, R(lw / 2)), yb - hipY + 1, C(o.boneC || "#d8d0bc")); continue; }
+          s.rect(xx, hipY, lw, yb - hipY + 1 - feetH, i === 0 ? mul(legC, .85) : legC);
+          if (o.onuchi) s.rect(xx, hipY + R((yb - hipY) * .5), lw, R((yb - hipY) * .5) - feetH + 1, C("#d6cfbd"));
+          s.rect(xx, yb - feetH + 1, lw + 1, feetH, lt === "hooves" ? C("#1a1412") : lt === "roots" ? C("#4a3420") : feetC);
+        }
+        if (lt === "roots") for (let r = 0; r < 5; r++) s.line(cx, yb - 1, cx + (r - 2) * sw * .45, yb, C("#4a3420"));
+      } else if (lt === "bone") {
+        s.rect(xL + R(lw / 2), hipY, 1, yb - hipY + 1, C("#d8d0bc")); s.rect(xR + R(lw / 2), hipY, 1, yb - hipY + 1, C("#d8d0bc"));
+      } else if (lt === "chicken") {
+        const lc = C("#d09030");
+        s.line(xL, hipY, xL - 1, yb, lc); s.line(xR + lw - 1, hipY, xR + lw, yb, lc);
+        s.line(xL - 3, yb, xL + 1, yb, lc); s.line(xR + lw - 2, yb, xR + lw + 2, yb, lc);
+      } else if (lt === "tail" || lt === "fishtail") {
+        const tc = C(o.tailC || "#3a6a3a");
+        s.path([[cx, hipY], [cx + sw * .2, yb - legLen * .5], [cx + sw * .9, yb - 1], [cx + sw * 1.6, yb - 2]], sw * .42, 1, tc);
+        if (lt === "fishtail") s.poly([[cx + sw * 1.5, yb - 2], [cx + sw * 2.1, yb - legLen * .35], [cx + sw * 2.1, yb]], tc);
+      } else if (lt === "wisp") {
+        for (let y = hipY; y <= yb - legLen * .1; y++) { const t = (y - hipY) / legLen, half = sw * .55 * (1 - t * .8); for (let x = R(cx - half); x <= R(cx + half); x++) if (s.r() > t * .8) s.set(x, y, garment === "none" ? skin : main); }
+      } else if (lt === "pole") {
+        s.rect(cx - Math.max(1, R(h / 30)), hipY, Math.max(1, R(h / 15)), yb - hipY + 1, C("#6a4a2a"));
+      }
+    }
+
+    // torso
+    const hem = upper ? yb : hipY + Math.max(1, R(h * .05));
+    const T = (y0, y1, w0, w1, c) => s.poly([[cx - w0 / 2 + lean, y0], [cx + w0 / 2 + lean, y0], [cx + w1 / 2, y1], [cx - w1 / 2, y1]], c);
+    const longY = upper ? yb : yb - feetH + 1;
+    const trimLine = (y0, y1) => { if (h >= 14) s.line(cx + 1 + lean * .5, y0, cx + 1, y1, trim); };
+    switch (garment) {
+      case "shirt": case "rags": case "fur": case "bark": case "none":
+        T(tTop, hem, sw, sw * 1.08, garment === "none" ? skin : main);
+        if (garment === "shirt") { trimLine(tTop, R(tTop + (hipY - tTop) * .5)); if (h >= 18) for (let x = R(cx - sw * .5); x <= R(cx + sw * .5); x += 2) s.set(x, hem - 1, trim); }
+        if (garment === "rags") for (let x = R(cx - sw * .55); x <= R(cx + sw * .55); x++) if (s.r() < .45) s.del(x, hem - (s.r() < .5 ? 0 : 1));
+        if (garment === "fur") s.tex(main, mul(main, .78), .35);
+        if (garment === "bark") s.each((x, y, c) => { if (c === main && x % 2 === 0 && s.r() < .7) s.p[y * s.W + x] = mul(main, .75); });
+        break;
+      case "robe": case "dress": case "shroud": case "sarafan": case "straw":
+        T(tTop, longY, sw, sw * (garment === "dress" ? 1.6 : 1.45), main);
+        if (garment === "robe" || garment === "dress") { trimLine(tTop, longY); for (let x = R(cx - sw * .75); x <= R(cx + sw * .75); x++) if ((x & 1) === 0) s.set(x, longY - 1, trim); }
+        if (garment === "shroud") { s.line(cx - sw * .4, tTop + 2, cx + sw * .45, hipY + 2, mul(main, .82)); s.line(cx + sw * .4, tTop + 2, cx - sw * .45, hipY + 2, mul(main, .82)); }
+        if (garment === "sarafan") { s.line(cx - sw * .3, tTop, cx - sw * .3, tTop + R((hipY - tTop) * .35), C("#e6e0d0")); s.line(cx + sw * .3, tTop, cx + sw * .3, tTop + R((hipY - tTop) * .35), C("#e6e0d0")); trimLine(tTop + 2, longY); for (let x = R(cx - sw * .75); x <= R(cx + sw * .75); x++) s.set(x, longY - 2, trim); }
+        if (garment === "straw") s.tex(main, mul(main, .7), .4);
+        break;
+      case "coat": case "armor":
+        T(tTop, hipY + R(legLen * (garment === "coat" ? .6 : .35)), sw * 1.04, sw * 1.3, main);
+        if (garment === "coat") { s.line(cx + 1 + lean * .5, tTop, cx + 1, hipY + R(legLen * .6), trim); if (o.collar) s.ell(cx + lean, tTop + .5, sw * .5, Math.max(1, h * .04), C(o.collar)); }
+        if (garment === "armor") s.tex(main, mul(main, .7), .45);
+        break;
+      case "bones":
+        s.line(cx + lean * .5, tTop, cx, hipY, C("#d8d0bc"), Math.max(1, h / 24));
+        for (let y = tTop + 1; y < hipY - 1; y += 2) s.line(cx - sw * .4, y, cx + sw * .4, y, C("#cfc7b2"));
+        s.ell(cx, hipY, sw * .35, Math.max(1, h * .03), C("#d8d0bc"));
+        break;
+    }
+    if (o.belt) s.rect(R(cx - sw * .55), hipY - 1, R(sw * 1.1) + 1, Math.max(1, R(h / 24)), C(o.belt));
+    if (o.belly) s.ell(cx + sw * .2, R(tTop + (hipY - tTop) * .65), sw * .42, (hipY - tTop) * .4, garment === "none" ? skin : main);
+    if (has("hollowBack")) s.ell(cx - sw * .35, R(tTop + (hipY - tTop) * .55), sw * .18, (hipY - tTop) * .3, C("#5a1418"));
+    if (has("chains")) { s.line(cx - sw * .6, tTop + 1, cx + sw * .6, hipY, C("#6a6a72")); s.line(cx + sw * .6, tTop + 1, cx - sw * .6, hipY, C("#6a6a72")); }
+    if (o.hump) s.ell(cx - sw * .35 + lean * .5, tTop + 1, sw * .35, sw * .3, main);
+
+    // front arm + held item
+    s.cap(shR, shY, hR[0], hR[1], armW * .55, armW * .5, sleeve);
+    s.ell(hR[0], hR[1], armW * .6, armW * .6, handC);
+    if (o.claws) { s.set(hR[0] + 1, hR[1] + 1, C("#ece6d4")); s.set(hL[0] - 1, hL[1] + 1, C("#ece6d4")); }
+    if (has("shadowHands")) for (const hh of [hL, hR]) for (let k = 1; k < 5; k++) if (s.r() < .8) s.set(hh[0] + (s.r() - .5) * 2, hh[1] + k + 1, C("#6a46a0"), k < 3);
+    if (o.hold) held(s, o.hold, hR[0], hR[1], h, o);
+
+    // head
+    const head = o.head || "human";
+    const eyeY = R(top + headH * .52);
+    const inHead = (x, y) => ((x - hx) / (headW / 2 + .3)) ** 2 + ((y - hcy) / (headH / 2 + .3)) ** 2 <= 1;
+    const eyeC = C(o.eyes || "#24160f"), glow = !!o.glowEyes;
+    const eye = (x, y) => s.set(x, y, eyeC, glow);
+    if (["human", "skull", "frog", "stump"].includes(head)) {
+      const hc = head === "skull" ? C("#d9d1bb") : head === "stump" ? C(o.cloth || "#4a3626") : skin;
+      s.ell(hx, hcy, headW / 2, headH / 2, hc);
+      if (head === "stump") s.tex(hc, mul(hc, .75), .4);
+      s.set(hx + headW / 2, eyeY + 1, mul(hc, .85));
+      if (o.oneEye) { s.ell(hx + 1, eyeY - 1, Math.max(.6, headW * .14), Math.max(.6, headW * .12), C(o.eyes || "#e8e4d0"), glow); s.set(hx + 1, eyeY - 1, C("#141010")); }
+      else if (head === "skull") { s.set(hx + R(headW * .22), eyeY, C("#141114")); s.set(hx - R(headW * .12), eyeY, C("#141114")); if (glow) { s.set(hx + R(headW * .22), eyeY, eyeC, true); } if (headH >= 5) for (let x = R(hx - headW * .2); x <= R(hx + headW * .35); x += 2) s.set(x, eyeY + 2, C("#2a2620")); }
+      else { eye(hx + R(headW * .22), eyeY); if (headW >= 5) eye(hx - R(headW * .12), eyeY); }
+      if (o.fangs) { s.set(hx + R(headW * .2), eyeY + 2, C("#f4f0e6")); s.set(hx + R(headW * .2) + 1, eyeY + 2, C("#a8201a")); }
+      if (o.nose) s.line(hx + headW / 2, eyeY, hx + headW / 2 + o.nose, eyeY + 1, mul(hc, .9));
+    } else {
+      animalHead(s, head, hx, hcy, headW, headH, o, glow);
+    }
+    if (o.lids) for (const ex of [hx + R(headW * .22), hx - R(headW * .12)]) s.rect(ex, eyeY - 1, 2, yb - eyeY, C(o.lidC || "#4a3a2a"));
+
+    // hair
+    const hs = o.hairStyle || (o.hair ? "short" : "bald");
+    const hcol = C(o.hair || "#9a7444");
+    if (hs !== "bald" && head !== "skull") {
+      const capRows = Math.max(1, R(headH * .35));
+      if (hs === "kerchief") {
+        for (let y = top - 1; y <= top + headH; y++) for (let x = hx - headW; x <= hx + headW; x++) if (inHead(x, y) && (y < top + capRows + 1 || x < hx - headW * .1)) s.set(x, y, hcol);
+        s.poly([[hx - headW * .5, top + headH * .5], [hx - headW * .9, top + headH * 1.2], [hx - headW * .2, top + headH * .9]], hcol);
+      } else {
+        for (let y = top - 1; y <= top + headH; y++) for (let x = hx - headW; x <= hx + headW; x++) if (inHead(x, y) && (y < top + capRows || (x < hx - headW * .18 && y < top + headH * .75))) s.set(x, y, hcol);
+        s.ell(hx - .3, top + capRows * .45, headW / 2 + .2, Math.max(.6, capRows * .6), hcol);
+        const fall = (hipY - top);
+        if (hs === "long" || hs === "loose") s.rect(R(hx - headW / 2), top + capRows, Math.max(1, R(headW * .45)), R(fall * (hs === "loose" ? .85 : .6)), hcol);
+        if (hs === "loose") s.rect(R(hx + headW * .3), top + capRows, 1, R(fall * .55), hcol);
+        if (hs === "braid") s.cap(hx - headW * .4, top + headH * .7, hx - headW * .55, hipY + 2, Math.max(.6, headW * .12), Math.max(.5, headW * .08), hcol);
+        if (hs === "wild") for (let k = 0; k < 7; k++) { const a = Math.PI * (1 + k / 6); s.line(hx + Math.cos(a) * headW * .45, hcy + Math.sin(a) * headH * .45, hx + Math.cos(a) * headW * (.75 + s.r() * .3), hcy + Math.sin(a) * headH * (.75 + s.r() * .3), hcol); }
+      }
+    }
+    // beard
+    if (o.beard) {
+      const bc = C(o.beardC || o.hair || "#9a7444");
+      for (let y = eyeY + 1; y <= top + headH; y++) for (let x = R(hx - headW * .25); x <= R(hx + headW * .5); x++) if (inHead(x, y) || y >= top + headH - 1) s.set(x, y, bc);
+      if (o.beard === "long" || o.beard === "moss") s.poly([[hx - headW * .25, top + headH], [hx + headW * .5, top + headH], [hx + headW * .25, R(tTop + (hipY - tTop) * .55)], [hx - headW * .05, R(tTop + (hipY - tTop) * .6)]], bc);
+      if (o.beard === "huge") s.poly([[hx - headW * .3, top + headH], [hx + headW * .55, top + headH], [hx + headW * 1.4, yb], [hx - headW * .1, yb]], bc);
+      if (o.beard === "moss") s.tex(bc, C("#5a8a3a"), .35);
+    }
+    // headwear
+    const hat = o.hat;
+    if (hat === "fur") { s.ell(hx, top - headH * .05, headW * .58, headH * .33, C(o.hatC || "#3a2a20")); s.rect(R(hx - headW * .55), R(top + headH * .15), R(headW * 1.1) + 1, 1, C(o.hatTrim || "#6a5040")); }
+    if (hat === "helmet") { s.poly([[hx - headW * .55, top + headH * .35], [hx + headW * .55, top + headH * .35], [hx + headW * .1, top - headH * .55]], C(o.hatC || "#9aa0a8")); s.set(hx + headW * .1, top - headH * .6, C(o.hatC || "#9aa0a8")); s.line(hx + headW * .3, top + headH * .35, hx + headW * .3, eyeY + 1, C(o.hatC || "#9aa0a8")); }
+    if (hat === "crown") { const cy0 = top - 1, gc = C(o.hatC || "#d6a640"); s.rect(R(hx - headW * .5), cy0, R(headW) + 1, Math.max(1, R(headH * .2)), gc); for (let i = 0; i < 3; i++) s.line(hx - headW * .4 + i * headW * .4, cy0, hx - headW * .4 + i * headW * .4, cy0 - Math.max(1, headH * .3), gc); s.set(hx, cy0, C("#c8302a"), true); }
+    if (hat === "kokoshnik") { const kc = C(o.hatC || "#a8301e"); s.ell(hx - headW * .05, top + headH * .1, headW * .68, headH * .55, kc); for (let a = 0; a < 7; a++) s.set(hx - headW * .05 + Math.cos(Math.PI + a / 6 * Math.PI) * headW * .6, top + headH * .1 + Math.sin(Math.PI + a / 6 * Math.PI) * headH * .5, C("#f0ead8")); s.ell(hx, hcy + headH * .05, headW * .42, headH * .38, skin); eye(hx + R(headW * .22), eyeY); if (headW >= 5) eye(hx - R(headW * .12), eyeY); }
+    if (hat === "hood") { for (let y = top - 1; y <= top + headH + 1; y++) for (let x = hx - headW; x <= hx + headW; x++) { const d = ((x - hx) / (headW / 2 + 1.2)) ** 2 + ((y - hcy) / (headH / 2 + 1.2)) ** 2; if (d <= 1 && !(x > hx - headW * .05 && y > top + headH * .3 && inHead(x, y))) s.set(x, y, C(o.hatC || o.cloak || o.cloth || "#2a2532")); } }
+    if (hat === "wreath") { for (let x = R(hx - headW * .55); x <= R(hx + headW * .55); x++) { s.set(x, top, C("#3a6a2a")); if ((x & 1) === 0) s.set(x, top - 1, C(["#e8d040", "#c8302a", "#4a78c8", "#f0f0f0"][x & 3])); } }
+    if (hat === "cap") s.ell(hx - headW * .1, top + 1, headW * .6, headH * .28, C(o.hatC || "#d8d0bc"));
+    if (hat === "horns") { const hc2 = C(o.hatC || "#2a2420"); s.path([[hx - headW * .3, top + 1], [hx - headW * .45, top - headH * .35], [hx - headW * .2, top - headH * .5]], Math.max(.6, h * .025), .5, hc2); s.path([[hx + headW * .25, top + 1], [hx + headW * .35, top - headH * .35], [hx + headW * .6, top - headH * .45]], Math.max(.6, h * .025), .5, hc2); }
+    if (hat === "antlers") { const ac = C(o.hatC || "#5a4430"); for (const d of [-1, 1]) { const bx = hx + d * headW * .3; s.line(bx, top, bx + d * headW * .5, top - headH * .9, ac); s.line(bx + d * headW * .2, top - headH * .35, bx + d * headW * .7, top - headH * .45, ac); s.line(bx + d * headW * .35, top - headH * .6, bx + d * headW * .15, top - headH * 1.0, ac); } }
+
+    // effects
+    if (has("drips")) for (let k = 0; k < Math.max(3, h / 5); k++) s.set(hx - headW * .5 + s.r() * headW * 1.2, top + headH + s.r() * (hipY - top), C("#5aa8c8"), s.r() < .3);
+    if (has("frost")) for (let k = 0; k < h / 2; k++) s.set(cx - sw + s.r() * sw * 2, top + s.r() * h, C("#cfefff"), true);
+    if (has("fire")) for (let k = 0; k < h; k++) { const x = hx - headW * .5 + s.r() * headW, y = top - s.r() * headH * .8; s.set(x, y, C(s.r() < .5 ? "#ffb040" : "#ff6a1a"), true); }
+    if (has("sparks")) for (let k = 0; k < h / 2; k++) s.set(cx - sw + s.r() * sw * 2.2, top + s.r() * h * .9, C("#ffd070"), true);
+    if (has("moss")) for (let k = 0; k < h; k++) { const x = cx - sw * .6 + s.r() * sw * 1.2, y = top + s.r() * (hipY - top); if (s.get(x, y) >= 0) s.set(x, y, C(s.r() < .5 ? "#3a6a2a" : "#5a8a3a")); }
+    if (has("mushrooms")) for (let k = 0; k < 3; k++) { const x = hx - headW * .4 + k * headW * .4; s.set(x, top - 1, C("#c8302a")); s.set(x + 1, top - 1, C("#c8302a")); s.set(x, top - 2, C("#e8e0d0")); }
+    if (has("soil")) for (let k = 0; k < h / 2; k++) { const x = cx - sw * .6 + s.r() * sw * 1.2, y = tTop + s.r() * (yb - tTop); if (s.get(x, y) >= 0) s.set(x, y, C("#4a3626")); }
+    if (has("blood")) for (let k = 0; k < h / 3; k++) { const x = cx - sw * .3 + s.r() * sw * .7, y = tTop + s.r() * (hipY - tTop); if (s.get(x, y) >= 0) s.set(x, y, C("#7a1014")); }
+    if (has("gold")) for (let k = 0; k < h / 2; k++) { const x = cx - sw * .6 + s.r() * sw * 1.2, y = tTop + s.r() * (yb - tTop); if (s.get(x, y) >= 0) s.set(x, y, C("#e8c050"), s.r() < .3); }
+    if (has("smoke")) for (let k = 0; k < h; k++) s.set(hx + s.r() * headW - headW * .5, top - 2 - s.r() * headH * 1.4, C("#8a8a90"));
+    if (has("ash")) s.tex(main, C("#8a8580"), .3);
+    if (has("lightning")) { let x = cx + sw, y = top; for (let k = 0; k < 6; k++) { const nx = x + (s.r() - .3) * 4, ny = y + h / 6; s.line(x, y, nx, ny, C("#cfe0ff"), 1, true); x = nx; y = ny; } }
+    return { hx, top, tTop, hipY, hR, hL, headH, headW, sw };
+  }
+
+  function wingsHum(s, kind, cx, tTop, hipY, sw, h, o) {
+    const wc = C(o.wingC || ({ bird: "#6a5a48", bat: "#2a2228", paper: "#ece6d4", owl: "#8a7458", swan: "#f0eee6", fire: "#ff8a2a" }[kind]));
+    const span = h * (o.wingK || .55);
+    const pts = [[cx - sw * .2, tTop + 1], [cx - sw * .5 - span * .6, tTop - h * .32], [cx - sw * .5 - span, tTop - h * .1], [cx - sw * .5 - span * .9, tTop + h * .18], [cx - sw * .4, hipY - 1]];
+    s.poly(pts, wc, kind === "fire");
+    for (let k = 1; k < 4; k++) s.line(cx - sw * .3, tTop + 2, cx - sw * .5 - span * (.4 + k * .2), tTop - h * .2 + k * h * .1, kind === "paper" ? C("#a8a090") : mul(wc, .75), 1, kind === "fire");
+    if (kind === "bat") for (let k = 0; k < 3; k++) s.hole(cx - sw * .5 - span * (.3 + k * .25), hipY + span * .02, span * .12, span * .12);
+  }
+
+  function animalHead(s, head, hx, hcy, hw, hh, o, glow) {
+    const fc = C(o.headC || o.furC || o.cloth || "#5a4a3a"), ec = C(o.eyes || (glow ? "#ffd23a" : "#1a1008"));
+    const r = Math.max(1.5, hw * .5);
+    if (head === "wolf" || head === "dog") {
+      s.ell(hx, hcy, r, hh * .45, fc);
+      s.ell(hx + r * .9, hcy + hh * .15, r * .75, hh * .22, fc);
+      s.set(hx + r * 1.65, hcy + hh * .08, C("#140e0c"));
+      s.poly([[hx - r * .7, hcy - hh * .2], [hx - r * .2, hcy - hh * .3], [hx - r * .5, hcy - hh * .85]], fc);
+      s.poly([[hx, hcy - hh * .25], [hx + r * .5, hcy - hh * .3], [hx + r * .1, hcy - hh * .85]], fc);
+      s.set(hx + r * .35, hcy - hh * .08, ec, glow);
+    } else if (head === "bear") {
+      s.ell(hx, hcy, r, hh * .48, fc); s.ell(hx + r * .75, hcy + hh * .15, r * .5, hh * .22, mix(fc, 0xc8a070, .3));
+      s.ell(hx - r * .6, hcy - hh * .45, r * .3, r * .3, fc); s.ell(hx + r * .2, hcy - hh * .5, r * .3, r * .3, fc);
+      s.set(hx + r * 1.2, hcy + hh * .05, C("#140e0c")); s.set(hx + r * .3, hcy - hh * .1, ec, glow);
+    } else if (head === "goat" || head === "pig") {
+      s.ell(hx, hcy, r, hh * .48, fc);
+      if (head === "pig") { s.ell(hx + r * .9, hcy + hh * .1, r * .4, hh * .2, C("#c88a7a")); s.set(hx + r * 1.1, hcy + hh * .1, C("#3a1a14")); }
+      else s.ell(hx + r * .8, hcy + hh * .2, r * .5, hh * .2, fc);
+      s.path([[hx - r * .3, hcy - hh * .3], [hx - r * .8, hcy - hh * .9], [hx - r * 1.3, hcy - hh * .7]], Math.max(.6, r * .2), .5, C(o.hornC || "#2a2420"));
+      s.path([[hx + r * .2, hcy - hh * .35], [hx + r * .1, hcy - hh * .95], [hx - r * .3, hcy - hh * 1.05]], Math.max(.6, r * .2), .5, C(o.hornC || "#2a2420"));
+      s.set(hx + r * .35, hcy - hh * .1, ec, glow);
+    } else if (head === "bird") {
+      s.ell(hx, hcy, r, hh * .45, fc); s.poly([[hx + r * .8, hcy - hh * .1], [hx + r * 2, hcy + hh * .05], [hx + r * .8, hcy + hh * .25]], C(o.beakC || "#3a3a3a")); s.set(hx + r * .3, hcy - hh * .1, ec, glow);
+    } else if (head === "cat") {
+      s.ell(hx, hcy, r, hh * .45, fc); s.poly([[hx - r * .8, hcy - hh * .2], [hx - r * .3, hcy - hh * .3], [hx - r * .65, hcy - hh * .8]], fc); s.poly([[hx + r * .2, hcy - hh * .3], [hx + r * .75, hcy - hh * .2], [hx + r * .55, hcy - hh * .8]], fc);
+      s.set(hx + r * .4, hcy - hh * .05, ec, glow); s.set(hx - r * .2, hcy - hh * .05, ec, glow);
+    } else if (head === "frogface") {
+      s.ell(hx, hcy, r * 1.1, hh * .4, fc); s.set(hx + r * .4, hcy - hh * .35, ec, glow);
+    }
+  }
+
+  // ---------------------------------------------------------------- beasts
+  function beast(s, o, cx, yb) {
+    const h = o.h || 12, L = o.len || R(h * 1.5), kind = o.head || "wolf";
+    const body = C(o.color || "#7a6a58"), belly = C(o.belly || mix(o.color || "#7a6a58", "#e8dcc4", .35)), dark = mul(body, .72);
+    const pose = o.pose || "stand";
+    const LR = { horse: .48, deer: .5, indrik: .42, bull: .38, cow: .4, goat: .42, bear: .3, mouse: .2, hare: .3, hedgehog: .14, cat: .34, lion: .4, pig: .28, wolf: .42, dog: .4, fox: .36, weasel: .22 };
+    const legH = Math.max(1, R(h * (o.legK || LR[kind] || .38)));
+    const bodyH = Math.max(2, R(h * (kind === "hedgehog" ? .7 : kind === "weasel" ? .4 : .44)));
+    const rx = Math.max(2, L * .4), ry = bodyH / 2;
+    const by = yb - legH - ry + 1;
+    const legW = Math.max(1, R(h * .1));
+    const fx = cx + rx * .6, bx = cx - rx * .6;
+    const ec = C(o.eyes || (o.glowEyes ? "#ffd23a" : "#120c08"));
+    const hoof = ["horse", "deer", "indrik", "bull", "cow", "goat", "pig"].includes(kind);
+    const leg = (x, c, wood) => { const y0 = by + ry * .3; s.rect(R(x), R(y0), legW, yb - R(y0) + 1, wood ? C("#c8a878") : c); s.rect(R(x), yb, legW + (hoof ? 0 : 1), 1, hoof ? C("#1a1412") : mul(c, .7)); };
+    if (pose === "sit") {
+      const sx = cx - h * .1;
+      if (o.tailT !== "none") s.path([[sx - h * .2, yb - 1], [sx + h * .2, yb], [sx + h * .45, yb - 2]], Math.max(.6, h * .06), .5, body);
+      s.ell(sx, yb - h * .33, h * .28, h * .34, body);
+      s.ell(sx + h * .06, yb - h * .28, h * .16, h * .22, belly);
+      s.rect(R(sx + h * .12), R(yb - h * .3), legW, R(h * .3) + 1, body); s.rect(R(sx + h * .22), R(yb - h * .3), legW, R(h * .3) + 1, body);
+      animalHeadBeast(s, kind === "lion" ? "lion" : "cat", sx + h * .14, yb - h * .72, h, body, belly, ec, o);
+      if (o.pattern === "stripes") s.each((x, y, c) => { if ((c === body) && (y % 3 === 0)) s.p[y * s.W + x] = dark; });
+      return;
+    }
+    if (pose === "sleep") {
+      s.ell(cx, yb - ry, rx, ry, body); s.ell(cx + rx * .1, yb - ry * .4, rx * .8, ry * .4, belly);
+      animalHeadBeast(s, kind, cx + rx * .9, yb - ry * .7, h * .8, body, belly, ec, Object.assign({}, o, { sleeping: true }));
+      return;
+    }
+    if (o.wings) { const wc = C(o.wingC || "#6a5a48"); s.poly([[cx - rx * .3, by - ry * .6], [cx - rx * .9, by - h * .9], [cx + rx * .4, by - h * .7], [cx + rx * .2, by - ry * .5]], wc); for (let k = 0; k < 3; k++) s.line(cx - rx * .2, by - ry * .6, cx - rx * (.8 - k * .4), by - h * (.85 - k * .05), mul(wc, .75)); }
+    if (pose !== "sleep") { leg(fx + legW, dark); leg(bx + legW, dark); }
+    // tail
+    const tt = o.tailT || ({ wolf: "bushy", fox: "bushy", dog: "bushy", horse: "horse", deer: "short", indrik: "horse", bull: "thin", cow: "thin", cat: "thin", lion: "thin", mouse: "thin", hare: "short", bear: "short", hedgehog: "none", goat: "short", pig: "curl", weasel: "bushy" }[kind]);
+    const tx = cx - rx * .95, ty = by - ry * .3;
+    if (tt === "bushy") s.path([[tx, ty], [tx - h * .25, ty + h * .2], [tx - h * .35, ty + h * .4]], Math.max(1, h * .07), Math.max(1, h * .1), kind === "fox" ? C("#c86a2a") : body);
+    if (tt === "horse") s.path([[tx, ty], [tx - h * .15, ty + h * .25], [tx - h * .12, ty + h * .55]], Math.max(1, h * .06), Math.max(1, h * .05), C(o.mane || mul(body, .55)));
+    if (tt === "thin") { s.path([[tx, ty], [tx - h * .2, ty + h * .25], [tx - h * (kind === "mouse" ? .6 : .3), ty + h * .1]], .6, .5, kind === "mouse" ? C("#c8a89a") : body); if (kind === "lion" || kind === "bull" || kind === "cow") s.ell(tx - h * .3, ty + h * .1, 1, 1, mul(body, .6)); }
+    if (tt === "short") s.ell(tx, ty, Math.max(1, h * .06), Math.max(1, h * .06), kind === "hare" ? C("#f0ece0") : body);
+    if (tt === "curl") s.path([[tx, ty], [tx - 2, ty - 1], [tx - 2, ty + 1]], .5, .5, body);
+    // body
+    s.ell(cx, by, rx, ry, body);
+    s.ell(cx + rx * .05, by + ry * .45, rx * .78, ry * .42, belly);
+    if (kind === "hedgehog") { for (let k = 0; k < L * 2; k++) { const a = Math.PI * (1.05 + s.r() * .9), rr = rx * (.7 + s.r() * .3); s.line(cx + Math.cos(a) * rr * .6, by + Math.sin(a) * ry * .6, cx + Math.cos(a) * (rr + 1.5), by + Math.sin(a) * (ry + 1.5), C(s.r() < .5 ? "#5a4a3a" : "#2a2018")); } }
+    if (o.pattern === "spots" || o.pattern === "dapple") for (let k = 0; k < L; k++) { const a = s.r() * 6.28, rr = Math.sqrt(s.r()); const x = cx + Math.cos(a) * rx * rr * .9, y = by + Math.sin(a) * ry * rr * .8; if (s.get(x, y) === body) s.set(x, y, o.pattern === "dapple" ? mix(body, 0xffffff, .35) : mul(body, .6)); }
+    if (o.pattern === "stripes") s.each((x, y, c) => { if (c === body && (x % 4 === 0)) s.p[y * s.W + x] = dark; });
+    if (o.saddle) { s.rect(R(cx - rx * .2), R(by - ry), R(rx * .5), 2, C(o.saddle)); s.rect(R(cx - rx * .1), R(by - ry + 1), 1, R(ry), C(o.saddle)); }
+    if (o.mane && (kind === "horse" || kind === "indrik")) { }
+    // near legs
+    leg(fx, body, o.woodLeg); leg(bx, body);
+    // head
+    animalHeadBeast(s, kind, cx + rx * .85, by - ry * .55, h, body, belly, ec, o);
+    if (o.fire) for (let k = 0; k < h; k++) s.set(cx + rx + h * .55 + s.r() * h * .35, by - h * .45 + (s.r() - .5) * h * .25, C(s.r() < .5 ? "#ffb040" : "#ff6a1a"), true);
+    if (o.chains) s.line(cx - rx, by - ry * .5, cx + rx, by + ry * .5, C("#6a6a72"));
+  }
+
+  function animalHeadBeast(s, kind, x, y, h, body, belly, ec, o) {
+    const r = Math.max(1.3, h * (kind === "mouse" ? .26 : kind === "hare" ? .2 : .2));
+    const glow = !!o.glowEyes, eye = (ex, ey) => { if (o.sleeping) s.set(ex, ey, mul(body, .5)); else s.set(ex, ey, ec, glow); };
+    if (kind === "horse" || kind === "deer" || kind === "indrik") {
+      const nx = x + h * .18, ny = y - h * .38;
+      s.cap(x - h * .05, y + h * .05, nx, ny, h * .12, h * .1, body);
+      s.cap(nx, ny, nx + h * .3, ny + h * .17, h * .1, h * .07, body);
+      s.set(nx + h * .3, ny + h * .2, C("#1a1210"));
+      s.poly([[nx - h * .02, ny - h * .08], [nx + h * .04, ny - h * .2], [nx + h * .07, ny - h * .07]], body);
+      eye(nx + h * .06, ny);
+      if (kind === "horse" || kind === "indrik") s.path([[nx - h * .04, ny - h * .06], [x - h * .1, y - h * .05]], Math.max(.6, h * .05), Math.max(.6, h * .06), C(o.mane || mul(body, .55)));
+      if (kind === "indrik") s.path([[nx + h * .08, ny - h * .08], [nx + h * .3, ny - h * .45]], Math.max(1, h * .04), .5, C(o.hornC || "#e8dcb8"));
+      if (kind === "deer") for (const d of [0, .1]) { s.line(nx + h * d, ny - h * .1, nx - h * .1 + h * d, ny - h * .4, C("#8a6a4a")); s.line(nx - h * .05 + h * d, ny - h * .28, nx + h * .1 + h * d, ny - h * .38, C("#8a6a4a")); }
+      return;
+    }
+    if (kind === "bull" || kind === "cow" || kind === "goat") {
+      s.ell(x + r * .4, y + r * .2, r * 1.1, r * .9, body); s.ell(x + r * 1.3, y + r * .6, r * .55, r * .45, belly);
+      const hc = C(o.hornC || "#e0d4b0");
+      s.path([[x + r * .2, y - r * .5], [x - r * .2, y - r * 1.4], [x + r * .4, y - r * 1.9]], Math.max(.6, r * .25), .5, hc);
+      s.path([[x + r * .8, y - r * .5], [x + r * 1.1, y - r * 1.3], [x + r * 1.6, y - r * 1.6]], Math.max(.6, r * .25), .5, hc);
+      eye(x + r * .9, y - r * .05); return;
+    }
+    if (kind === "bear") { s.ell(x + r * .3, y, r * 1.05, r * .95, body); s.ell(x + r * 1.2, y + r * .3, r * .55, r * .4, belly); s.ell(x - r * .1, y - r * .85, r * .35, r * .35, body); s.set(x + r * 1.65, y + r * .2, C("#140e0c")); eye(x + r * .7, y - r * .25); return; }
+    if (kind === "cat" || kind === "lion") {
+      if (kind === "lion") s.ell(x, y, r * 1.6, r * 1.5, C(o.mane || "#8a5a2a"));
+      s.ell(x, y, r, r * .9, body);
+      s.poly([[x - r * .9, y - r * .3], [x - r * .3, y - r * .6], [x - r * .7, y - r * 1.5]], body);
+      s.poly([[x + r * .2, y - r * .6], [x + r * .85, y - r * .3], [x + r * .65, y - r * 1.5]], body);
+      eye(x + r * .45, y - r * .1); eye(x - r * .3, y - r * .1);
+      s.set(x + r * .15, y + r * .35, C("#c86a6a")); s.line(x + r * .5, y + r * .4, x + r * 1.6, y + r * .2, C("#d8d0c0"));
+      return;
+    }
+    if (kind === "hare") { s.ell(x + r * .3, y, r, r * .8, body); s.cap(x, y - r * .5, x - r * .6, y - r * 2.6, r * .3, r * .25, body); s.cap(x + r * .3, y - r * .5, x + r * .1, y - r * 2.4, r * .3, r * .25, body); eye(x + r * .6, y - r * .2); return; }
+    if (kind === "mouse") { s.ell(x + r * .3, y + r * .2, r, r * .8, body); s.ell(x - r * .1, y - r * .5, r * .6, r * .6, mix(body, "#e8b8a8", .5)); s.set(x + r * 1.3, y + r * .3, C("#e8a0a0")); eye(x + r * .6, y); return; }
+    if (kind === "hedgehog") { s.ell(x + r * .2, y + r * .6, r * .8, r * .6, C("#8a7058")); s.set(x + r * 1, y + r * .6, C("#140e0c")); eye(x + r * .4, y + r * .4); return; }
+    if (kind === "pig") { s.ell(x + r * .3, y + r * .3, r, r * .9, body); s.ell(x + r * 1.2, y + r * .4, r * .4, r * .45, C("#c88a7a")); eye(x + r * .6, y); return; }
+    // wolf, dog, fox, weasel
+    s.ell(x + r * .2, y, r, r * .85, body);
+    s.ell(x + r * 1.2, y + r * .35, r * .8, r * .4, kind === "fox" ? C("#e8dcc4") : body);
+    s.set(x + r * 1.95, y + r * .3, C("#140e0c"));
+    s.poly([[x - r * .6, y - r * .4], [x - r * .1, y - r * .6], [x - r * .45, y - r * 1.6]], body);
+    s.poly([[x + r * .1, y - r * .6], [x + r * .6, y - r * .5], [x + r * .25, y - r * 1.6]], body);
+    eye(x + r * .65, y - r * .15);
+  }
+
+  // ---------------------------------------------------------------- birds
+  function bird(s, o, cx, yb) {
+    const h = o.h || 8, kind = o.kind || "songbird", pose = o.pose || "perch";
+    const body = C(o.color || "#6a5a48"), wing = C(o.wing || mul(o.color || "#6a5a48", .8)), belly = C(o.belly || mix(o.color || "#6a5a48", "#f0e8d8", .35));
+    const beak = C(o.beak || (kind === "raptor" ? "#3a3530" : kind === "duck" || kind === "swan" || kind === "goose" ? "#e08a2a" : "#d8a030"));
+    const legsC = C(o.legsC || "#c8902a"), em = !!o.emit;
+    const eyeC = C(o.eyes || "#120c08");
+    if (pose === "fly") {
+      const span = o.span || h * 2.4, cy = yb - h * .55;
+      const tail = kind === "firebird" ? 1.2 : .5;
+      s.poly([[cx - h * .12, cy + h * .25], [cx + h * .12, cy + h * .25], [cx + h * .25, cy + h * tail], [cx - h * .25, cy + h * tail]], wing, em);
+      for (const d of [-1, 1]) {
+        const pts = [[cx + d * h * .1, cy - h * .15], [cx + d * span * .25, cy - h * .45], [cx + d * span * .5, cy - h * .3], [cx + d * span * .48, cy - h * .15], [cx + d * span * .35, cy + h * .05], [cx + d * span * .15, cy + h * .1], [cx + d * h * .1, cy + h * .15]];
+        s.poly(pts, wing, em);
+        for (let k = 1; k <= 4; k++) s.line(cx + d * span * (.15 + k * .08), cy - h * .1, cx + d * span * (.15 + k * .085), cy + h * .08, mul(wing, .72), 1, em);
+      }
+      s.ell(cx, cy, h * .17, h * .3, body, em);
+      s.ell(cx, cy + h * .05, h * .1, h * .2, belly, em);
+      if (kind === "human") { humanFace(s, o, cx, cy - h * .42, h * .2); }
+      else { s.ell(cx, cy - h * .38, h * .13, h * .13, body, em); s.poly([[cx - h * .04, cy - h * .32], [cx + h * .04, cy - h * .32], [cx, cy - h * .2]], beak); s.set(cx - h * .05, cy - h * .41, eyeC, !!o.glowEyes); s.set(cx + h * .05, cy - h * .41, eyeC, !!o.glowEyes); }
+      if (o.crown) crownAt(s, cx, cy - h * .55, h * .12);
+      return;
+    }
+    const by = yb - h * .42, rx = h * .36, ry = h * .27;
+    // tail
+    if (kind === "firebird") { for (let k = 0; k < 4; k++) s.path([[cx - rx * .7, by], [cx - rx * 1.6, by + h * .1 + k * .8], [cx - rx * 2.8 - k * 1.5, by - h * .05 + k * 1.6]], Math.max(.6, h * .05), .5, C(["#ffb040", "#ff7a1a", "#ffd060", "#e8502a"][k]), true); s.ell(cx - rx * 2.7, by + h * .2, 1, 1, C("#40c0ff"), true); }
+    else if (kind === "rooster") { for (let k = 0; k < 3; k++) s.path([[cx - rx * .6, by - ry * .2], [cx - rx * 1.4, by - h * .5 + k], [cx - rx * 1.6, by - h * .1 + k * 1.2]], Math.max(.6, h * .05), .5, C(["#1a3a2a", "#2a4a8a", "#1a2a3a"][k])); }
+    else if (kind === "cuckoo" || kind === "raptor" || kind === "crow" || kind === "songbird" || kind === "human") s.poly([[cx - rx * .6, by - ry * .2], [cx - rx * 1.5, by + ry * .4], [cx - rx * 1.4, by + ry * .9], [cx - rx * .5, by + ry * .4]], wing);
+    else s.poly([[cx - rx * .7, by - ry * .3], [cx - rx * 1.25, by - ry * .6], [cx - rx * .9, by + ry * .2]], wing);
+    // legs
+    if (!["duck", "swan", "goose"].includes(kind) || h > 6) { const lt = yb - (by + ry * .6); s.line(cx - rx * .1, by + ry * .6, cx - rx * .1, yb, legsC); s.line(cx + rx * .2, by + ry * .6, cx + rx * .25, yb, legsC); if (lt > 3) { s.set(cx - rx * .1 + 1, yb, legsC); s.set(cx + rx * .25 + 1, yb, legsC); } }
+    // body
+    s.ell(cx, by, rx, ry, body, em && kind === "firebird");
+    s.ell(cx + rx * .25, by + ry * .25, rx * .6, ry * .55, belly, em && kind === "firebird");
+    s.ell(cx - rx * .2, by - ry * .1, rx * .7, ry * .6, wing, em && kind === "firebird");
+    if (kind === "cuckoo") s.each((x, y, c) => { if (c === belly && y % 2 === 0) s.p[y * s.W + x] = mul(belly, .7); });
+    // neck & head
+    let hx = cx + rx * .75, hy = by - ry * .9;
+    if (kind === "swan" || kind === "goose") { s.path([[cx + rx * .5, by - ry * .3], [cx + rx * .9, by - h * .5], [cx + rx * .7, by - h * .75], [cx + rx * 1.0, by - h * .85]], Math.max(.7, h * .06), Math.max(.7, h * .05), body); hx = cx + rx * 1.05; hy = by - h * .85; }
+    const hr = Math.max(1.2, h * (kind === "human" ? .2 : .15));
+    if (kind === "human") humanFace(s, o, hx, hy - hr * .3, hr);
+    else {
+      s.ell(hx, hy, hr, hr * .95, body, em && kind === "firebird");
+      if (kind === "raptor") s.path([[hx + hr * .7, hy - hr * .1], [hx + hr * 1.5, hy + hr * .1], [hx + hr * 1.2, hy + hr * .7]], Math.max(.5, hr * .3), .5, beak);
+      else if (kind === "duck" || kind === "swan" || kind === "goose") s.poly([[hx + hr * .6, hy - hr * .1], [hx + hr * 1.8, hy + hr * .15], [hx + hr * 1.7, hy + hr * .5], [hx + hr * .6, hy + hr * .4]], beak);
+      else s.poly([[hx + hr * .7, hy - hr * .2], [hx + hr * (kind === "crow" ? 1.9 : 1.5), hy + hr * .15], [hx + hr * .7, hy + hr * .45]], beak);
+      s.set(hx + hr * .3, hy - hr * .2, eyeC, !!o.glowEyes);
+      if (kind === "rooster" || kind === "chicken") { s.ell(hx + hr * .1, hy - hr * 1.1, hr * (kind === "rooster" ? .7 : .4), hr * .4, C("#d02a1a")); s.ell(hx + hr * .9, hy + hr * .9, hr * .3, hr * .4, C("#d02a1a")); }
+      if (kind === "duck" && o.drake) s.ell(hx, hy, hr, hr * .95, C("#1f6a3a"));
+      if (o.ironBeak) s.set(hx + hr * 1.3, hy + hr * .1, C("#c8d0dc"), true);
+    }
+    if (o.crown) crownAt(s, hx, hy - hr * 1.1, Math.max(1.2, hr * .8));
+    if (o.keys) { s.line(hx + hr, hy + hr, hx + hr * 1.6, hy + hr * 2.2, C("#d6a640")); s.set(hx + hr * 1.7, hy + hr * 2.4, C("#d6a640")); }
+  }
+  function humanFace(s, o, x, y, r) {
+    const sk = C(o.skin || "#e8c8a8"), hc = C(o.hair || "#3a2a1a");
+    s.rect(R(x - r * 1.1), R(y - r * .2), R(r * .9), R(r * 2.6), hc);
+    s.ell(x, y, r, r * 1.05, sk);
+    s.ell(x - r * .2, y - r * .7, r * .9, r * .45, hc);
+    s.set(x + r * .35, y, C(o.eyes || "#2a1a12"), !!o.glowEyes); if (r >= 2.4) s.set(x - r * .2, y, C(o.eyes || "#2a1a12"), !!o.glowEyes);
+    if (o.face === "sad") s.set(x + r * .1, y + r * .55, mul(sk, .7));
+    if (o.kokoshnik) { s.ell(x - r * .1, y - r * .9, r * 1.1, r * .7, C(o.kokoshnik)); s.ell(x, y + r * .05, r * .8, r * .8, sk); s.set(x + r * .35, y, C(o.eyes || "#2a1a12"), !!o.glowEyes); }
+  }
+  function crownAt(s, x, y, r) { const g = C("#d6a640"); s.rect(R(x - r), R(y), R(r * 2) + 1, Math.max(1, R(r * .4)), g); for (let i = -1; i <= 1; i++) s.line(x + i * r * .8, y, x + i * r * .8, y - Math.max(1, r * .6), g); s.set(x, y, C("#c8302a"), true); }
+
+  // ---------------------------------------------------------------- serpents & dragons
+  function scaleFn(o, body, belly) { const dark = mul(body, .72); return (d, x, y) => (o.pattern === "plain" ? body : (R(x + y) % 4 < 2 ? body : dark)); }
+  function snakeHead(s, o, x, y, r, dir) {
+    const body = C(o.color || "#4a6a3a"), ec = C(o.eyes || (o.glowEyes ? "#ffcf4a" : "#120c08"));
+    s.ell(x, y, r * 1.25, r * .85, body);
+    s.set(x + dir * r * .5, y - r * .35, ec, !!o.glowEyes);
+    if (o.rooster) { s.ell(x - dir * r * .1, y - r * 1.1, r * .7, r * .45, C("#d02a1a")); s.poly([[x + dir * r, y - r * .1], [x + dir * r * 2, y + r * .1], [x + dir * r, y + r * .4]], C("#d8a030")); }
+    else { s.line(x + dir * r * 1.2, y + r * .2, x + dir * r * 2, y + r * .3, C("#c8302a")); }
+    if (o.crown) crownAt(s, x, y - r * 1.2, Math.max(1.2, r * .7));
+    if (o.beak) s.poly([[x + dir * r, y - r * .3], [x + dir * r * 2.1, y + r * .2], [x + dir * r, y + r * .5]], C("#3a3530"));
+  }
+  function snake(s, o, cx, yb) {
+    const L = o.len || 20, t = Math.max(1, o.thick || 2), pose = o.pose || "slither";
+    const body = C(o.color || "#4a6a3a");
+    if (o.wings) { const wc = C(o.wingC || "#5a4a3a"); s.poly([[cx - L * .1, yb - t], [cx - L * .25, yb - L * .45], [cx + L * .1, yb - L * .35], [cx + L * .05, yb - t]], wc); }
+    let pts = [];
+    if (pose === "coil") {
+      for (let a = 0; a <= 4 * Math.PI; a += .25) { const r = L * .22 * (1 - a / (4 * Math.PI) * .7); pts.push([cx + Math.cos(a) * r, yb - t - L * .02 - (Math.sin(a) + 1) * r * .32]); }
+      pts.push([cx + L * .05, yb - t - L * .35]); pts.push([cx + L * .12, yb - t - L * .45]);
+      s.path(pts, t * .45, t * .55, null, false, scaleFn(o, body));
+      snakeHead(s, o, cx + L * .16, yb - t - L * .45, t * .7, 1);
+      return;
+    }
+    const n = 24;
+    for (let i = 0; i <= n; i++) { const u = i / n, x = cx - L / 2 + u * L * .82, y = yb - t * .5 - Math.abs(Math.sin(u * 3 * Math.PI)) * t * .6 - (u > .8 ? (u - .8) * 5 * L * (pose === "rise" ? .35 : .15) : 0); pts.push([x, y]); }
+    s.path(pts, .5, t * .55, null, false, scaleFn(o, body));
+    const last = pts[pts.length - 1];
+    snakeHead(s, o, last[0] + t * .5, last[1] - t * .2, t * .7, 1);
+  }
+  function wyrm(s, o, cx, yb) {
+    const L = o.len || 60, t = o.thick || 8, amp = o.amp != null ? o.amp : L * .12, em = !!o.fire;
+    const body = C(o.color || "#a8903a"), belly = C(o.belly || "#d8b850");
+    const pts = []; const n = 40;
+    for (let i = 0; i <= n; i++) { const u = i / n, x = cx - L / 2 + u * L, y = yb - t - amp - Math.sin(u * Math.PI * (o.waves || 1.5) + .4) * amp * (o.fly ? 1 : .9); pts.push([x, y]); }
+    s.path(pts, .6, t * .5, null, em, (d, x, y) => em ? (R(x + y) % 3 ? C("#ff8a2a") : C("#ffd060")) : (R(x * .8 + y) % 5 < 2 ? mul(body, .7) : body));
+    for (let i = 4; i < n; i += 2) { const p = pts[i]; s.set(p[0], p[1] + t * .3 * i / n, belly, em); }
+    const hp = pts[n];
+    s.ell(hp[0] + t * .4, hp[1] - t * .1, t * .75, t * .55, em ? C("#ffb040") : body, em);
+    s.set(hp[0] + t * .6, hp[1] - t * .35, C(o.eyes || "#ffcf4a"), true);
+    s.line(hp[0] + t * 1.1, hp[1] + t * .1, hp[0] + t * 1.6, hp[1] + t * .2, C("#c8302a"));
+    if (em) for (let k = 0; k < L / 2; k++) { const p = pts[Math.floor(s.r() * n)]; s.set(p[0] + (s.r() - .5) * t * 2, p[1] - t * .6 - s.r() * t, C("#ffd060"), true); }
+  }
+  function dragon(s, o, cx, yb) {
+    const h = o.h || 40, L = o.len || R(h * 1.5), n = o.heads || 1, em = false;
+    const body = C(o.color || "#3a5a2a"), belly = C(o.belly || "#8a9a4a"), dark = mul(body, .7), wingC = C(o.wingC || "#2a3a22");
+    const bx = cx - L * .08, by = yb - h * .3, rx = L * .25, ry = h * .2;
+    // tail
+    s.path([[bx - rx * .8, by + ry * .2], [cx - L * .4, yb - h * .08], [cx - L * .52, yb - h * .2], [cx - L * .48, yb - h * .3]], .6, Math.max(1, h * .07), null, false, (d) => d > .5 ? body : dark);
+    // wings
+    if (o.wings !== false) {
+      const wy = by - ry * .6;
+      s.poly([[bx - rx * .3, wy], [bx - rx * .6, yb - h * .98], [bx + rx * .3, yb - h * .9], [bx + rx * .6, yb - h * .75], [bx + rx * .5, wy]], wingC);
+      for (let k = 0; k < 4; k++) s.line(bx, wy, bx - rx * .6 + k * rx * .4, yb - h * (.96 - k * .06), mul(wingC, .6));
+
+    }
+    // legs
+    const legN = o.legsN != null ? o.legsN : 4;
+    const legW = Math.max(1, R(h * .07));
+    const legAt = (x, c) => { s.rect(R(x), R(by + ry * .3), legW + 1, yb - R(by + ry * .3) + 1, c); for (let k = 0; k < 3; k++) s.set(x + legW + 1 + k * .7, yb, C("#e8e0d0")); };
+    if (legN >= 4) { legAt(bx - rx * .5 + 2, dark); legAt(bx + rx * .5 + 2, dark); }
+    // body
+    s.ell(bx, by, rx, ry, body); s.ell(bx + rx * .1, by + ry * .4, rx * .8, ry * .45, belly);
+    for (let y = R(by - ry); y < by + ry; y += 2) for (let x = R(bx - rx); x < bx + rx; x += 3) if (s.get(x, y) === body) s.set(x + (y % 4 === 0 ? 1 : 0), y, dark);
+    if (legN >= 2) { legAt(bx - rx * .55, body); legAt(bx + rx * .45, body); }
+    // necks & heads
+    const baseX = bx + rx * .7, baseY = by - ry * .5;
+    const fan = n === 1 ? [-.6] : Array.from({ length: n }, (_, i) => (n > 3 ? -1.55 : -1.25) + i * ((n > 3 ? 1.75 : 1.2) / (n - 1)));
+    const reach = h * (n > 3 ? .5 : .6);
+    fan.forEach((a, i) => {
+      const rr = reach * (n > 3 ? (i % 2 ? 1.05 : .72) : (.85 + (i % 2) * .15)), hx = baseX + Math.cos(a) * rr, hy = baseY + Math.sin(a) * rr;
+      const mid = [lerp(baseX, hx, .5) - Math.sin(a) * h * .06, lerp(baseY, hy, .5)];
+      s.path([[baseX, baseY], mid, [hx, hy]], Math.max(1, h * .06), Math.max(1, h * .045), body);
+      const hr = Math.max(1.5, h * .065);
+      s.ell(hx + hr * .4, hy, hr * 1.3, hr * .9, body);
+      if (o.mouthOpen) { s.poly([[hx + hr, hy], [hx + hr * 3.2, hy - hr * 1.4], [hx + hr * 3.2, hy + hr * 1.6]], C("#8a1a14")); s.line(hx + hr, hy - hr * .5, hx + hr * 3, hy - hr * 1.3, C("#f0e8d8")); }
+      else s.poly([[hx + hr, hy - hr * .4], [hx + hr * 2.3, hy + hr * .1], [hx + hr, hy + hr * .6]], body);
+      s.set(hx + hr * .7, hy - hr * .4, C(o.eyes || "#ffcf4a"), true);
+      s.line(hx - hr * .3, hy - hr * .5, hx - hr * 1.1, hy - hr * 1.3, C("#d8d0b8"));
+      if (o.fire && i % 2 === 0) for (let k = 0; k < h * .6; k++) { const t = s.r(); s.set(hx + hr * 2 + t * h * .3, hy + (s.r() - .5) * t * h * .15, C(s.r() < .5 ? "#ffb040" : "#ff6a1a"), true); }
+    });
+    if (o.fireFinger) s.ell(bx + rx * .45 + legW + 2, yb - 1, legW, legW, C("#ff7a2a"), true);
+  }
+
+  // ---------------------------------------------------------------- fish
+  function fish(s, o, cx, yb) {
+    const L = o.len || 12, h = o.h || R(L * .3), kind = o.kind || "pike", body = C(o.color || "#5a7a4a"), belly = C(o.belly || mix(o.color || "#5a7a4a", "#f0ecd8", .45));
+    const cy = yb - h * .5 - (o.lift || 0);
+    s.poly([[cx - L * .4, cy], [cx - L * .55, cy - h * .5], [cx - L * .55, cy + h * .5]], mul(body, .8));
+    s.ell(cx, cy, L * .42, h * .45, body);
+    s.ell(cx + L * .05, cy + h * .2, L * .32, h * .2, belly);
+    s.poly([[cx - L * .1, cy - h * .4], [cx + L * .05, cy - h * .7], [cx + L * .12, cy - h * .4]], mul(body, .8));
+    if (kind === "pike") for (let k = 0; k < L / 2; k++) s.set(cx - L * .3 + s.r() * L * .6, cy - h * .2 + s.r() * h * .3, mix(body, "#e8e0a0", .5));
+    if (kind === "catfish") { s.line(cx + L * .38, cy + h * .1, cx + L * .55, cy + h * .5, mul(body, .6)); s.line(cx + L * .38, cy + h * .15, cx + L * .5, cy + h * .7, mul(body, .6)); }
+    if (kind === "whale") { for (let k = 0; k < 6; k++) s.line(cx - L * .1 + k * L * .06, cy + h * .25, cx - L * .1 + k * L * .06, cy + h * .42, mul(belly, .8)); for (let k = 0; k < 10; k++) s.set(cx + L * .2 + (s.r() - .5) * 3, cy - h * .6 - k, C("#cfe8f0"), k < 3); if (o.village) for (let k = 0; k < 3; k++) { const x = cx - L * .2 + k * L * .12; s.rect(x, cy - h * .52, 4, 3, C("#5a3e27")); s.poly([[x - 1, cy - h * .52], [x + 5, cy - h * .52], [x + 2, cy - h * .52 - 3]], C("#2a2019")); s.set(x + 2, cy - h * .5, C("#ffb75a"), true); } }
+    s.set(cx + L * .3, cy - h * .12, C(o.eyes || "#f0e8b0"), !!o.glowEyes);
+    if (o.crown) crownAt(s, cx + L * .25, cy - h * .55, Math.max(1.2, h * .15));
+  }
+
+  // ---------------------------------------------------------------- spirits
+  function spirit(s, o, cx, yb) {
+    const h = o.h || 10, kind = o.kind || "wisp", c = C(o.color || "#9fdcff");
+    if (kind === "wisp" || kind === "orb") {
+      const cy = yb - h * .6 - (o.lift || 0);
+      s.ell(cx, cy, h * .22, h * .22, c, true); s.ell(cx, cy, h * .1, h * .1, C("#ffffff"), true);
+      if (kind === "wisp") for (let k = 1; k < 6; k++) s.set(cx - k * 1.2, cy + k * .8 + Math.sin(k) * .6, c, k < 4);
+      if (o.face) { s.set(cx - 1, cy - 1, C("#203040")); s.set(cx + 1, cy - 1, C("#203040")); }
+    } else if (kind === "fog") {
+      for (let k = 0; k < h * 3; k++) { const a = s.r() * 6.28, r = Math.sqrt(s.r()); s.ell(cx + Math.cos(a) * r * h * .8, yb - h * .5 + Math.sin(a) * r * h * .35, h * .12, h * .1, s.r() < .5 ? c : mul(c, .8)); }
+      s.set(cx + h * .15, yb - h * .55, C(o.eyes || "#ffe060"), true); s.set(cx + h * .35, yb - h * .55, C(o.eyes || "#ffe060"), true);
+      if (o.mouth) s.ell(cx + h * .25, yb - h * .35, h * .12, h * .06, C("#1a1014"));
+      if (o.hail) for (let k = 0; k < h; k++) s.set(cx - h * .7 + s.r() * h * 1.4, yb - h * .2 + s.r() * h * .2, C("#e8f0ff"));
+    } else if (kind === "whirl") {
+      for (let y = 0; y < h; y++) { const t = y / h, w = h * (.08 + .32 * t), yy = yb - y, off = Math.sin(y * .35) * h * .05; for (let x = -w; x <= w; x++) if (Math.sin((x + y * 1.7) * .7) > -.2) s.set(cx + x + off, yy, mix(c, 0x000000, (1 - Math.abs(x / w)) * .3)); }
+      for (let k = 0; k < h / 2; k++) s.set(cx + (s.r() - .5) * h * .8, yb - s.r() * h, C(s.r() < .5 ? "#5a4a3a" : "#3a6a2a"));
+      s.set(cx - 1, yb - h * .6, C("#ffe060"), true); s.set(cx + 1, yb - h * .6, C("#ffe060"), true);
+    } else if (kind === "flame") {
+      for (let y = 0; y < h; y++) { const t = y / h, w = h * .3 * Math.sin((1 - t) * Math.PI * .9 + .2) * (1 - t * .5); for (let x = -w; x <= w; x++) s.set(cx + x + Math.sin(y * .5) * .8, yb - y, C(Math.abs(x) < w * .4 ? "#ffe080" : t > .6 ? "#ff6a1a" : "#ffb040"), true); }
+      if (o.face) { s.set(cx - 1, yb - h * .4, C("#3a1004")); s.set(cx + 1, yb - h * .4, C("#3a1004")); }
+    }
+  }
+
+  // ---------------------------------------------------------------- idols, blobs
+  function idol(s, o, cx, yb) {
+    const h = o.h || 40, w = Math.max(5, R(h * (o.wK || .26))), wood = C(o.wood || (o.dark ? "#2a2024" : "#7a5a38")), dk = mul(wood, .7);
+    const top = yb - h + 1, headH = R(h * .26);
+    if (o.sun) { s.ell(cx, top - h * .08, h * .2, h * .2, C(o.sun), true); for (let a = 0; a < 12; a++) s.line(cx + Math.cos(a * .52) * h * .22, top - h * .08 + Math.sin(a * .52) * h * .22, cx + Math.cos(a * .52) * h * .3, top - h * .08 + Math.sin(a * .52) * h * .3, C(o.sun), 1, true); }
+    if (o.wind) for (let k = 0; k < 4; k++) s.path([[cx - w * 2.2, top + k * h * .12], [cx - w * 1.2, top + k * h * .12 - 2], [cx - w * .8, top + k * h * .12 + 1]], .6, .5, C("#cfe8ff"), true);
+    s.rect(cx - w / 2, top + headH, w, h - headH, wood);
+    s.each((x, y, c) => { if (c === wood && x % 3 === 0) s.p[y * s.W + x] = dk; });
+    const heads = o.heads || 1;
+    for (let i = 0; i < heads; i++) {
+      const hx = cx + (heads === 1 ? 0 : (i - 1) * w * .8), hc = C(o.silverHead && i === 0 ? "#c8ccd2" : o.wood || (o.dark ? "#2a2024" : "#7a5a38"));
+      s.ell(hx, top + headH * .55, w * (heads > 1 ? .42 : .55), headH * .55, hc);
+      const ey = top + headH * .5;
+      s.set(hx - w * .18, ey, C(o.eyes || "#1a1008"), !!o.glowEyes); s.set(hx + w * .18, ey, C(o.eyes || "#1a1008"), !!o.glowEyes);
+      s.line(hx, ey, hx, ey + headH * .2, mul(hc, .8));
+      if (o.mustache) s.line(hx - w * .28, ey + headH * .3, hx + w * .28, ey + headH * .3, C(o.mustache), 1, true);
+      if (o.horns) { s.path([[hx - w * .4, top + 1], [hx - w * .8, top - headH * .5], [hx - w * .5, top - headH * .8]], .8, .5, C("#d8c8a0")); s.path([[hx + w * .4, top + 1], [hx + w * .8, top - headH * .5], [hx + w * .5, top - headH * .8]], .8, .5, C("#d8c8a0")); }
+      if (o.hatTop) s.ell(hx, top + 1, w * .5, headH * .25, mul(wood, .8));
+    }
+    if (o.faces === 4) for (const d of [-1, 1]) { s.ell(cx + d * w * .45, top + headH * .55, w * .2, headH * .45, mul(wood, .85)); s.set(cx + d * w * .5, top + headH * .5, C("#1a1008")); }
+    s.line(cx - w / 2, top + headH + h * .12, cx + w / 2, top + headH + h * .12, C(o.beltC || "#c8a040"));
+    s.line(cx - w * .45, top + headH + h * .02, cx - w * .2, top + headH + h * .3, dk); s.line(cx + w * .45, top + headH + h * .02, cx + w * .2, top + headH + h * .3, dk);
+    if (o.hammer) { s.line(cx + w * .6, top + headH + h * .1, cx + w * .6, top + headH + h * .35, C("#5a3a1e")); s.rect(cx + w * .4, top + headH + h * .07, w * .5, 3, C("#8a8a90")); s.ell(cx, yb - 2, w * .7, 2, C("#ff7a2a"), true); }
+    if (o.spindle) held(s, "spindle", cx + w * .7, top + headH + h * .25, h, {});
+    if (o.hornCup) s.path([[cx + w * .3, top + headH + h * .2], [cx + w * .6, top + headH + h * .1], [cx + w * .7, top + headH - h * .02]], .7, 1.2, C("#d8c8a0"));
+    if (o.small) for (const d of [-1, 1]) { const fx = cx + d * w * 1.3; s.rect(fx - 1.5, yb - h * .35, 3, h * .35, mul(wood, 1.1)); s.ell(fx, yb - h * .38, 1.8, 2, mul(wood, 1.15)); }
+    if (o.dragonUnder) dragon(s, { h: h * .3, len: h * .6, color: "#3a5a2a", wings: false, legsN: 2 }, cx - h * .4, yb);
+  }
+  function blob(s, o, cx, yb) {
+    const h = o.h || 6, kind = o.kind || "kolobok";
+    if (kind === "kolobok") { const c = C("#d8a050"); s.ell(cx, yb - h / 2, h / 2, h / 2, c); s.set(cx + h * .15, yb - h * .6, C("#2a1a10")); s.set(cx + h * .35, yb - h * .6, C("#2a1a10")); s.line(cx + h * .1, yb - h * .3, cx + h * .35, yb - h * .35, C("#8a3a20")); s.tex(c, C("#c88a3a"), .25); }
+    if (kind === "mound") {
+      const L = o.len || h * 2.5, c = C("#4a3626");
+      s.ell(cx, yb, L / 2, h, c);
+      for (let x = R(cx - L / 2); x <= cx + L / 2; x++) for (let y = 0; y < 3; y++) { const yy = R(yb - h * Math.sqrt(Math.max(0, 1 - ((x - cx) / (L / 2)) ** 2))) + y; if (s.get(x, yy) >= 0) s.set(x, yy, C(s.r() < .7 ? "#3a6a2a" : "#5a8a3a")); }
+      s.line(cx - h * .5, yb - h * .5, cx - h * .2, yb - h * .45, C("#2a1a10")); s.line(cx + h * .2, yb - h * .45, cx + h * .5, yb - h * .5, C("#2a1a10")); s.line(cx - h * .2, yb - h * .2, cx + h * .2, yb - h * .2, C("#2a1a10"));
+      for (let k = 0; k < 6; k++) s.set(cx - L * .4 + s.r() * L * .8, yb - h * .9 + s.r() * 2, C(["#e8d040", "#f0f0f0", "#4a78c8"][k % 3]));
+    }
+    if (kind === "ant") {
+      const L = o.len || 7, c = C(o.color || "#3a2418");
+      s.ell(cx - L * .3, yb - h * .5, L * .2, h * .45, c); s.ell(cx, yb - h * .5, L * .14, h * .3, c); s.ell(cx + L * .28, yb - h * .55, L * .14, h * .35, c);
+      for (let i = -1; i <= 1; i++) { s.line(cx + i * L * .1, yb - h * .4, cx + i * L * .25 - 1, yb, c); }
+      s.line(cx + L * .35, yb - h * .8, cx + L * .5, yb - h * 1.3, c);
+      if (o.crown) crownAt(s, cx + L * .28, yb - h - 1, 1.2);
+    }
+    if (kind === "frog") {
+      const L = o.len || 6, c = C(o.color || "#4a8a3a");
+      s.ell(cx, yb - h * .4, L * .45, h * .4, c); s.ell(cx + L * .15, yb - h * .3, L * .3, h * .2, C("#c8d890"));
+      s.set(cx + L * .1, yb - h * .85, C("#1a1a10")); s.set(cx + L * .35, yb - h * .85, C("#1a1a10"));
+      s.line(cx - L * .4, yb - h * .2, cx - L * .55, yb, c); s.line(cx + L * .4, yb - h * .2, cx + L * .55, yb, c);
+      if (o.crown) crownAt(s, cx + L * .2, yb - h - 1, 1.3);
+    }
+    if (kind === "stone") {
+      const c = C("#8a8478");
+      s.ell(cx, yb - h * .5, h * .35, h * .5, c); s.rect(cx - h * .35, yb - h * .5, h * .7, h * .5, c); s.tex(c, mul(c, .85), .3);
+      s.set(cx - h * .12, yb - h * .65, C("#2a2620")); s.set(cx + h * .12, yb - h * .65, C("#2a2620")); s.line(cx - h * .1, yb - h * .45, cx + h * .1, yb - h * .45, C("#2a2620"));
+    }
+  }
+
+  // ---------------------------------------------------------------- composites
+  function centaur(s, o, cx, yb, rider) {
+    const hs = Object.assign({ head: "horse", h: 22, len: 30, color: "#8a6a4a" }, o.horse || {});
+    const H = hs.h, L = hs.len;
+    if (!rider) hs.head = "none";
+    const legH = R(H * .48), bodyH = R(H * .44), by = yb - legH - bodyH / 2 + 1;
+    if (hs.head === "none") {
+      const body = C(hs.color), dark = mul(body, .72), legW = Math.max(1, R(H * .1)), rx = L * .4, ry = bodyH / 2;
+      const leg = (x, c) => { s.rect(R(x), R(by + ry * .3), legW, yb - R(by + ry * .3) + 1, c); s.set(x, yb, C("#1a1412")); };
+      leg(cx + rx * .6 + legW, dark); leg(cx - rx * .6 + legW, dark);
+      s.path([[cx - rx * .95, by - ry * .3], [cx - rx * 1.1, by + H * .3]], Math.max(1, H * .05), Math.max(1, H * .04), C(hs.mane || mul(body, .55)));
+      s.ell(cx, by, rx, ry, body); leg(cx + rx * .6, body); leg(cx - rx * .6, body);
+      const man = Object.assign({ h: R(H * .75) }, o.man || {}, { upper: true });
+      hum(s, man, R(cx + rx * .75), R(by - ry * .2));
+    } else {
+      beast(s, hs, cx, yb);
+      const man = Object.assign({ h: R(H * .7) }, o.man || {}, { upper: true });
+      hum(s, man, R(cx - L * .05), R(by - bodyH * .4));
+    }
+  }
+  function swarm(s, o, cx, yb) {
+    const n = o.n || 3, gap = o.gap || 8, vars = o.variants || [o.of];
+    const start = cx - (n - 1) * gap / 2;
+    for (let i = 0; i < n; i++) { const sp = Object.assign({}, vars[i % vars.length]); const dy = o.float ? -R((Math.sin(i * 2.1) + 1) * (o.float)) : 0; drawSpec(s, sp, R(start + i * gap), yb + dy); }
+  }
+  function drawSpec(s, sp, cx, yb) {
+    switch (sp.t) {
+      case "hum": hum(s, sp, cx, yb); break;
+      case "beast": beast(s, sp, cx, yb); break;
+      case "bird": bird(s, sp, cx, yb); break;
+      case "snake": snake(s, sp, cx, yb); break;
+      case "wyrm": wyrm(s, sp, cx, yb); break;
+      case "dragon": dragon(s, sp, cx, yb); break;
+      case "fish": fish(s, sp, cx, yb); break;
+      case "spirit": spirit(s, sp, cx, yb); break;
+      case "idol": idol(s, sp, cx, yb); break;
+      case "blob": blob(s, sp, cx, yb); break;
+      case "swarm": swarm(s, sp, cx, yb); break;
+      case "centaur": centaur(s, sp, cx, yb, false); break;
+      case "rider": centaur(s, sp, cx, yb, true); break;
+      case "item": itemDraw(s, sp, cx, yb); break;
+    }
+  }
+  function extent(sp) {
+    const h = sp.h || (sp.horse && sp.horse.h) || 12;
+    let w = Math.max(h * 1.4, sp.len || 0, sp.span || 0, (sp.horse && sp.horse.len) || 0) + 40;
+    if (sp.t === "swarm") { const inner = extent(sp.of || sp.variants[0]); w = inner.w + (sp.n || 3) * (sp.gap || 8) + 20; return { w: R(w), h: inner.h }; }
+    return { w: R(w * 1.6 + 30), h: R(h * 2 + 40) };
+  }
+  function make(sp, idSeed) {
+    const ex = extent(sp);
+    const s = new Spr(ex.w, ex.h, hashStr(String(idSeed || sp.id || "x")));
+    const base = ex.h - 8; s.base = base;
+    drawSpec(s, sp, R(ex.w / 2), base);
+    return finish(s, sp);
+  }
+
+  // ---------------------------------------------------------------- items
+  function itemDraw(s, o, cx, yb) {
+    const h = o.h || 8, k = h / 8, t = o.k;
+    const col = (c, d) => C(o[c] || d);
+    switch (t) {
+      case "bottle": { const g = col("glass", "#7a9a8a"), lq = col("liquid", "#4ac08a"); s.ell(cx, yb - h * .3, h * .3, h * .3, g); s.rect(cx - h * .1, yb - h * .85, h * .2 + 1, h * .5, g); s.rect(cx - h * .12, yb - h, h * .24 + 1, h * .15 + 1, col("cork", "#8a6a3a")); s.ell(cx, yb - h * .25, h * .24, h * .22, lq, !!o.glow); s.set(cx - h * .15, yb - h * .4, C("#f0fff8")); break; }
+      case "vial": { s.rect(cx - 1, yb - h + 2, 3, h - 2, col("glass", "#bcd8e0")); s.rect(cx - 1, yb - h + 1, 3, 1, C("#8a6a3a")); s.rect(cx, yb - h * .5, 1, h * .5, col("liquid", "#e8f8ff"), true); break; }
+      case "jug": { const c = col("clay", "#9a5e3a"); s.ell(cx, yb - h * .35, h * .36, h * .35, c); s.rect(cx - h * .14, yb - h * .9, h * .28 + 1, h * .4, c); s.rect(cx - h * .2, yb - h, h * .4 + 1, 1, mul(c, 1.1)); s.ell(cx, yb - h * .95, h * .12, .6, col("liquid", "#8ac8e8"), !!o.glow); s.path([[cx + h * .14, yb - h * .85], [cx + h * .4, yb - h * .7], [cx + h * .3, yb - h * .45]], .6, .6, c); if (o.band) s.line(cx - h * .3, yb - h * .45, cx + h * .3, yb - h * .45, C(o.band)); break; }
+      case "pot": { const c = col("clay", "#8a5a3a"); s.ell(cx, yb - h * .4, h * .45, h * .4, c); s.rect(cx - h * .35, yb - h * .85, h * .7 + 1, 2, mul(c, 1.1)); s.ell(cx, yb - h * .8, h * .3, 1, col("fill", "#e8a020"), !!o.glow); if (o.drip) s.line(cx + h * .3, yb - h * .8, cx + h * .35, yb - h * .5, col("fill", "#e8a020")); break; }
+      case "barrel": { const c = col("wood", "#7a5530"); for (const [dx, lc] of (o.two ? [[-h * .35, o.liquid || "#4a6a8a"], [h * .35, o.liquid2 || "#b8a890"]] : [[0, null]])) { s.ell(cx + dx, yb - h * .5, h * .3, h * .5, c); s.line(cx + dx - h * .3, yb - h * .75, cx + dx + h * .3, yb - h * .75, C("#3a3a3a")); s.line(cx + dx - h * .3, yb - h * .25, cx + dx + h * .3, yb - h * .25, C("#3a3a3a")); if (lc) s.ell(cx + dx, yb - h + 1, h * .2, .8, C(lc)); } break; }
+      case "cauldron": { const c = col("metal", "#2a2a2e"); s.ell(cx, yb - h * .45, h * .5, h * .38, c); s.rect(cx - h * .5, yb - h * .75, h + 1, 2, mul(c, 1.3)); s.ell(cx, yb - h * .72, h * .42, 1.2, col("liquid", "#e8e0d0"), !!o.glow); s.line(cx - h * .3, yb - h * .15, cx - h * .4, yb, c); s.line(cx + h * .3, yb - h * .15, cx + h * .4, yb, c); for (let i = 0; i < 6; i++) s.set(cx + (s.r() - .5) * h * .6, yb - h * .85 - s.r() * h * .4, C("#c8c8c8")); if (o.fire) for (let i = 0; i < 10; i++) s.set(cx + (s.r() - .5) * h * .6, yb - s.r() * 2, C("#ff8a2a"), true); break; }
+      case "kovsh": { const c = col("wood", "#b8782a"); s.ell(cx, yb - h * .35, h * .45, h * .3, c); s.ell(cx, yb - h * .55, h * .35, h * .12, col("liquid", "#4a8a3a")); s.path([[cx + h * .4, yb - h * .5], [cx + h * .55, yb - h * .85], [cx + h * .7, yb - h * .9]], .7, .7, c); s.set(cx + h * .75, yb - h * .9, C("#2a1a10")); s.path([[cx - h * .4, yb - h * .45], [cx - h * .6, yb - h * .6]], .6, .5, c); break; }
+      case "bucket": { const c = col("wood", "#7a5530"); s.poly([[cx - h * .35, yb - h * .8], [cx + h * .35, yb - h * .8], [cx + h * .28, yb], [cx - h * .28, yb]], c); s.line(cx - h * .32, yb - h * .5, cx + h * .32, yb - h * .5, C("#3a3a3a")); s.ell(cx, yb - h * .8, h * .3, 1, col("fill", "#141010")); s.path([[cx - h * .35, yb - h * .8], [cx, yb - h * 1.1], [cx + h * .35, yb - h * .8]], .5, .5, C("#5a5a5a")); break; }
+      case "pile": { const c = col("color", "#8a8580"); s.ell(cx, yb, h * .6, h * .7, c); s.tex(c, mul(c, .8), .4); if (o.sparkle) for (let i = 0; i < h; i++) s.set(cx + (s.r() - .5) * h, yb - s.r() * h * .6, C("#ffffff"), true); if (o.sack) { s.ell(cx - h * .3, yb - h * .5, h * .35, h * .5, C("#a8946a")); } break; }
+      case "saltcellar": { const c = col("wood", "#c89a5a"); s.ell(cx, yb - h * .4, h * .45, h * .35, c); s.path([[cx + h * .35, yb - h * .5], [cx + h * .55, yb - h * .9], [cx + h * .7, yb - h * .85]], .8, .7, c); s.set(cx + h * .55, yb - h * .9, C("#2a1a10")); s.ell(cx - h * .05, yb - h * .65, h * .2, 1, C("#f4f2ea")); s.line(cx - h * .3, yb - h * .3, cx + h * .3, yb - h * .3, C("#c0392b")); break; }
+      case "firedrill": { s.rect(cx - h * .6, yb - 1, h * 1.2, 2, C("#7a5530")); s.line(cx, yb - 1, cx, yb - h * .8, C("#a07a4a")); s.path([[cx - h * .5, yb - h * .6], [cx, yb - h * .75], [cx + h * .5, yb - h * .6]], .6, .6, C("#8a6a3a")); s.ell(cx + 1, yb - 2, 1.2, 1, C("#ffb040"), true); for (let i = 0; i < 5; i++) s.set(cx + 1 + i * .5, yb - 3 - i, C("#9a9a9a")); break; }
+      case "poppy": { s.ell(cx, yb - h * .6, h * .3, h * .32, C("#8a9a6a")); s.rect(cx - h * .3, yb - h * .9, h * .6, 1, C("#5a6a3a")); s.line(cx, yb - h * .3, cx, yb, C("#6a7a4a")); for (let i = 0; i < h * 2; i++) s.set(cx + (s.r() - .5) * h * 1.6, yb - s.r() * 1.5, C("#2a2a3a")); break; }
+      case "sword": { const bl = col("blade", "#c8ccd2"); s.rect(cx - Math.max(.5, k * .5), yb - h, Math.max(1, R(k)), h * .78, bl, !!o.glow); s.line(cx, yb - h, cx, yb - h * .3, mix(bl, 0xffffff, .4), 1, !!o.glow); s.rect(cx - h * .14, yb - h * .24, h * .28 + 1, Math.max(1, k * .6), col("guard", "#c8a040")); s.rect(cx - Math.max(.5, k * .4), yb - h * .22, Math.max(1, R(k * .8)), h * .18, C("#5a3a20")); s.ell(cx, yb - 1, k * .7, k * .7, col("guard", "#c8a040")); if (o.motion) for (let i = 0; i < 2; i++) s.path([[cx + 3 + i * 4, yb - h * .95], [cx + 6 + i * 4, yb - h * .55], [cx + 3 + i * 4, yb - h * .2]], .4, .4, C("#a8c0e0")); break; }
+      case "mace": { s.line(cx, yb, cx, yb - h * .6, C("#6a4a2a"), Math.max(1, k * .8)); s.ell(cx, yb - h * .78, h * .22, h * .22, col("head", "#5a5a60")); for (let a = 0; a < 8; a++) s.set(cx + Math.cos(a * .8) * h * .28, yb - h * .78 + Math.sin(a * .8) * h * .28, C("#8a8a90")); break; }
+      case "arrows": { for (let i = -1; i <= 1; i++) { s.line(cx + i * 2, yb, cx + i * 3, yb - h, C("#8a6a3a")); s.set(cx + i * 3, yb - h - 1, C("#ff5a1a"), true); s.set(cx + i * 3, yb - h, C("#ffb040"), true); s.set(cx + i * 2 - 1, yb - 1, C("#e8e0d0")); } break; }
+      case "belemnite": { s.poly([[cx - h * .25, yb - h], [cx + h * .25, yb - h], [cx, yb]], C("#8a6a4a")); s.line(cx, yb - h * .9, cx, yb - h * .2, C("#b89a6a")); if (o.glow) s.set(cx, yb - h * .5, C("#cfe0ff"), true); break; }
+      case "sack": { const c = col("color", "#a8946a"); s.ell(cx, yb - h * .4, h * .42, h * .42, c); s.poly([[cx - h * .15, yb - h * .75], [cx + h * .15, yb - h * .75], [cx + h * .25, yb - h], [cx - h * .25, yb - h]], c); s.rect(cx - h * .18, yb - h * .78, h * .36 + 1, 1, C("#5a4a2a")); if (o.heads) { for (const d of [-1, 1]) { s.ell(cx + d * h * .12, yb - h * 1.08, h * .1, h * .1, C("#e3b088")); s.set(cx + d * h * .12 + 1, yb - h * 1.1, C("#1a1008")); } } break; }
+      case "cap": { s.poly([[cx - h * .45, yb - h * .3], [cx + h * .45, yb - h * .3], [cx + h * .2, yb - h], [cx - h * .1, yb - h * .9]], col("color", "#6a4a7a")); s.ell(cx, yb - h * .2, h * .45, h * .2, C("#5a3e22")); s.tex(C("#5a3e22"), C("#3a2a18"), .4); break; }
+      case "knife": { s.line(cx - h * .4, yb, cx + h * .1, yb - h * .45, C("#5a3a20"), Math.max(1, k)); s.poly([[cx + h * .05, yb - h * .4], [cx + h * .5, yb - h * 1], [cx + h * .2, yb - h * .4]], C("#c8ccd2")); if (o.blood) s.set(cx + h * .4, yb - h * .85, C("#8a1010")); break; }
+      case "stake": { s.poly([[cx - h * .12, yb - h], [cx + h * .12, yb - h], [cx + h * .12, yb - h * .25], [cx, yb], [cx - h * .12, yb - h * .25]], C("#d8ccb0")); s.tex(C("#d8ccb0"), C("#8a8a80"), .25); break; }
+      case "sickle": held(s, "sickle", cx, yb - 2, h * 3, o); break;
+      case "axe": { s.line(cx, yb, cx + h * .1, yb - h, C("#6a4a2a"), Math.max(1, k * .7)); s.poly([[cx + h * .1, yb - h], [cx + h * .55, yb - h * 1.15], [cx + h * .55, yb - h * .55], [cx + h * .1, yb - h * .75]], col("color", "#d6a640"), !!o.glow); break; }
+      case "ball": { const c = col("color", "#c0392b"); s.ell(cx, yb - h * .5, h * .5, h * .5, c, !!o.glow); for (let i = 0; i < 4; i++) s.line(cx - h * .4, yb - h * .3 - i * h * .15, cx + h * .4, yb - h * .5 - i * h * .1, mul(c, .75)); s.path([[cx + h * .4, yb - h * .2], [cx + h * 1.2, yb], [cx + h * 2, yb - 1]], .5, .5, c, !!o.glow); break; }
+      case "carpet": { const W = o.len || h * 3, c = col("color", "#8a1a1a"), b = col("border", "#d6a640"); for (let x = 0; x < W; x++) { const y = yb - h * .5 + Math.sin(x * .25) * h * .15; s.rect(cx - W / 2 + x, y - h * .25, 1, h * .5, (x < 2 || x > W - 3) ? b : c); s.set(cx - W / 2 + x, y - h * .25, b); s.set(cx - W / 2 + x, y + h * .25, b); if (x % 6 === 3) s.set(cx - W / 2 + x, y, b); } break; }
+      case "boots": { const c = col("color", "#a8201a"); for (const d of [-1, 1]) { const x = cx + d * h * .3; s.rect(x - h * .15, yb - h, h * .3, h * .8, c); s.poly([[x - h * .15, yb - h * .25], [x + h * .35, yb - h * .2], [x + h * .45, yb - h * .35], [x + h * .2, yb], [x - h * .15, yb]], c); s.line(x - h * .15, yb - h * .9, x + h * .15, yb - h * .9, C("#d6a640")); } break; }
+      case "furcap": { s.ell(cx, yb - h * .45, h * .5, h * .45, C("#6a5040")); s.rect(cx - h * .55, yb - h * .3, h * 1.1, h * .3, C("#8a7a68")); break; }
+      case "mortar": { const c = C("#6a4a2a"); s.poly([[cx - h * .3, yb - h * .7], [cx + h * .3, yb - h * .7], [cx + h * .22, yb], [cx - h * .22, yb]], c); s.ell(cx, yb - h * .7, h * .3, 1, C("#2a1a10")); s.line(cx + h * .2, yb - h * .6, cx + h * .45, yb - h * 1.1, C("#c8b890"), Math.max(1, k)); s.line(cx - h * .2, yb - h * .6, cx - h * .5, yb - h, C("#7a5530")); s.poly([[cx - h * .55, yb - h * .95], [cx - h * .45, yb - h * 1.05], [cx - h * .75, yb - h * 1.25], [cx - h * .8, yb - h * 1.1]], C("#8a7a3a")); break; }
+      case "gusli": held(s, "gusli", cx, yb - h * .4, h * 2.4, o); break;
+      case "pipe": { s.line(cx - h * .5, yb - h * .2, cx + h * .5, yb - h * .6, C("#c8b070"), Math.max(1, k)); for (let i = 0; i < 4; i++) s.set(cx - h * .2 + i * h * .15, yb - h * .33 - i * h * .06, C("#3a2a1a")); break; }
+      case "ring": { s.ell(cx, yb - h * .5, h * .5, h * .5, C("#d6a640")); s.hole(cx, yb - h * .5, h * .22, h * .22); s.set(cx, yb - h, C("#c8302a"), true); break; }
+      case "mirror": { s.ell(cx, yb - h * .6, h * .35, h * .35, C("#b8946a")); s.ell(cx, yb - h * .6, h * .26, h * .26, C("#cfe0f0"), !!o.glow); s.line(cx, yb - h * .25, cx, yb, C("#8a6a4a"), Math.max(1, k)); s.set(cx - h * .1, yb - h * .7, C("#ffffff"), true); break; }
+      case "saucer": { s.ell(cx, yb - h * .2, h * .55, h * .18, C("#c8ccd2")); s.ell(cx, yb - h * .22, h * .4, h * .1, C("#e8ecf0")); s.ell(cx + h * .1, yb - h * .5, h * .2, h * .2, col("fruit", "#c8302a")); if (o.egg) s.ell(cx - h * .15, yb - h * .45, h * .13, h * .18, C("#e8c050"), true); break; }
+      case "flightset": { s.rect(cx - h * .9, yb - h * .3, h * .5, h * .3, C("#c8b890")); for (let i = 0; i < 4; i++) s.line(cx - h * .85 + i * h * .12, yb, cx - h * .85 + i * h * .12, yb - h * .12, C("#1a1410")); s.rect(cx - h * .3, yb - h * .2, h * .4, h * .2, C("#e8e0d0")); s.line(cx - h * .3, yb - h * .1, cx + h * .1, yb - h * .1, C("#c0392b")); s.rect(cx + h * .2, yb - h * .25, h * .35, h * .12, C("#6a4a2a")); for (let i = 0; i < 4; i++) s.set(cx + h * .23 + i * h * .08, yb - h * .1, C("#2a2a2a")); s.ell(cx + h * .8, yb - h * .15, h * .14, h * .14, C("#8a8478")); s.set(cx + h * .8, yb - h * .35, C("#ffb040"), true); break; }
+      case "sleeves": { const c = C("#ece6d4"); s.poly([[cx - h * .2, yb - h], [cx + h * .2, yb - h], [cx + h * .45, yb], [cx - h * .45, yb]], c); s.rect(cx - h * .45, yb - h * .15, h * .9, h * .1, C("#c0392b")); for (let i = 0; i < 6; i++) s.set(cx + h * .6 + i * .6, yb - h * .2 + i, C("#5ab0e8"), true); s.ell(cx + h * .9, yb - h * .8, h * .1, h * .07, C("#ffffff")); s.ell(cx + h * .7, yb - h * .9, h * .08, h * .06, C("#ffffff")); break; }
+      case "cloth": { const W = o.len || h * 2; s.rect(cx - W / 2, yb - h * .3, W, h * .3, C("#ece6d4")); for (let x = 0; x < W; x += 2) s.set(cx - W / 2 + x, yb - h * .3, C("#c0392b")); s.ell(cx - W * .15, yb - h * .45, h * .3, h * .18, C("#b8782a")); s.rect(cx + W * .15, yb - h * .6, h * .2, h * .3, C("#8a5a3a")); s.ell(cx + W * .35, yb - h * .4, h * .12, h * .1, C("#c8302a")); break; }
+      case "millstones": { for (let i = 0; i < 2; i++) s.ell(cx, yb - h * .2 - i * h * .35, h * .5, h * .17, C(i ? "#9a948a" : "#7a746a")); s.line(cx + h * .3, yb - h * .55, cx + h * .3, yb - h * .9, C("#6a4a2a")); s.ell(cx - h * .2, yb - h * .9, h * .15, h * .08, C("#d8a050")); break; }
+      case "bridle": { s.path([[cx - h * .4, yb - h], [cx - h * .5, yb - h * .4], [cx - h * .1, yb - h * .1], [cx + h * .4, yb - h * .3], [cx + h * .4, yb - h * .9]], .6, .6, C("#5a3a20")); s.ell(cx - h * .1, yb - h * .1, h * .1, h * .1, C("#c8ccd2")); s.ell(cx - h * .5, yb - h * .4, h * .08, h * .08, C("#c8ccd2")); break; }
+      case "spindle": { s.line(cx, yb - h, cx, yb, C("#a8804e"), Math.max(1, k * .6)); s.ell(cx, yb - h * .55, h * .18, h * .3, col("thread", "#c8392a")); s.ell(cx, yb - h * .15, h * .18, h * .07, C("#6a4a2a")); if (o.glow) s.path([[cx, yb - h * .55], [cx + h * .5, yb - h * .7], [cx + h, yb - h * .5]], .5, .5, col("thread", "#c8392a"), true); break; }
+      case "keys": { const c = col("color", "#5a5a60"); s.ell(cx, yb - h * .85, h * .15, h * .15, c); s.hole(cx, yb - h * .85, h * .07, h * .07); for (let i = -1; i <= 1; i++) { s.line(cx + i * h * .15, yb - h * .75, cx + i * h * .3, yb - h * .1, c, Math.max(1, k * .5)); s.rect(cx + i * h * .3, yb - h * .2, h * .12, h * .1, c); } if (o.bird) s.ell(cx, yb - h * 1.05, h * .1, h * .08, C("#8a8a7a")); if (o.glow) s.set(cx, yb - h * .85, c, true); break; }
+      case "book": { const c = col("color", "#5a2a1a"); s.rect(cx - h * .55, yb - h, h * 1.1, h, c); s.rect(cx - h * .5, yb - h * .05, h, h * .05 + 1, C("#e8e0c8")); s.rect(cx - h * .3, yb - h * .75, h * .6, h * .45, mul(c, 1.3)); s.ell(cx, yb - h * .55, h * .14, h * .12, C("#e8e8e8")); s.rect(cx + h * .5, yb - h * .6, h * .1 + 1, h * .2, C("#c8a040")); break; }
+      case "needle": { s.line(cx - h * .5, yb - h * .5, cx + h * .5, yb - h * .5 - 1, col("color", "#c8ccd2")); s.set(cx - h * .45, yb - h * .5, C("#1a1a1a")); if (o.thread) s.path([[cx - h * .5, yb - h * .5], [cx - h * .7, yb - h * .2], [cx - h * .4, yb]], .5, .5, C(o.thread)); if (o.glow) s.set(cx + h * .5, yb - h * .5 - 1, col("color", "#c8ccd2"), true); break; }
+      case "belt": { for (let x = 0; x < h * 1.6; x++) { const y = yb - 2 - Math.sin(x * .3) * 1.5; s.set(cx - h * .8 + x, y, C(x % 3 === 0 ? "#f0e8d0" : "#b8201a")); s.set(cx - h * .8 + x, y + 1, C(x % 3 === 1 ? "#f0e8d0" : "#b8201a")); } s.line(cx + h * .8, yb - 2, cx + h * .85, yb + 1, C("#b8201a")); break; }
+      case "knots": { for (let i = 0; i < 3; i++) { s.line(cx - h * .3 + i * h * .3, yb - h, cx - h * .3 + i * h * .3, yb, C(["#c0392b", "#e8e0d0", "#3a3a3a"][i])); s.ell(cx - h * .3 + i * h * .3, yb - h * .4 - i, 1, 1, mul(C(["#c0392b", "#e8e0d0", "#3a3a3a"][i]), .8)); } break; }
+      case "lunnitsa": { s.path([[cx - h * .2, yb - h], [cx, yb - h * .6], [cx + h * .2, yb - h]], .5, .5, C("#6a5a3a")); s.path([[cx - h * .4, yb - h * .6], [cx - h * .3, yb - h * .2], [cx, yb], [cx + h * .3, yb - h * .2], [cx + h * .4, yb - h * .6]], Math.max(.6, k * .5), Math.max(.6, k * .5), C("#c8ccd2")); break; }
+      case "rosette": { s.ell(cx, yb - h * .5, h * .5, h * .5, C("#8a6a4a")); s.ell(cx, yb - h * .5, h * .4, h * .4, C("#b8946a")); for (let a = 0; a < 6; a++) s.line(cx, yb - h * .5, cx + Math.cos(a * 1.047) * h * .38, yb - h * .5 + Math.sin(a * 1.047) * h * .38, C("#5a3a20")); break; }
+      case "horseshoe": { s.path([[cx - h * .35, yb], [cx - h * .4, yb - h * .6], [cx, yb - h], [cx + h * .4, yb - h * .6], [cx + h * .35, yb]], Math.max(.6, k * .6), Math.max(.6, k * .6), C("#7a7a80")); for (let i = 0; i < 3; i++) { s.set(cx - h * .38, yb - h * .2 - i * h * .2, C("#2a2a2a")); s.set(cx + h * .38, yb - h * .2 - i * h * .2, C("#2a2a2a")); } break; }
+      case "holestone": { s.line(cx, yb - h, cx, yb - h * .55, C("#8a7a5a")); s.ell(cx, yb - h * .3, h * .35, h * .3, C("#8a8478")); s.hole(cx + 1, yb - h * .32, Math.max(.6, h * .1), Math.max(.6, h * .1)); break; }
+      case "bundle": { s.ell(cx, yb - h * .35, h * .45, h * .38, C("#ece6d4")); s.poly([[cx - h * .2, yb - h * .6], [cx + h * .2, yb - h * .6], [cx + h * .35, yb - h], [cx - h * .3, yb - h * .95]], C("#ece6d4")); s.line(cx - h * .4, yb - h * .3, cx + h * .4, yb - h * .3, C("#c0392b")); for (let i = 0; i < 4; i++) s.set(cx + h * .4 + i, yb - i % 2, C("#4a3626")); break; }
+      case "candle": { const c = col("wax", "#efe4c0"); s.rect(cx - h * .1, yb - h * .8, Math.max(1, h * .2), h * .8, c); s.ell(cx, yb - h * .92, Math.max(.7, h * .08), Math.max(1, h * .12), C("#ffc050"), true); s.set(cx, yb - h * .98, C("#fff0c0"), true); if (o.ribbon) s.line(cx - h * .12, yb - h * .5, cx + h * .12, yb - h * .45, C(o.ribbon)); break; }
+      case "egg": { const c = col("color", "#e8e0d0"); s.ell(cx, yb - h * .5, h * .38, h * .5, c, !!o.glow); if (o.pattern) { for (let x = R(cx - h * .38); x <= cx + h * .38; x++) { s.set(x, yb - h * .5, C(o.pattern)); if ((x & 1) === 0) { s.set(x, yb - h * .7, C(o.pattern2 || "#2a2a2a")); s.set(x, yb - h * .3, C(o.pattern2 || "#2a2a2a")); } } } if (o.dark) { s.set(cx - h * .1, yb - h * .6, C("#ff5040"), true); } break; }
+      case "branch": { const c = col("stem", "#5a3e22"); if (o.cross) { s.line(cx - h * .5, yb - h * .5, cx + h * .5, yb - h * .5, c, Math.max(1, k * .5)); s.line(cx, yb - h, cx, yb, c, Math.max(1, k * .5)); s.ell(cx, yb - h * .5, h * .1, h * .1, C("#c0392b")); } else s.line(cx - h * .3, yb, cx + h * .2, yb - h, c); for (let i = 0; i < h; i++) { const x = cx - h * .4 + s.r() * h * .8, y = yb - s.r() * h; s.set(x, y, C(o.leaf || "#2a5a3a")); } for (let i = 0; i < (o.berries || 0); i++) s.set(cx - h * .3 + s.r() * h * .6, yb - h * .3 - s.r() * h * .6, C(o.berryC || "#d0302a")); break; }
+      case "herb": {
+        const st = col("stem", "#4a7a3a"), fl = col("flower", "#c8302a"), shape = o.shape || "cup", em = !!o.glow;
+        s.line(cx, yb, cx, yb - h * .75, st); for (let i = 0; i < 3; i++) { s.line(cx, yb - h * (.2 + i * .18), cx - h * .25, yb - h * (.3 + i * .18), st); s.line(cx, yb - h * (.25 + i * .18), cx + h * .25, yb - h * (.35 + i * .18), st); }
+        const fy = yb - h * .82;
+        if (shape === "cup") { s.ell(cx, fy, h * .16, h * .12, fl, em); s.set(cx, fy - h * .12, fl, em); }
+        if (shape === "spike") for (let i = 0; i < h * .35; i++) s.set(cx + (i % 2), fy - i * .6, fl, em);
+        if (shape === "star") for (let a = 0; a < 5; a++) s.line(cx, fy, cx + Math.cos(a * 1.26) * h * .18, fy + Math.sin(a * 1.26) * h * .18, fl, 1, em);
+        if (shape === "bell") { s.ell(cx + h * .1, fy + h * .05, h * .12, h * .15, fl, em); s.ell(cx - h * .15, fy + h * .15, h * .1, h * .12, fl, em); }
+        if (shape === "umbel") for (let i = -2; i <= 2; i++) s.set(cx + i * h * .07, fy - Math.abs(i) * .3, fl, em);
+        if (shape === "lily") { s.ell(cx, fy, h * .25, h * .12, fl, em); s.ell(cx, fy - h * .05, h * .12, h * .08, C("#f0e060"), em); s.ell(cx, yb - h * .05, h * .45, h * .07, C("#2a6a3a")); }
+        if (shape === "thistle") { s.ell(cx, fy + 1, h * .14, h * .12, C("#4a7a3a")); for (let i = -2; i <= 2; i++) s.line(cx + i * .8, fy, cx + i * 1.2, fy - h * .15, fl); }
+        if (shape === "fern") { for (let i = 0; i < 5; i++) { s.line(cx, yb - h * (.15 + i * .15), cx - h * (.4 - i * .06), yb - h * (.25 + i * .15), st); s.line(cx, yb - h * (.15 + i * .15), cx + h * (.4 - i * .06), yb - h * (.25 + i * .15), st); } s.ell(cx, fy, h * .14, h * .14, fl, true); for (let a = 0; a < 6; a++) s.set(cx + Math.cos(a) * h * .25, fy + Math.sin(a) * h * .25, C("#fff0a0"), true); }
+        if (shape === "nettle") s.each((x, y, c) => { if (c === st && s.r() < .3) s.set(x + 1, y, C("#7aa84a")); });
+        if (shape === "silver") s.each((x, y, c) => { if (c === st) s.p[y * s.W + x] = C("#a8b8a0"); });
+        if (shape === "pair") { s.ell(cx - h * .1, fy, h * .12, h * .1, C("#e8d040"), em); s.ell(cx + h * .12, fy + 1, h * .12, h * .1, C("#7a4ab8"), em); }
+        if (shape === "root") { s.path([[cx, yb], [cx - h * .2, yb + h * .2], [cx - h * .1, yb + h * .4]], h * .08, .5, C("#c8a878")); }
+        break;
+      }
+      case "garlic": { s.ell(cx, yb - h * .35, h * .4, h * .35, C("#ece6d8")); for (let i = -1; i <= 1; i++) s.line(cx + i * h * .15, yb - h * .65, cx + i * h * .12, yb - h * .1, C("#cfc5b0")); s.line(cx, yb - h * .7, cx, yb - h, C("#8a9a6a")); break; }
+      case "coin": { s.ell(cx, yb - h * .5, h * .5, h * .5, col("color", "#c8ccd2"), !!o.glow); s.ell(cx, yb - h * .5, h * .3, h * .3, mul(col("color", "#c8ccd2"), .85)); s.set(cx, yb - h * .5, C("#ffffff"), true); break; }
+      case "feather": { const c = col("color", "#8a7a6a"); s.line(cx - h * .4, yb, cx + h * .3, yb - h, C("#e8e0d0")); for (let i = 1; i < h * .9; i++) { const t = i / h, x = lerp(cx - h * .4, cx + h * .3, t), y = lerp(yb, yb - h, t); s.line(x, y, x - h * .2 * (1 - t * .5), y - h * .05, o.fire ? C(t > .6 ? "#ffd060" : t > .3 ? "#ff8a2a" : "#e8502a") : (i % 3 === 0 ? mul(c, .7) : c), 1, !!o.fire); s.line(x, y, x + h * .12 * (1 - t * .5), y + h * .06, o.fire ? C("#ffb040") : c, 1, !!o.fire); } break; }
+      case "doll": { const c = col("color", "#c0392b"); s.poly([[cx - h * .15, yb - h * .6], [cx + h * .15, yb - h * .6], [cx + h * .3, yb], [cx - h * .3, yb]], c); s.ell(cx, yb - h * .75, h * .17, h * .17, C("#ece6d4")); s.line(cx - h * .1, yb - h * .75, cx + h * .1, yb - h * .75, C("#c0392b")); s.line(cx, yb - h * .85, cx, yb - h * .65, C("#c0392b")); s.line(cx - h * .3, yb - h * .5, cx + h * .3, yb - h * .5, C("#ece6d4")); s.poly([[cx - h * .2, yb - h * .9], [cx + h * .2, yb - h * .9], [cx, yb - h * 1.02]], C("#3a5a8a")); break; }
+      case "skull": { s.line(cx, yb, cx, yb - h * .5, C("#6a4a2a")); s.ell(cx, yb - h * .75, h * .3, h * .27, C("#d9d1bb")); s.rect(cx - h * .15, yb - h * .55, h * .3, h * .1, C("#d9d1bb")); s.set(cx - h * .12, yb - h * .78, C("#e8ff7a"), true); s.set(cx + h * .12, yb - h * .78, C("#e8ff7a"), true); break; }
+      case "stone": { const c = col("color", "#f2eddc"); s.poly([[cx - h * .4, yb], [cx - h * .45, yb - h * .5], [cx - h * .1, yb - h], [cx + h * .35, yb - h * .7], [cx + h * .45, yb]], c, !!o.glow); for (let i = 0; i < 3; i++) s.set(cx - h * .15 + i * h * .15, yb - h * .5 + (i % 2), C("#b89a5a"), !!o.glow); break; }
+      case "chain": { const c = col("color", "#6a6a72"); for (let i = 0; i < (o.len || h * 2) / 3; i++) { const x = cx - (o.len || h * 2) / 2 + i * 3, y = yb - 2 - Math.sin(i * .4) * 2; if (i % 2) s.ell(x, y, 1.4, .6, c); else { s.set(x - 1, y, c); s.set(x + 1, y, c); s.set(x, y - 1, c); s.set(x, y + 1, c); } } break; }
+      case "tablet": { const c = C("#e8e2cf"); s.rect(cx - h * .5, yb - h, h, h, c); for (let i = 0; i < 6; i++) s.line(cx - h * .45 + s.r() * h * .6, yb - h + 1 + s.r() * (h - 2), cx - h * .45 + s.r() * h * .6 + 2, yb - h + 1 + s.r() * (h - 2), C("#3a3428")); glyph(s, o.glyph, cx, yb - h * .5, h * .35); break; }
+      case "bag": { const c = col("color", "#5a3a22"); s.rect(cx - h * .45, yb - h * .7, h * .9, h * .7, c); s.poly([[cx - h * .45, yb - h * .7], [cx + h * .45, yb - h * .7], [cx + h * .3, yb - h * .45], [cx - h * .3, yb - h * .45]], mul(c, 1.2)); s.set(cx, yb - h * .45, C("#c8a040")); s.line(cx - h * .4, yb - h * .7, cx - h * .2, yb - h, C("#3a2a18")); s.line(cx + h * .4, yb - h * .7, cx + h * .2, yb - h, C("#3a2a18")); if (o.heavy) for (let i = 0; i < 6; i++) s.set(cx - h * .5 + i * h * .2, yb + 1, C("#2a2018")); break; }
+      case "shoeset": { for (let i = 0; i < 3; i++) s.poly([[cx - h * .9 + i * 2, yb - h * .2], [cx - h * .5 + i * 2, yb - h * .25], [cx - h * .4 + i * 2, yb], [cx - h * .9 + i * 2, yb]], C("#5a5a60")); for (let i = 0; i < 3; i++) s.line(cx - h * .1 + i * 2, yb, cx + h * .05 + i * 2, yb - h, C("#3a3a40")); for (let i = 0; i < 3; i++) s.ell(cx + h * .6, yb - h * .12 - i * h * .2, h * .22, h * .1, C("#8a8478")); break; }
+      case "gifts": { itemDraw(s, { k: "saucer", h: h * .6, egg: true }, cx - h * .6, yb); itemDraw(s, { k: "spindle", h: h * .8, thread: "#d6a640" }, cx + h * .1, yb); s.ell(cx + h * .6, yb - h * .4, h * .25, h * .25, C("#d6a640")); s.hole(cx + h * .6, yb - h * .4, h * .17, h * .17); s.line(cx + h * .45, yb - h * .5, cx + h * .7, yb - h * .3, C("#e8e8e8")); break; }
+      case "invisible": { for (let y = 0; y < h; y++) for (let x = -h * .25; x <= h * .25; x++) { const inBody = (y < h * .22 ? (x * x) / (h * h * .012) + ((y - h * .1) ** 2) / (h * h * .012) < 1 : Math.abs(x) < h * (y < h * .6 ? .2 : .12)); if (inBody && (R(x + y) % 3 === 0)) s.set(cx + x, yb - h + y, C("#9ab8c8"), y % 2 === 0); } break; }
+    }
+  }
+  function glyph(s, g, x, y, r) {
+    const ink = C("#5a2a1a");
+    if (g === "man") { s.set(x, y - r * .8, ink); s.line(x, y - r * .5, x, y + r * .3, ink); s.line(x - r * .5, y - r * .2, x + r * .5, y - r * .2, ink); s.line(x, y + r * .3, x - r * .4, y + r * .9, ink); s.line(x, y + r * .3, x + r * .4, y + r * .9, ink); }
+    if (g === "island") { s.line(x - r, y + r * .5, x + r, y + r * .5, C("#3a6a8a")); s.poly([[x - r * .4, y + r * .5], [x, y - r * .3], [x + r * .4, y + r * .5]], C("#8a8478")); s.line(x + r * .2, y - r * .3, x + r * .2, y - r, C("#3a5a2a")); }
+    if (g === "field") for (let i = 0; i < 4; i++) s.line(x - r, y - r * .6 + i * r * .4, x + r, y - r * .6 + i * r * .4, C(i % 2 ? "#b89a3a" : "#5a6a3a"));
+    if (g === "sun") { s.ell(x, y + r * .2, r * .45, r * .45, C("#d6802a"), true); s.line(x - r, y + r * .5, x + r, y + r * .5, ink); for (let a = 0; a < 5; a++) s.line(x + Math.cos(Math.PI + a * .78) * r * .6, y + r * .2 + Math.sin(Math.PI + a * .78) * r * .6, x + Math.cos(Math.PI + a * .78) * r, y + r * .2 + Math.sin(Math.PI + a * .78) * r, C("#d6802a")); }
+    if (g === "wind") for (let i = 0; i < 3; i++) s.path([[x - r, y - r * .5 + i * r * .5], [x, y - r * .7 + i * r * .5], [x + r * .6, y - r * .4 + i * r * .5], [x + r * .4, y - r * .1 + i * r * .5]], .5, .5, ink);
+    if (g === "reeds") { for (let i = -2; i <= 2; i++) { s.line(x + i * r * .4, y + r, x + i * r * .35, y - r * .5, C("#4a5a2a")); s.set(x + i * r * .35, y - r * .6, C("#5a3a1e")); } s.line(x - r, y + r * .8, x + r, y + r * .8, C("#3a5a6a")); }
+    if (g === "key") { s.ell(x - r * .4, y, r * .35, r * .35, ink); s.del(x - r * .4, y); s.line(x - r * .1, y, x + r, y, ink); s.line(x + r * .7, y, x + r * .7, y + r * .4, ink); s.line(x + r, y, x + r, y + r * .3, ink); }
+  }
+  function makeItem(sp, id) {
+    const h = sp.h || 8;
+    if (sp.k === "creature") return make(sp.spec, id);
+    const W = R(Math.max(h * 3, (sp.len || 0) + h) + 40), H = R(h * 2.6 + 30);
+    const s = new Spr(W, H, hashStr(String(id || sp.k)));
+    s.base = H - 8;
+    itemDraw(s, sp, R(W / 2), s.base);
+    return finish(s, sp);
+  }
+
+  // ---------------------------------------------------------------- Ivan reference (hand-drawn)
+  const IVAN = ["................", "......hhhh......", ".....hhhhhh.....", "....hhhhhhhh....", "....hhhhhhhhh...", "....hhsssssss...", "....hsssssess...", "....hssssssss...", ".....sssssSs....", ".....hhssshh....", "......hhhhh.....", ".....wrrrrrw....", "....wwwwrwwww...", "...wwwwwrwwwww..", "...wwWwwrwwWww..", "...ssWwwrwwWss..", "...ssBBBBBBBss..", ".....wwwwwwW....", ".....rwrwrwr....", ".....ppp.ppp....", ".....ppp.ppp....", ".....ooo.ooo....", ".....ooo.ooo....", "....llll.llll..."];
+  const IVAN_PAL = { h: "#9a7444", s: "#e2ae86", S: "#c48a66", e: "#2a1a12", w: "#e6dfcf", W: "#b9b09c", r: "#c0392b", B: "#8e2a1f", p: "#565a66", o: "#d6cfbd", l: "#c9a35a" };
+  function ivan() {
+    const w = 18, h = 25, p = new Int32Array(w * h).fill(-1), e = new Uint8Array(w * h);
+    IVAN.forEach((row, y) => { for (let x = 0; x < 16; x++) { const c = IVAN_PAL[row[x]]; if (c) p[(y + 1) * w + x + 1] = hexI(c); } });
+    return { w, h, p, e, foot: 24 };
+  }
+
+  // ---------------------------------------------------------------- canvas rendering (browser only)
+  function draw(cv, spr, z, o) {
+    o = o || {};
+    const ctx = cv.getContext("2d");
+    if (!o.keep) ctx.clearRect(0, 0, cv.width, cv.height);
+    const ox = o.x || 0, oy = o.y || 0;
+    for (let y = 0; y < spr.h; y++) for (let x = 0; x < spr.w; x++) {
+      const i = y * spr.w + x, c = spr.p[i]; if (c < 0) continue;
+      ctx.fillStyle = o.silhouette || "#" + c.toString(16).padStart(6, "0");
+      ctx.fillRect(ox + x * z, oy + y * z, z, z);
+    }
+    if (o.silhouette) return;
+    ctx.save();
+    for (let y = 0; y < spr.h; y++) for (let x = 0; x < spr.w; x++) {
+      const i = y * spr.w + x; if (!spr.e[i] || spr.p[i] < 0) continue;
+      const hex = "#" + spr.p[i].toString(16).padStart(6, "0");
+      ctx.shadowColor = hex; ctx.shadowBlur = Math.max(4, z * 4); ctx.fillStyle = hex; ctx.fillRect(ox + x * z, oy + y * z, z, z);
+    }
+    ctx.restore();
+  }
+
+  return { creature: (sp, id) => make(sp, id), item: (sp, id) => makeItem(sp, id), ivan, draw, hashStr };
+})();
+if (typeof module !== "undefined") module.exports = PX;
